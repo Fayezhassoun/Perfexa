@@ -1,0 +1,122 @@
+// Adapter state persistence + campaigns_mirror sync (CONTRACTS §8 tool layer).
+//
+// Mock adapter state (simulation params included) lives in
+// organizations.settings.adState[platform]. On every save we also upsert the
+// public view of each campaign into campaigns_mirror so the UI reads a plain
+// relational table — a true mirror of what the "platform API" holds.
+
+import { and, eq } from 'drizzle-orm';
+import { campaignsMirror, connectedAccounts, organizations, type Db } from '@voxmarketer/db';
+import {
+  getAdAdapter,
+  type AdAdapter,
+  type AdapterStore,
+  type AdPlatform,
+  type CampaignMetrics,
+} from '@voxmarketer/integrations';
+
+interface StoredCampaignView {
+  externalId: string;
+  platform: string;
+  name: string;
+  status: string;
+  budgetDailyCents: number;
+  metrics: CampaignMetrics;
+}
+
+interface AdapterStateView {
+  campaigns?: StoredCampaignView[];
+}
+
+export interface MirrorMetrics extends CampaignMetrics {
+  history: ({ date: string } & CampaignMetrics)[];
+}
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function mirrorCampaigns(db: Db, orgId: string, platform: AdPlatform, state: AdapterStateView): Promise<void> {
+  for (const c of state.campaigns ?? []) {
+    const [existing] = await db
+      .select()
+      .from(campaignsMirror)
+      .where(
+        and(
+          eq(campaignsMirror.orgId, orgId),
+          eq(campaignsMirror.platform, platform),
+          eq(campaignsMirror.externalId, c.externalId),
+        ),
+      )
+      .limit(1);
+
+    if (!existing) {
+      const metrics: MirrorMetrics = {
+        ...c.metrics,
+        history: [{ date: today(), ...c.metrics }],
+      };
+      await db.insert(campaignsMirror).values({
+        orgId,
+        platform,
+        externalId: c.externalId,
+        name: c.name,
+        status: c.status,
+        budgetDailyCents: c.budgetDailyCents,
+        metrics,
+        mode: 'sandbox',
+      });
+    } else {
+      const prev = (existing.metrics as MirrorMetrics | null) ?? { ...c.metrics, history: [] };
+      const history = [...(prev.history ?? [])];
+      if (history.length === 0 || history[history.length - 1]?.date !== today()) {
+        history.push({ date: today(), ...c.metrics });
+      } else {
+        history[history.length - 1] = { date: today(), ...c.metrics };
+      }
+      const metrics: MirrorMetrics = { ...c.metrics, history: history.slice(-90) };
+      await db
+        .update(campaignsMirror)
+        .set({ name: c.name, status: c.status, budgetDailyCents: c.budgetDailyCents, metrics })
+        .where(eq(campaignsMirror.id, existing.id));
+    }
+  }
+}
+
+export function createAdapterStore(db: Db, orgId: string): AdapterStore {
+  return {
+    async load(loadOrgId: string, platform: AdPlatform) {
+      const [org] = await db
+        .select({ settings: organizations.settings })
+        .from(organizations)
+        .where(eq(organizations.id, loadOrgId))
+        .limit(1);
+      const adState = (org?.settings as Record<string, unknown> | undefined)?.adState as
+        | Record<string, unknown>
+        | undefined;
+      return adState?.[platform] ?? null;
+    },
+
+    async save(saveOrgId: string, platform: AdPlatform, state: unknown) {
+      const [org] = await db
+        .select({ settings: organizations.settings })
+        .from(organizations)
+        .where(eq(organizations.id, saveOrgId))
+        .limit(1);
+      const settings = (org?.settings as Record<string, unknown> | undefined) ?? {};
+      const adState = { ...((settings.adState as Record<string, unknown> | undefined) ?? {}), [platform]: state };
+      await db.update(organizations).set({ settings: { ...settings, adState } }).where(eq(organizations.id, saveOrgId));
+      await mirrorCampaigns(db, saveOrgId, platform, state as AdapterStateView);
+    },
+  };
+}
+
+/** Adapter for this org: mode comes from connected_accounts (default sandbox). */
+export async function getOrgAdapter(db: Db, orgId: string, platform: AdPlatform): Promise<AdAdapter> {
+  const [account] = await db
+    .select({ mode: connectedAccounts.mode })
+    .from(connectedAccounts)
+    .where(and(eq(connectedAccounts.orgId, orgId), eq(connectedAccounts.platform, platform)))
+    .limit(1);
+  const mode = account?.mode === 'live' ? 'live' : 'sandbox';
+  return getAdAdapter(platform, mode, { store: createAdapterStore(db, orgId), orgId });
+}

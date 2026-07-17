@@ -1,0 +1,32 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'e2e'
+
+# pnpm blocks dependency build scripts by default; these need them:
+# - embedded-postgres + its per-platform binary packages: symlink the PG binaries
+# - redis-memory-server: downloads + compiles the redis-server binary
+# - esbuild: installs its platform binary (used by tsx)
+onlyBuiltDependencies:
+  - embedded-postgres
+  - '@embedded-postgres/darwin-arm64'
+  - '@embedded-postgres/darwin-x64'
+  - '@embedded-postgres/linux-arm'
+  - '@embedded-postgres/linux-arm64'
+  - '@embedded-postgres/linux-ia32'
+  - '@embedded-postgres/linux-ppc64'
+  - '@embedded-postgres/linux-x64'
+  - '@embedded-postgres/windows-x64'
+  - redis-memory-server
+  - esbuild
+
+# optional native accel for msgpackr (via @trpc); works fine without it
+ignoredBuiltDependencies:
+  - msgpackr-extract
+
+# pnpm 11 explicit build approvals (auto-detected; keep in sync with onlyBuiltDependencies)
+allowBuilds:
+  '@embedded-postgres/darwin-arm64': true
+  esbuild: true
+  msgpackr-extract: false
+  redis-memory-server: true

@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# env (any level — apps/web/.env is a symlink to the root one)
+.env
+.env.local
+.env.*.local
+
+# embedded dev-services data (scripts/dev-services.mjs)
+.devdata/
+
+# misc
+.DS_Store
+*.log
+.turbo/
+coverage/
+playwright-report/
+test-results/
