@@ -10,10 +10,14 @@ import { campaignsMirror, connectedAccounts, organizations, type Db } from '@vox
 import {
   getAdAdapter,
   type AdAdapter,
+  type AdapterDeps,
   type AdapterStore,
   type AdPlatform,
   type CampaignMetrics,
+  type ConnectablePlatform,
+  type FetchLike,
 } from '@voxmarketer/integrations';
+import { loadLiveDeps } from './live.js';
 
 interface StoredCampaignView {
   externalId: string;
@@ -110,13 +114,27 @@ export function createAdapterStore(db: Db, orgId: string): AdapterStore {
   };
 }
 
-/** Adapter for this org: mode comes from connected_accounts (default sandbox). */
-export async function getOrgAdapter(db: Db, orgId: string, platform: AdPlatform): Promise<AdAdapter> {
+/**
+ * Adapter for this org: mode comes from connected_accounts (default sandbox).
+ * Live mode gets real API adapters when the org has OAuth-connected tokens
+ * (loadLiveDeps); otherwise the safe stub that throws LiveAdapterNotConnected.
+ */
+export async function getOrgAdapter(
+  db: Db,
+  orgId: string,
+  platform: AdPlatform,
+  opts?: { fetchImpl?: FetchLike },
+): Promise<AdAdapter> {
   const [account] = await db
     .select({ mode: connectedAccounts.mode })
     .from(connectedAccounts)
     .where(and(eq(connectedAccounts.orgId, orgId), eq(connectedAccounts.platform, platform)))
     .limit(1);
   const mode = account?.mode === 'live' ? 'live' : 'sandbox';
-  return getAdAdapter(platform, mode, { store: createAdapterStore(db, orgId), orgId });
+  const deps: AdapterDeps = { store: createAdapterStore(db, orgId), orgId };
+  if (mode === 'live') {
+    const live = await loadLiveDeps(db, orgId, platform as ConnectablePlatform, opts);
+    if (live) deps.live = live;
+  }
+  return getAdAdapter(platform, mode, deps);
 }

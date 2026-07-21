@@ -2,48 +2,43 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { getDb, closeDb, schema } from './index';
+import { KNOWLEDGE_SEED_DOCS, embedText } from '@voxmarketer/integrations';
+import { getDb, closeDb, schema, type Db } from './index';
 import { loadRootEnv } from './env';
 
 export const DEMO_USER_EMAIL = 'demo@voxmarketer.dev';
 export const DEMO_USER_PASSWORD = 'demo1234';
 
-// TODO(wave-2): replace with KNOWLEDGE_SEED_DOCS from @voxmarketer/integrations
-// (~12 distilled docs). Wave 1 keeps a local minimal set so this package has
-// no dependency on packages/integrations yet.
-const MINIMAL_KNOWLEDGE_DOCS: { source: string; title: string; content: string }[] = [
-  {
-    source: 'seo_guide',
-    title: 'On-page SEO basics',
-    content:
-      'Every page needs a unique title tag and meta description, one clear H1, and ' +
-      'descriptive headings. Missing meta descriptions lower click-through from search ' +
-      'results. Keep pages fast on mobile: compress images and minimize render-blocking scripts.',
-  },
-  {
-    source: 'google_ads_help',
-    title: 'Google Search campaign structure',
-    content:
-      'A Search campaign targets keywords users type into Google. Start with a small set of ' +
-      'high-intent keywords, one tightly themed ad group, and a daily budget you are ' +
-      'comfortable testing. Track conversions before scaling spend.',
-  },
-  {
-    source: 'policy',
-    title: 'Ad policy essentials',
-    content:
-      'Ads must not make misleading claims, must match the landing page content, and must ' +
-      'not target prohibited categories. Policy violations lead to disapproval; repeated ' +
-      'violations can suspend the account.',
-  },
-  {
-    source: 'meta_help',
-    title: 'Meta lead ads overview',
-    content:
-      'Meta lead ads collect contact details through an in-app form instead of sending ' +
-      'traffic to a website. Keep forms short: every extra field lowers completion rate.',
-  },
-];
+/**
+ * Seed the knowledge base from the distilled best-practice docs
+ * (@voxmarketer/integrations). Idempotent: docs are upserted by title and
+ * each gets its deterministic embedding.
+ */
+export async function seedKnowledge(db: Db): Promise<number> {
+  for (const doc of KNOWLEDGE_SEED_DOCS) {
+    const embedding = embedText(`${doc.title} ${doc.content}`);
+    const [existing] = await db
+      .select({ id: schema.knowledgeDocuments.id })
+      .from(schema.knowledgeDocuments)
+      .where(eq(schema.knowledgeDocuments.title, doc.title))
+      .limit(1);
+    if (existing) {
+      await db
+        .update(schema.knowledgeDocuments)
+        .set({ source: doc.source, content: doc.content, embedding })
+        .where(eq(schema.knowledgeDocuments.id, existing.id));
+    } else {
+      await db.insert(schema.knowledgeDocuments).values({
+        source: doc.source,
+        title: doc.title,
+        content: doc.content,
+        embedding,
+        metadata: {},
+      });
+    }
+  }
+  return KNOWLEDGE_SEED_DOCS.length;
+}
 
 /** Seed the demo org (CONTRACTS §3/§12). Idempotent: re-running is a no-op. */
 export async function seedDemo(): Promise<void> {
@@ -56,7 +51,8 @@ export async function seedDemo(): Promise<void> {
     .where(eq(schema.users.email, DEMO_USER_EMAIL))
     .limit(1);
   if (existing.length > 0) {
-    console.log('[db] demo user already present — seed skipped');
+    const count = await seedKnowledge(db);
+    console.log(`[db] demo user already present — org seed skipped, ${count} knowledge docs upserted`);
     return;
   }
 
@@ -95,19 +91,11 @@ export async function seedDemo(): Promise<void> {
     period: 'monthly',
   });
 
-  await db.insert(schema.knowledgeDocuments).values(
-    MINIMAL_KNOWLEDGE_DOCS.map((d) => ({
-      source: d.source,
-      title: d.title,
-      content: d.content,
-      embedding: null,
-      metadata: {},
-    })),
-  );
+  const docCount = await seedKnowledge(db);
 
   console.log(
     `[db] seeded demo org "${org.name}" (${org.id}) with user ${DEMO_USER_EMAIL} ` +
-      `and ${MINIMAL_KNOWLEDGE_DOCS.length} knowledge documents`,
+      `and ${docCount} knowledge documents`,
   );
 }
 

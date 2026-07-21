@@ -12,6 +12,7 @@ import type {
   CampaignMetrics,
 } from '../types.js';
 import { hashString, seededRandom } from '../util/hash.js';
+import { checkAdCopyPolicy } from './policy.js';
 
 interface SimParams {
   dailyImpressions: number;
@@ -219,16 +220,7 @@ export function createMockAdapter(platform: AdPlatform, deps: AdapterDeps): Mock
     },
 
     async checkAdPolicy(adCopy: { headline: string; body: string }) {
-      const text = `${adCopy.headline} ${adCopy.body}`;
-      const violations: string[] = [];
-      const capsWords = text.match(/\b[A-Z]{4,}\b/g) ?? [];
-      if (capsWords.length >= 3) violations.push('Excessive capitalization (3+ all-caps words).');
-      if (/guarantee[ds]?\b/i.test(text)) violations.push('"Guaranteed" claims are not allowed.');
-      if (/free money/i.test(text)) violations.push('"Free money" claims are prohibited.');
-      if (/click here/i.test(text)) violations.push('"Click here" is flagged as low-quality copy.');
-      if (/100% (off|free)/i.test(text)) violations.push('Absolute discount claims may be rejected.');
-      if (/!{3,}/.test(text)) violations.push('Excessive exclamation marks.');
-      return { ok: violations.length === 0, violations };
+      return checkAdCopyPolicy(adCopy);
     },
   };
 }

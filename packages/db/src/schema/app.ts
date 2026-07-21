@@ -251,3 +251,88 @@ export const auditLogs = pgTable('audit_logs', {
   metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
+
+// ---------------------------------------------------------------------------
+// Expansion: social media, content studio, competitor intel, reputation.
+// ---------------------------------------------------------------------------
+
+export const socialPosts = pgTable('social_posts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  platform: text('platform'), // facebook|instagram|x|linkedin|tiktok
+  content: text('content'),
+  mediaUrls: jsonb('media_urls').$type<string[]>(),
+  status: text('status').default('draft'), // draft|scheduled|published|failed
+  scheduledAt: timestamp('scheduled_at', { mode: 'date' }),
+  publishedAt: timestamp('published_at', { mode: 'date' }),
+  externalId: text('external_id'),
+  // {impressions,likes,comments,shares} latest snapshot
+  metrics: jsonb('metrics').$type<Record<string, number>>(),
+  createdByAgentId: uuid('created_by_agent_id'),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const contentPieces = pgTable('content_pieces', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  type: text('type'), // blog|ad_copy|social_caption
+  title: text('title'),
+  body: text('body'),
+  status: text('status').default('draft'), // draft|approved|rejected
+  // what the draft was grounded on: audit facts, knowledge doc titles, topic
+  grounding: jsonb('grounding').$type<Record<string, unknown>>(),
+  createdByAgentId: uuid('created_by_agent_id'),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const competitors = pgTable('competitors', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  url: text('url').notNull(),
+  name: text('name'),
+  // latest analysis: {score, title, keywords[], missingMetaDescriptions, hasLeadForm, performanceScore, analyzedAt}
+  snapshot: jsonb('snapshot').$type<Record<string, unknown>>(),
+  // prior snapshots for diffs: [{analyzedAt, score, keywords[]}]
+  history: jsonb('history').$type<Record<string, unknown>[]>(),
+  suggestions: jsonb('suggestions').$type<string[]>(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const reviews = pgTable('reviews', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  source: text('source').default('google_business'),
+  externalId: text('external_id'),
+  author: text('author'),
+  rating: integer('rating'),
+  content: text('content'),
+  sentiment: text('sentiment'), // positive|neutral|negative
+  replyDraft: text('reply_draft'),
+  replyStatus: text('reply_status').default('none'), // none|drafted|replied
+  repliedAt: timestamp('replied_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});

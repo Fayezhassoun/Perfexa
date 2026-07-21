@@ -8,6 +8,13 @@
       "when": 1784290555446,
       "tag": "0000_loving_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784354763798,
+      "tag": "0001_organic_stone_men",
+      "breakpoints": true
     }
   ]
 }

@@ -50,6 +50,8 @@ export interface AdCampaignInput {
   dailyBudgetCents: number;
   targeting: { geography?: string; keywords?: string[]; audience?: string };
   adCopy?: { headline: string; body: string };
+  /** Where ads point. Required by live adapters to attach an ad; without it they create the campaign shell only. */
+  landingUrl?: string;
 }
 
 export interface CampaignMetrics {
@@ -77,6 +79,35 @@ export interface AdapterDeps {
   store: AdapterStore;
   /** Org whose state the adapter reads/writes (mock adapters are per-org stateful). */
   orgId?: string;
+  /** Present when live mode can really connect (OAuth done). Absent → live adapter is the safe stub. */
+  live?: LiveAdapterDeps;
+}
+
+/** Minimal fetch shape so live adapters are unit-testable offline; the global fetch satisfies it. */
+export interface FetchResponse {
+  ok: boolean;
+  status: number;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+}
+
+export type FetchLike = (
+  url: string,
+  init?: { method?: string; headers?: Record<string, string>; body?: string },
+) => Promise<FetchResponse>;
+
+/** Everything a live adapter needs: a fresh token, the platform account id, and injectable fetch. */
+export interface LiveAdapterDeps {
+  /** Returns a valid access token; refreshes + persists behind the scenes when expired. */
+  getAccessToken: () => Promise<string>;
+  /** Platform-side id: Google customer id (digits), Meta `act_…`, GA4 property id, GSC site url. */
+  externalAccountId: string;
+  /** Google Ads API developer token (google_ads only). */
+  developerToken?: string;
+  /** How the access token is sent: Bearer header (default) or TikTok's `Access-Token`. */
+  tokenHeader?: 'authorization' | 'access-token';
+  /** Injectable fetch for tests (defaults to global fetch). */
+  fetchImpl?: FetchLike;
 }
 
 export interface AdAdapter {

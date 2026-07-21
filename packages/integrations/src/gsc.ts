@@ -1,6 +1,9 @@
-// Google Search Console stub — deterministic mock query rows (phase 2 shape).
+// Google Search Console — deterministic mock query rows (default), plus a
+// real Search Analytics API adapter (Phase 2) for OAuth-connected orgs.
 
-import { hashString, hostnameOf, seededRange } from './util/hash.js';
+import { liveFetchJson } from './live-http.js';
+import type { LiveAdapterDeps } from './types.js';
+import { dateDaysAgo, hashString, hostnameOf, seededRange } from './util/hash.js';
 
 export interface GscQueryRow {
   query: string;
@@ -24,3 +27,51 @@ export async function getGscQueries(siteUrl: string, _days = 30): Promise<GscQue
     };
   });
 }
+
+// ---------------------------------------------------------------------------
+// Live adapter (Phase 2): Search Analytics query.
+// ---------------------------------------------------------------------------
+
+export interface GscAdapter {
+  mode: 'live';
+  getQueries(days?: number): Promise<GscQueryRow[]>;
+}
+
+interface GscRow {
+  keys?: string[];
+  clicks?: number;
+  impressions?: number;
+  position?: number;
+}
+
+export function createGscLiveAdapter(deps: LiveAdapterDeps): GscAdapter {
+  const siteUrl = deps.externalAccountId;
+  return {
+    mode: 'live',
+    async getQueries(days = 30): Promise<GscQueryRow[]> {
+      const data = await liveFetchJson<{ rows?: GscRow[] }>(
+        'gsc',
+        deps,
+        `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+        {
+          method: 'POST',
+          body: {
+            startDate: dateDaysAgo(days),
+            endDate: dateDaysAgo(0),
+            dimensions: ['query'],
+            rowLimit: 15,
+          },
+        },
+      );
+      return (data.rows ?? [])
+        .filter((row) => typeof row.keys?.[0] === 'string')
+        .map((row) => ({
+          query: row.keys![0]!,
+          clicks: Math.round(row.clicks ?? 0),
+          impressions: Math.round(row.impressions ?? 0),
+          position: Math.round(row.position ?? 0),
+        }));
+    },
+  };
+}
+

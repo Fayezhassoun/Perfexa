@@ -12,6 +12,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@voxmarketer/integrations": "workspace:*",
     "bcryptjs": "2.4.3",
     "drizzle-orm": "0.36.4",
     "postgres": "3.4.9",

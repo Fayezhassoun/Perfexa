@@ -17,6 +17,10 @@ const AGENT_DISPLAY: Record<AgentType, string> = {
   lead_gen: 'Lead Gen Specialist',
   analytics: 'Analytics Specialist',
   budget_guardian: 'Budget Guardian',
+  social_media: 'Social Media Specialist',
+  content: 'Content Specialist',
+  competitor: 'Competitor Analyst',
+  reputation: 'Reputation Specialist',
 };
 
 export async function getOrCreateAgent(

@@ -65,7 +65,11 @@ Packages are consumed as TS source (no build step): each package.json has
 | `REDIS_URL` | `redis://localhost:6380` | bullmq (dev-services 6380; compose 6379 internal) |
 | `AUTH_SECRET` | `dev-secret-change-me-32-bytes-minimum!!` | Auth.js |
 | `AUTH_URL` | `http://localhost:3000` | Auth.js |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | empty | optional OAuth login |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | empty | optional OAuth login; also the OAuth client for google_ads / ga4 / gsc integration connects |
+| `GOOGLE_ADS_DEVELOPER_TOKEN` | empty | Google Ads API developer token — required to connect google_ads live |
+| `META_APP_ID` / `META_APP_SECRET` | empty | Meta app credentials — required to connect meta live |
+| `TIKTOK_APP_ID` / `TIKTOK_APP_SECRET` | empty | TikTok Marketing API app — required to connect tiktok live |
+| `CRON_SECRET` | empty | Bearer secret for `/api/cron/*` (weekly report); empty = cron disabled |
 | `ENCRYPTION_KEY` | `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f` | 64 hex chars, AES-256-GCM for tokens |
 | `LLM_PROVIDER` | `mock` | `mock`\|`openai`\|`anthropic` |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | empty | live LLM |
@@ -185,9 +189,14 @@ optional `idempotencyKey: string`; duplicate keys return the original result.
   `leads.forms.list/create/update`, `leads.forms.embedSnippet({id})` → `{snippet, hostedUrl}`.
 - `knowledge.list({source?})`, `knowledge.search({q})` → top-5 by cosine similarity (JS impl).
 - `audit.list({limit?, cursor?})` → audit rows desc.
-- `settings.integrations()` → connected_accounts (tokens redacted) + adapter health.
+- `settings.integrations()` → connected_accounts (tokens redacted) + adapter health +
+  per-platform `oauthConfigured` / `connectUrl` (Phase 2 OAuth availability).
   `settings.setMode({platform, mode})` → sandbox→live requires `confirmText: 'LIVE'` +
-  OAuth-connected account; else 400. Writes audit log. (Phase 2: real OAuth.)
+  OAuth-connected account; else 400. Writes audit log.
+  OAuth connect (Phase 2): REST `GET /api/integrations/[platform]/connect` → provider
+  redirect (HMAC-signed state, 10-min TTL); `GET /api/integrations/[platform]/callback`
+  → `services.oauth.completeOAuthFlow` stores tokens encrypted + audit `integration.connected`;
+  the account stays in sandbox until the explicit LIVE-confirm switch.
   `settings.budgets.list/update` — update >20% of current cap → creates `approvals` row
   (pending) instead of applying; approved via approvals.decide.
   `settings.members.list/invite(stub)/remove`. `settings.notifications.update` (jsonb on org config — keep in orgs.goals? NO: add `orgs.settings jsonb default '{}'`).
@@ -258,7 +267,8 @@ hasLeadForm false — the §12 dialog depends on these exact values.
 // ads/types.ts + mock adapters (stateful, persisted via injected store functions)
 export type AdPlatform = 'google_ads'|'meta'|'tiktok';
 export interface AdCampaignInput { name: string; objective: string; dailyBudgetCents: number;
-  targeting: { geography?: string; keywords?: string[]; audience?: string }; adCopy?: { headline: string; body: string } }
+  targeting: { geography?: string; keywords?: string[]; audience?: string }; adCopy?: { headline: string; body: string };
+  landingUrl?: string /* required by live adapters to attach an ad; campaign shell only without it */ }
 export interface AdCampaign { externalId: string; platform: AdPlatform; name: string;
   status: 'draft'|'active'|'paused'|'removed'; budgetDailyCents: number; metrics: CampaignMetrics }
 export interface CampaignMetrics { impressions: number; clicks: number; spendCents: number; conversions: number }
@@ -277,7 +287,16 @@ export function getAdAdapter(platform: AdPlatform, mode: 'sandbox'|'live', deps:
 // AdapterDeps = { store: {load(orgId,platform), save(orgId,platform,state)} } so mock state
 // persists into campaigns_mirror via the agent layer. Mock metrics evolve deterministically
 // (+2..7% impressions/hour seeded by externalId) so dashboards "move" between polls.
-// live mode in phase 1: throws `LiveAdapterNotConnected` — agent layer converts to user-visible status.
+// live mode (Phase 2+3): real Google Ads / Meta / TikTok REST adapters driven by
+// LiveAdapterDeps (getAccessToken + externalAccountId + injectable fetch; TikTok sends
+// the token via `Access-Token` header, others Bearer); tokens come from
+// connected_accounts, AES-256-GCM decrypted, refreshed 60s before expiry and persisted
+// back encrypted. Without OAuth deps the live adapter throws
+// `LiveAdapterNotConnected` — agent layer converts to user-visible status.
+// OAuth helpers (buildAuthorizationUrl, exchangeCodeForTokens, refreshAccessToken,
+// fetchExternalAccountId, signOAuthState/verifyOAuthState) live in oauth.ts — pure,
+// fetch-injected. GA4/GSC ship live adapters too (createGa4LiveAdapter /
+// createGscLiveAdapter); agents resolve live-vs-mock per org with mock fallback.
 ```
 
 ```ts
@@ -445,7 +464,12 @@ mic-denied → text mode + hint banner. All state via tRPC `conversations.sendMe
 Hono `/health` + BullMQ queues on REDIS_URL:
 - `metrics-poll` (repeatable 5 min): for each sandbox campaign → adapter.getMetrics →
   update campaigns_mirror → `guardian.tick` → audit on enforcement.
-- `email` queue: weekly-report stub (logs only without RESEND_API_KEY).
+- `optimize` (repeatable 1 h, Phase 3): per org → `services.optimize.generateOptimizationApprovals`
+  — deterministic rules (trim burner / scale winner / shift budget) create PENDING
+  approvals only; nothing auto-executes, idempotent via payloadHash dedupe.
+- `email` queue (weekly, Mon 09:00, Phase 3): `services.reports.runWeeklyReportsForAllOrgs`
+  — builds the `reports` row per org and emails owners via Resend when RESEND_API_KEY
+  is set (log-only otherwise). Same runner backs `POST /api/cron/weekly-report`.
 Worker must not be required for web to function; web has an inline "simulate" fallback
 button on dashboard (dev only) that calls the same service directly.
 

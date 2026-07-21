@@ -1,0 +1,21 @@
+// Service surface (CONTRACTS §5): all router logic lives here; routers are thin.
+
+export * as dashboard from './dashboard.js';
+export * as conversations from './conversations.js';
+export * as proposals from './proposals.js';
+export * as approvals from './approvals.js';
+export * as campaigns from './campaigns.js';
+export * as agents from './agents.js';
+export * as leads from './leads.js';
+export * as knowledge from './knowledge.js';
+export * as settings from './settings.js';
+export * as oauth from './oauth.js';
+export * as optimize from './optimize.js';
+export * as reports from './reports.js';
+export * as onboarding from './onboarding.js';
+export * as auditLog from './audit-log.js';
+export * as admin from './admin.js';
+export * as social from './social.js';
+export * as content from './content.js';
+export * as competitors from './competitors.js';
+export * as reviews from './reviews.js';

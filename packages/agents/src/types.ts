@@ -13,7 +13,11 @@ export type AgentType =
   | 'tiktok_ads'
   | 'lead_gen'
   | 'analytics'
-  | 'budget_guardian';
+  | 'budget_guardian'
+  | 'social_media'
+  | 'content'
+  | 'competitor'
+  | 'reputation';
 
 export interface AgentContext {
   db: Db;
@@ -35,7 +39,11 @@ export type Intent =
   | 'ads_tiktok'
   | 'analytics'
   | 'budget_change'
-  | 'pause';
+  | 'pause'
+  | 'social'
+  | 'content'
+  | 'competitor'
+  | 'reviews';
 
 export interface Question {
   id: string;

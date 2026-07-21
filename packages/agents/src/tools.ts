@@ -8,18 +8,27 @@ import { z } from 'zod';
 import {
   approvals,
   campaignsMirror,
+  competitors,
+  contentPieces,
   leadForms,
   leads,
   organizations,
+  reviews,
+  socialPosts,
   websites,
 } from '@voxmarketer/db';
 import {
   ApprovalRequired,
   BudgetCapExceeded,
   crawlWebsite,
+  createMockSocialAdapter,
+  fetchMockReviews,
   runSeoAudit,
+  sentimentForReview,
   type AdPlatform,
   type MockAdAdapter,
+  type SeoAudit,
+  type SocialPlatform,
 } from '@voxmarketer/integrations';
 import type { AgentContext, AgentType, ToolCallRecord, ToolDef } from './types.js';
 import { payloadHash } from './audit.js';
@@ -73,6 +82,87 @@ async function assertSpendAllowed(ctx: AgentContext, platform: AdPlatform, addit
   if (!verdict.ok) {
     throw new BudgetCapExceeded(verdict.scope ?? `platform:${platform}`, verdict.capCents ?? 0, verdict.attemptedCents ?? additionalDailyCents);
   }
+}
+
+/** Deterministic caption template (the mock stand-in for the LLM copywriter). */
+export function draftCaption(businessName: string, topic: string, platform: string): string {
+  const clean = topic.trim().replace(/[.!?]+$/, '');
+  const hashtags = clean
+    .toLowerCase()
+    .match(/[a-z0-9]+/g)
+    ?.slice(0, 3)
+    .map((w) => `#${w}`)
+    .join(' ');
+  const cta =
+    platform === 'linkedin'
+      ? 'Get in touch to learn more.'
+      : platform === 'x'
+        ? 'DM us to get started.'
+        : 'Tap the link in bio to get started.';
+  return `${clean.charAt(0).toUpperCase()}${clean.slice(1)} — here's how ${businessName} can help. ${cta} ${hashtags ?? ''}`.trim();
+}
+
+/** Deterministic content drafts grounded on audit keywords (mock LLM). */
+export function draftContent(
+  businessName: string,
+  type: string,
+  topic: string,
+  keywords: string[],
+): { title: string; body: string } {
+  const clean = topic.trim().replace(/[.!?]+$/, '');
+  if (type === 'ad_copy') {
+    return {
+      title: `${clean} — ${businessName}`,
+      body: `Headline: ${clean} made simple\nBody: ${businessName} helps you with ${clean.toLowerCase()} — fast, reliable, and local. Get a free quote today.`,
+    };
+  }
+  if (type === 'social_caption') {
+    return { title: clean, body: draftCaption(businessName, clean, 'instagram') };
+  }
+  const kw = keywords.length ? keywords.join(', ') : clean.toLowerCase();
+  return {
+    title: `${clean}: a practical guide from ${businessName}`,
+    body:
+      `## Why ${clean.toLowerCase()} matters\n\nCustomers searching for ${kw} want clear answers fast. ` +
+      `This guide explains what to look for, what it costs, and how to choose well.\n\n` +
+      `## What ${businessName} recommends\n\n1. Start with the basics and measure results.\n` +
+      `2. Focus on the keywords your customers actually use (${kw}).\n` +
+      `3. Make it easy to contact you from every page.\n\n` +
+      `## Next steps\n\nTalk to us — we'll walk you through it without the jargon.`,
+  };
+}
+
+/** Counter-move suggestions from a competitor audit vs our score. */
+export function competitorSuggestions(theirs: SeoAudit, myScore: number | null): string[] {
+  const suggestions: string[] = [];
+  if (myScore != null) {
+    suggestions.push(
+      theirs.score > myScore
+        ? `They score ${theirs.score}/100 vs your ${myScore} — close the gap by fixing your failing SEO checks first.`
+        : `You score ${myScore}/100 vs their ${theirs.score} — you're ahead; protect the lead with fresh content.`,
+    );
+  }
+  if (!theirs.crawl.hasLeadForm) {
+    suggestions.push('They have no lead form — your contact form is a direct conversion advantage. Promote it.');
+  }
+  if (theirs.pagespeed.performanceScore < 60) {
+    suggestions.push(`Their site is slow (${theirs.pagespeed.performanceScore}/100 mobile) — fast pages can win you their impatient visitors.`);
+  }
+  const kw = theirs.keywordSuggestions.slice(0, 3).map((k) => k.keyword);
+  if (kw.length) suggestions.push(`They target: ${kw.join(', ')}. Consider bidding or writing content on these.`);
+  return suggestions;
+}
+
+/** Tone-matched review reply templates (mock LLM). */
+export function draftReviewReply(author: string, sentiment: string): string {
+  const firstName = author.split(' ')[0] ?? 'there';
+  if (sentiment === 'positive') {
+    return `Thank you so much, ${firstName}! We're thrilled you had a great experience — see you again soon.`;
+  }
+  if (sentiment === 'negative') {
+    return `${firstName}, we're really sorry this fell short. That's not the standard we hold ourselves to — please reach out directly so we can make it right.`;
+  }
+  return `Thanks for the honest feedback, ${firstName}. We're always improving and would love another chance to impress you.`;
 }
 
 export const TOOLS: ToolDef[] = [
@@ -166,6 +256,7 @@ export const TOOLS: ToolDef[] = [
             audience: z.string().optional(),
           }),
           adCopy: z.object({ headline: z.string(), body: z.string() }).optional(),
+          landingUrl: z.string().url().optional(),
         }),
       })
       .strict(),
@@ -350,6 +441,241 @@ export const TOOLS: ToolDef[] = [
     },
   },
 
+  // ---- Social media ----
+  {
+    name: 'social.draft_post',
+    description: 'Draft a social post (caption generated from the topic and brand voice). Not published.',
+    schema: z
+      .object({
+        platform: z.enum(['facebook', 'instagram', 'x', 'linkedin', 'tiktok']),
+        topic: z.string(),
+        scheduledAt: z.string().optional(), // ISO
+      })
+      .strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const [org] = await ctx.db
+        .select({ name: organizations.name })
+        .from(organizations)
+        .where(eq(organizations.id, ctx.orgId))
+        .limit(1);
+      const content = draftCaption(org?.name ?? 'our business', args.topic as string, args.platform as string);
+      const scheduledAt = args.scheduledAt ? new Date(args.scheduledAt as string) : null;
+      const [post] = await ctx.db
+        .insert(socialPosts)
+        .values({
+          orgId: ctx.orgId,
+          platform: args.platform as string,
+          content,
+          status: scheduledAt ? 'scheduled' : 'draft',
+          scheduledAt,
+        })
+        .returning();
+      return post;
+    },
+  },
+  {
+    name: 'social.publish_post',
+    description: 'Publish a drafted/scheduled post to its platform. PUBLISH action — requires approval.',
+    schema: z.object({ postId: z.string() }).strict(),
+    gated: true,
+    async execute(ctx, args) {
+      const [post] = await ctx.db
+        .select()
+        .from(socialPosts)
+        .where(and(eq(socialPosts.id, args.postId as string), eq(socialPosts.orgId, ctx.orgId)))
+        .limit(1);
+      if (!post) throw new Error('Post not found');
+      if (post.status === 'published') throw new Error('Post is already published');
+      const adapter = createMockSocialAdapter(post.platform as SocialPlatform);
+      const now = ctx.now ?? new Date();
+      const { externalId, publishedAt } = await adapter.publishPost(
+        { content: post.content ?? '', mediaUrls: post.mediaUrls ?? undefined },
+        now,
+      );
+      const [updated] = await ctx.db
+        .update(socialPosts)
+        .set({
+          status: 'published',
+          externalId,
+          publishedAt: new Date(publishedAt),
+          metrics: { impressions: 0, likes: 0, comments: 0, shares: 0 },
+        })
+        .where(eq(socialPosts.id, post.id))
+        .returning();
+      return updated;
+    },
+  },
+  {
+    name: 'social.get_engagement',
+    description: 'Refresh engagement metrics for published posts.',
+    schema: z.object({ postId: z.string().optional() }).strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const conditions = [eq(socialPosts.orgId, ctx.orgId), eq(socialPosts.status, 'published')];
+      if (args.postId) conditions.push(eq(socialPosts.id, args.postId as string));
+      const posts = await ctx.db
+        .select()
+        .from(socialPosts)
+        .where(and(...conditions));
+      const now = ctx.now ?? new Date();
+      let refreshed = 0;
+      for (const post of posts) {
+        if (!post.externalId || !post.publishedAt) continue;
+        const adapter = createMockSocialAdapter(post.platform as SocialPlatform);
+        const metrics = await adapter.getEngagement(post.externalId, post.publishedAt, now);
+        await ctx.db.update(socialPosts).set({ metrics: { ...metrics } }).where(eq(socialPosts.id, post.id));
+        refreshed++;
+      }
+      return { refreshed };
+    },
+  },
+
+  // ---- Content studio ----
+  {
+    name: 'content.draft',
+    description: 'Draft a content piece (blog, ad copy, or caption) grounded on the site audit and knowledge base.',
+    schema: z
+      .object({
+        type: z.enum(['blog', 'ad_copy', 'social_caption']),
+        topic: z.string(),
+      })
+      .strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const [org] = await ctx.db
+        .select({ name: organizations.name, websiteUrl: organizations.websiteUrl })
+        .from(organizations)
+        .where(eq(organizations.id, ctx.orgId))
+        .limit(1);
+      const [site] = await ctx.db.select().from(websites).where(eq(websites.orgId, ctx.orgId)).limit(1);
+      const audit = site?.crawl as { keywordSuggestions?: { keyword: string }[]; score?: number } | null;
+      const keywords = (audit?.keywordSuggestions ?? []).slice(0, 5).map((k) => k.keyword);
+      const piece = draftContent(org?.name ?? 'our business', args.type as string, args.topic as string, keywords);
+      const [row] = await ctx.db
+        .insert(contentPieces)
+        .values({
+          orgId: ctx.orgId,
+          type: args.type as string,
+          title: piece.title,
+          body: piece.body,
+          status: 'draft',
+          grounding: { topic: args.topic, keywords, auditScore: audit?.score ?? null },
+        })
+        .returning();
+      return row;
+    },
+  },
+
+  // ---- Competitor intelligence ----
+  {
+    name: 'competitor.analyze',
+    description: 'Run an SEO analysis of a competitor site and store the snapshot + counter-move suggestions.',
+    schema: z.object({ competitorId: z.string() }).strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const [row] = await ctx.db
+        .select()
+        .from(competitors)
+        .where(and(eq(competitors.id, args.competitorId as string), eq(competitors.orgId, ctx.orgId)))
+        .limit(1);
+      if (!row) throw new Error('Competitor not found');
+      const audit = await runSeoAudit(row.url);
+      const [mySite] = await ctx.db.select().from(websites).where(eq(websites.orgId, ctx.orgId)).limit(1);
+      const myAudit = mySite?.crawl as { score?: number } | null;
+      const snapshot = {
+        analyzedAt: (ctx.now ?? new Date()).toISOString(),
+        score: audit.score,
+        title: audit.crawl.title,
+        performanceScore: audit.pagespeed.performanceScore,
+        missingMetaDescriptions: audit.crawl.missingMetaDescriptions,
+        hasLeadForm: audit.crawl.hasLeadForm,
+        keywords: audit.keywordSuggestions.slice(0, 8).map((k) => k.keyword),
+      };
+      const suggestions = competitorSuggestions(audit, myAudit?.score ?? null);
+      const history = [...(row.history ?? []), { analyzedAt: snapshot.analyzedAt, score: snapshot.score, keywords: snapshot.keywords }].slice(-12);
+      const [updated] = await ctx.db
+        .update(competitors)
+        .set({ snapshot, suggestions, history })
+        .where(eq(competitors.id, row.id))
+        .returning();
+      return updated;
+    },
+  },
+
+  // ---- Reputation ----
+  {
+    name: 'reviews.sync',
+    description: 'Fetch the latest reviews (mock Google Business) and store new ones with sentiment.',
+    schema: z.object({}).strict(),
+    gated: false,
+    async execute(ctx) {
+      const external = fetchMockReviews(ctx.orgId, 8, ctx.now ?? new Date());
+      const existing = await ctx.db
+        .select({ externalId: reviews.externalId })
+        .from(reviews)
+        .where(eq(reviews.orgId, ctx.orgId));
+      const known = new Set(existing.map((r) => r.externalId));
+      let added = 0;
+      for (const review of external) {
+        if (known.has(review.externalId)) continue;
+        await ctx.db.insert(reviews).values({
+          orgId: ctx.orgId,
+          source: review.source,
+          externalId: review.externalId,
+          author: review.author,
+          rating: review.rating,
+          content: review.content,
+          sentiment: sentimentForReview(review.content, review.rating),
+        });
+        added++;
+      }
+      return { added, total: external.length };
+    },
+  },
+  {
+    name: 'reviews.draft_reply',
+    description: 'Draft a reply to a review, tone-matched to its sentiment. Not posted.',
+    schema: z.object({ reviewId: z.string() }).strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const [review] = await ctx.db
+        .select()
+        .from(reviews)
+        .where(and(eq(reviews.id, args.reviewId as string), eq(reviews.orgId, ctx.orgId)))
+        .limit(1);
+      if (!review) throw new Error('Review not found');
+      const replyDraft = draftReviewReply(review.author ?? 'there', review.sentiment ?? 'neutral');
+      const [updated] = await ctx.db
+        .update(reviews)
+        .set({ replyDraft, replyStatus: 'drafted' })
+        .where(eq(reviews.id, review.id))
+        .returning();
+      return updated;
+    },
+  },
+  {
+    name: 'reviews.post_reply',
+    description: 'Post the drafted reply publicly. PUBLISH action — requires approval.',
+    schema: z.object({ reviewId: z.string() }).strict(),
+    gated: true,
+    async execute(ctx, args) {
+      const [review] = await ctx.db
+        .select()
+        .from(reviews)
+        .where(and(eq(reviews.id, args.reviewId as string), eq(reviews.orgId, ctx.orgId)))
+        .limit(1);
+      if (!review) throw new Error('Review not found');
+      if (!review.replyDraft) throw new Error('No drafted reply to post');
+      const [updated] = await ctx.db
+        .update(reviews)
+        .set({ replyStatus: 'replied', repliedAt: ctx.now ?? new Date() })
+        .where(eq(reviews.id, review.id))
+        .returning();
+      return updated;
+    },
+  },
+
   // ---- Memory ----
   {
     name: 'memory.remember',
@@ -428,6 +754,10 @@ const AGENT_TOOLS: Record<AgentType, string[]> = {
   lead_gen: ['leads.create_form', 'leads.score', 'memory.remember', 'memory.recall'],
   analytics: ['analytics.get_overview', 'memory.recall'],
   budget_guardian: [],
+  social_media: ['social.draft_post', 'social.publish_post', 'social.get_engagement', 'memory.remember', 'memory.recall'],
+  content: ['content.draft', 'seo.crawl', 'memory.recall'],
+  competitor: ['competitor.analyze', 'seo.run_audit', 'memory.recall'],
+  reputation: ['reviews.sync', 'reviews.draft_reply', 'reviews.post_reply', 'memory.recall'],
 };
 
 export function getToolsForAgent(type: AgentType): ToolDef[] {

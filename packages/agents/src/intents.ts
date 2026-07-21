@@ -14,9 +14,13 @@ const KEYWORDS: Record<Intent, RegExp> = {
   analytics: /how (did|are) we (do|doing)|performance|results|report|analytics|how('s| is) it going/i,
   budget_change: /budget|spend|raise|increase|decrease|reduce|move .* (budget|money)/i,
   pause: /\bpause\b|\bstop\b|\bhalt\b|\bsuspend\b/i,
+  social: /social media|\bpost\b|\bposts\b|\binstagram\b|\blinkedin\b|\btweet\b|\bx\.com\b|social presence|content calendar/i,
+  content: /\bblog\b|write (an? )?(article|post|copy)|content (studio|ideas|plan)|ad copy|caption/i,
+  competitor: /\bcompetitors?\b|\brivals?\b|who am i up against|compare (me|us) (to|with)/i,
+  reviews: /\breviews?\b|\breputation\b|\bratings?\b|google business|testimonials?/i,
 };
 
-const ORDER: Intent[] = ['seo', 'visibility', 'leads', 'ads_google', 'ads_meta', 'ads_tiktok', 'analytics', 'budget_change', 'pause'];
+const ORDER: Intent[] = ['seo', 'visibility', 'leads', 'ads_google', 'ads_meta', 'ads_tiktok', 'analytics', 'budget_change', 'pause', 'social', 'content', 'competitor', 'reviews'];
 
 export function detectIntents(message: string): Intent[] {
   return ORDER.filter((intent) => KEYWORDS[intent].test(message));

@@ -136,8 +136,24 @@ export async function handleUserMessage(
     return handleAnalyticsQuestion(ctx);
   }
 
+  // 4b. Expansion intents (social / content / competitors / reviews) — only
+  // when the message isn't part of the campaign-planning state machine.
+  const hasMarketingIntent = intents.some((i) => MARKETING_INTENTS.includes(i));
+  // An explicit "post …" request is social even when a platform name (e.g.
+  // Instagram) also matched an ads intent.
+  const explicitlySocial = intents.includes('social') && /\bposts?\b|social media|content calendar/i.test(message);
+  if (explicitlySocial && !meta.draft) {
+    return handleSocialRequest(ctx, message);
+  }
+  if (!hasMarketingIntent && !meta.draft) {
+    if (intents.includes('social')) return handleSocialRequest(ctx, message);
+    if (intents.includes('content')) return handleContentRequest(ctx, message);
+    if (intents.includes('reviews')) return handleReviewsRequest(ctx);
+    if (intents.includes('competitor')) return handleCompetitorRequest(ctx, message);
+  }
+
   // 5. Marketing intents → audit + clarification state machine.
-  const hasMarketing = intents.some((i) => MARKETING_INTENTS.includes(i));
+  const hasMarketing = hasMarketingIntent;
   if (hasMarketing && !meta.draft) {
     return startDraft(ctx, org, intents, message, meta);
   }
@@ -451,4 +467,93 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
     }
   }
   return { assistantMessage: 'I looked into that for you. Could you confirm what you would like me to do next?' };
+}
+
+// ---------------------------------------------------------------------------
+// Expansion intent handlers (social / content / reviews / competitors)
+// ---------------------------------------------------------------------------
+
+function extractTopic(message: string): string | undefined {
+  const about = message.match(/\babout\s+(.{3,120})$/i);
+  if (about?.[1]) return about[1].trim().replace(/[.!?]+$/, '');
+  const on = message.match(/\b(?:post|blog|article|write|caption)\s+(?:on|for)\s+(.{3,120})$/i);
+  if (on?.[1]) return on[1].trim().replace(/[.!?]+$/, '');
+  return undefined;
+}
+
+function detectSocialPlatform(message: string): 'facebook' | 'instagram' | 'x' | 'linkedin' | 'tiktok' {
+  if (/instagram|\big\b/i.test(message)) return 'instagram';
+  if (/linkedin/i.test(message)) return 'linkedin';
+  if (/facebook|\bfb\b/i.test(message)) return 'facebook';
+  if (/tik\s?tok/i.test(message)) return 'tiktok';
+  if (/\btweet\b|\bx\b/i.test(message)) return 'x';
+  return 'instagram';
+}
+
+async function handleSocialRequest(ctx: AgentContext, message: string): Promise<OrchestratorResult> {
+  const { createPost } = await import('./services/social.js');
+  const topic = extractTopic(message);
+  if (!topic) {
+    return {
+      assistantMessage:
+        'Happy to handle your social media. Tell me what to post about — for example: "post about our summer discount on Instagram" — and I\'ll draft it for your review on the Social page.',
+      needsClarification: [{ id: 'social-topic', question: 'What should the post be about?', field: 'topic' }],
+    };
+  }
+  const platform = detectSocialPlatform(message);
+  const post = await createPost(ctx, { platform, topic });
+  return {
+    assistantMessage:
+      `I drafted a ${platform} post for you: “${post.content}” — it's waiting on the Social page. ` +
+      `Nothing goes public until you hit Publish (that step always needs your approval).`,
+  };
+}
+
+async function handleContentRequest(ctx: AgentContext, message: string): Promise<OrchestratorResult> {
+  const { draftPiece } = await import('./services/content.js');
+  const topic = extractTopic(message) ?? message.slice(0, 80);
+  const type = /ad copy/i.test(message) ? ('ad_copy' as const) : /caption/i.test(message) ? ('social_caption' as const) : ('blog' as const);
+  const piece = await draftPiece(ctx, { type, topic });
+  const label = type === 'blog' ? 'blog draft' : type === 'ad_copy' ? 'ad copy draft' : 'caption draft';
+  return {
+    assistantMessage: `Done — I wrote a ${label} titled “${piece.title}”. It's in the Content studio for you to review, edit, and approve.`,
+  };
+}
+
+async function handleReviewsRequest(ctx: AgentContext): Promise<OrchestratorResult> {
+  const { syncReviews, stats } = await import('./services/reviews.js');
+  await syncReviews(ctx);
+  const s = await stats(ctx);
+  const negativeNote = s.negative > 0 ? ` ${s.negative} negative review${s.negative > 1 ? 's' : ''} could use a reply — I can draft those for you.` : '';
+  return {
+    assistantMessage:
+      `I pulled your latest reviews: ${s.total} total, averaging ${s.avgRating ?? '—'}★ ` +
+      `(${s.positive} positive, ${s.neutral} neutral, ${s.negative} negative).${negativeNote} ` +
+      `See them all on the Reviews page — posting any reply needs your approval.`,
+  };
+}
+
+async function handleCompetitorRequest(ctx: AgentContext, message: string): Promise<OrchestratorResult> {
+  const { addCompetitor, listCompetitors } = await import('./services/competitors.js');
+  const urlMatch = message.match(/\b((?:https?:\/\/)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/\S*)?)\b/i);
+  if (urlMatch?.[1]) {
+    const competitor = await addCompetitor(ctx, urlMatch[1]);
+    const snapshot = competitor.snapshot as { score?: number } | null;
+    return {
+      assistantMessage:
+        `I analyzed ${competitor.name}: their SEO score is ${snapshot?.score ?? '—'}/100. ` +
+        `The full breakdown and my counter-move suggestions are on the Competitors page.`,
+    };
+  }
+  const existing = await listCompetitors(ctx);
+  if (existing.length) {
+    return {
+      assistantMessage: `You're tracking ${existing.length} competitor${existing.length > 1 ? 's' : ''} — the latest snapshots are on the Competitors page. Give me another website address to add one more.`,
+    };
+  }
+  return {
+    assistantMessage:
+      'I can keep an eye on your competitors. Give me a website address — e.g. "track competitor rivalplumbing.com" — and I\'ll analyze their SEO and suggest counter-moves.',
+    needsClarification: [{ id: 'competitor-url', question: "What is the competitor's website?", field: 'url' }],
+  };
 }

@@ -34,6 +34,11 @@ export type Lead = InferSelectModel<typeof schema.leads>;
 export type Report = InferSelectModel<typeof schema.reports>;
 export type KnowledgeDocument = InferSelectModel<typeof schema.knowledgeDocuments>;
 export type AuditLog = InferSelectModel<typeof schema.auditLogs>;
+export type SocialPost = InferSelectModel<typeof schema.socialPosts>;
+export type NewSocialPost = InferInsertModel<typeof schema.socialPosts>;
+export type ContentPiece = InferSelectModel<typeof schema.contentPieces>;
+export type Competitor = InferSelectModel<typeof schema.competitors>;
+export type Review = InferSelectModel<typeof schema.reviews>;
 
 let client: postgres.Sql | undefined;
 let instance: Db | undefined;
@@ -60,6 +65,14 @@ export const db: Db = new Proxy({} as Db, {
     const real = getDb() as unknown as Record<PropertyKey, unknown>;
     const value = Reflect.get(real, prop, receiver);
     return typeof value === 'function' ? value.bind(real) : value;
+  },
+  // Libraries (e.g. @auth/drizzle-adapter) detect the drizzle dialect by
+  // walking the prototype chain — forward it to the real instance.
+  getPrototypeOf() {
+    return Object.getPrototypeOf(getDb());
+  },
+  has(_target, prop) {
+    return Reflect.has(getDb() as object, prop);
   },
 }) as Db;
 

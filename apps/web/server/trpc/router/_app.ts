@@ -1,0 +1,40 @@
+import { router } from '../trpc';
+import { authRouter } from './auth';
+import { onboardingRouter } from './onboarding';
+import { conversationsRouter } from './conversations';
+import { proposalsRouter } from './proposals';
+import { approvalsRouter } from './approvals';
+import { agentsRouter } from './agents';
+import { campaignsRouter } from './campaigns';
+import { dashboardRouter } from './dashboard';
+import { leadsRouter } from './leads';
+import { knowledgeRouter } from './knowledge';
+import { auditRouter } from './audit';
+import { settingsRouter } from './settings';
+import { adminRouter } from './admin';
+import { socialRouter } from './social';
+import { contentRouter } from './content';
+import { competitorsRouter } from './competitors';
+import { reviewsRouter } from './reviews';
+
+export const appRouter = router({
+  auth: authRouter,
+  onboarding: onboardingRouter,
+  conversations: conversationsRouter,
+  proposals: proposalsRouter,
+  approvals: approvalsRouter,
+  agents: agentsRouter,
+  campaigns: campaignsRouter,
+  dashboard: dashboardRouter,
+  leads: leadsRouter,
+  knowledge: knowledgeRouter,
+  audit: auditRouter,
+  settings: settingsRouter,
+  admin: adminRouter,
+  social: socialRouter,
+  content: contentRouter,
+  competitors: competitorsRouter,
+  reviews: reviewsRouter,
+});
+
+export type AppRouter = typeof appRouter;

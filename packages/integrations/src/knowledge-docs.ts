@@ -95,4 +95,55 @@ export const KNOWLEDGE_SEED_DOCS: KnowledgeSeedDoc[] = [
     content:
       'TikTok enforces: no misleading claims or exaggerated results, no before/after comparisons for body image products, age-appropriate targeting (no alcohol/gambling to minors; some verticals banned outright by region), creatives must match the landing page, and mandatory disclosures for regulated industries. Intellectual property rules are strict — use licensed or original music via TikTok’s Commercial Music Library in ads. Review is mostly automated and fast (often under an hour); rejected ads include a reason, and most are fixable by softening claims or swapping creative.',
   },
+  // -------------------------------------------------------------------------
+  // Phase 3 RAG expansion: TikTok depth + budget/pacing + learning-phase guidance.
+  // -------------------------------------------------------------------------
+  {
+    source: 'tiktok_help',
+    title: 'TikTok campaign objectives',
+    content:
+      'TikTok objectives map to funnel stages: Reach (cheap awareness, optimized for impressions), Traffic (link clicks to your site), Lead Generation (instant forms inside TikTok, or website leads with the pixel), and Conversions (pixel events like purchases or sign-ups). For a local service business starting out, Lead Generation with an instant form is usually the fastest signal — no landing page needed. Move budget to Conversions once the TikTok pixel has fired ~50 events so the algorithm has something to optimize toward.',
+  },
+  {
+    source: 'tiktok_help',
+    title: 'TikTok budget modes and minimums',
+    content:
+      'TikTok campaigns use either a daily budget (BUDGET_MODE_DAY) or a lifetime total (BUDGET_MODE_TOTAL). Daily is easier to control and is the safe default. Minimums: campaigns typically require at least $20/day, ad groups at least $5/day (varies by region). TikTok may overshoot a daily budget by up to ~20% on high-traffic days while staying within the weekly average — so set the daily number slightly below your true ceiling. Change budgets gradually (≤20–50% per edit) and no more than once a day to avoid resetting delivery learning.',
+  },
+  {
+    source: 'tiktok_help',
+    title: 'TikTok pixel and events',
+    content:
+      'The TikTok pixel is a small snippet on your website that reports visitor actions (page views, form submits, purchases) back to TikTok. Without it, Traffic campaigns can count clicks but TikTok cannot optimize for leads or sales, and reporting stops at the click. Setup: create the pixel in TikTok Events Manager, install the base code on every page, then define events (Contact, SubmitForm, CompletePayment). Verify with the TikTok Pixel Helper browser extension before spending — a campaign optimizing toward a silent pixel burns budget.',
+  },
+  {
+    source: 'google_ads_help',
+    title: 'Responsive search ads (RSA)',
+    content:
+      'Responsive search ads are the default Google Search ad format: you supply 3–15 short headlines (max 30 characters each) and 2–4 descriptions (max 90), and Google mixes them per auction. Write headlines that work in any order: include the core keyword in at least two, the location in one, a proof point in one, and a clear call to action in one. Pin sparingly — over-pinning defeats the testing. Check the asset report after ~2 weeks and replace the weakest headlines; keep at least 3 active so the ad stays eligible.',
+  },
+  {
+    source: 'google_ads_help',
+    title: 'Budget pacing and shared budgets',
+    content:
+      'Google can spend up to 2× your daily budget on a strong day but never more than your daily budget × 30.4 in a month. Practical rules: set daily = monthly ceiling ÷ 30.4, review pacing weekly not daily, and change budgets in small steps (≤20%) — large jumps reset Smart Bidding’s learning. If several small campaigns fight over one pool, a shared budget lets Google shift spend to whichever performs best that day. Watch “limited by budget” status: it means you are missing auctions, but raise budgets only when the campaign is actually converting profitably.',
+  },
+  {
+    source: 'meta_help',
+    title: 'The learning phase',
+    content:
+      'Every Meta ad set enters a learning phase until it collects ~50 optimization events (leads, purchases) in 7 days. During learning, delivery is unstable and costs swing — that is normal, not a bug. Rules of thumb: do not edit a learning ad set (any significant edit — budget, audience, creative, pause — restarts the clock), consolidate small ad sets so each can hit 50 events, and if an ad set is stuck in “learning limited”, broaden the audience or raise the budget rather than duplicating it. Judge performance only after learning exits.',
+  },
+  {
+    source: 'meta_help',
+    title: 'Special ad categories',
+    content:
+      'Ads for credit, employment, housing, social issues, elections, or politics must be declared in a special ad category at campaign creation. Declared campaigns get restricted targeting (no age, gender, or detailed location options; smaller lookalike ranges) and extra review. Not declaring a qualifying ad risks rejection or account restriction — when in doubt, declare. Local service businesses (plumbing, salons, gyms) are normally unaffected; the category mostly matters for financial products, recruiters, landlords, and anything civic.',
+  },
+  {
+    source: 'policy',
+    title: 'Billing safety and account access',
+    content:
+      'Protect ad accounts like bank accounts: turn on two-factor authentication for every user, grant the minimum role each person needs, and remove ex-employees the day they leave. Set account-level spend limits where the platform offers them and keep payment methods current — a failed card pauses all campaigns, sometimes for days. Watch for billing emails: a sudden spike in charges you did not authorize means change passwords and contact platform support immediately. Agencies should connect via partner/client access, never by sharing logins.',
+  },
 ];
