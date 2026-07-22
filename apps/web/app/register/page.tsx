@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
   return (
     <div className="vox-backdrop flex min-h-screen items-center justify-center p-4">
-      <Card className="glass animate-fade-up w-full max-w-sm rounded-2xl">
+      <Card className="glass animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
         <CardHeader className="text-center">
           <div className="animate-pulse-glow mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl vox-gradient">
             <Mic className="h-5 w-5 text-white" />

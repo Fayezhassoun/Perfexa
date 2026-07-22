@@ -23,7 +23,7 @@ export default function ProposalDetailPage() {
 
   const p = proposal.data;
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-6">
+    <div className="animate-page-in mx-auto max-w-2xl space-y-4 p-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Proposal review</h1>
       <ProposalCard
         plan={p.plan as unknown as PlanShape}

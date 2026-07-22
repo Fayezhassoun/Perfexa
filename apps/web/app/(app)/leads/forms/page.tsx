@@ -45,7 +45,7 @@ export default function LeadFormsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="animate-page-in space-y-6 p-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Lead capture forms</h1>
 
       <Card>
@@ -180,7 +180,7 @@ function FormRow({
           )}
         </div>
         {snippet.data && (
-          <pre className="overflow-x-auto rounded bg-muted p-2 text-xs">{snippet.data.snippet}</pre>
+          <pre className="glass-tile overflow-x-auto p-3 text-xs">{snippet.data.snippet}</pre>
         )}
       </CardContent>
     </Card>

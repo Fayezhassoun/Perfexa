@@ -119,7 +119,7 @@ export default function OnboardingPage() {
             />
           ))}
         </div>
-        <Card className="glass rounded-2xl">
+        <Card className="glass rounded-[var(--glass-radius-lg)]">
           {step === 'business' && (
             <>
               <CardHeader>
@@ -167,8 +167,8 @@ export default function OnboardingPage() {
                         )
                       }
                       className={cn(
-                        'flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors',
-                        active ? 'border-primary bg-primary/5' : 'hover:bg-accent',
+                        'glass-tile flex w-full items-center justify-between p-3 text-left transition-all duration-300',
+                        active ? 'border-primary/50 bg-primary/10' : 'hover:bg-[color:var(--glass-row-hover)]',
                       )}
                     >
                       <span>
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
                 {PLATFORMS.map((p) => {
                   const isConnected = connected.includes(p.key);
                   return (
-                    <div key={p.key} className="flex items-center justify-between rounded-lg border p-3">
+                    <div key={p.key} className="glass-tile flex items-center justify-between p-3">
                       <span className="text-sm font-medium">{p.label}</span>
                       {isConnected ? (
                         <span className="flex items-center gap-1 text-sm text-emerald-500">
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          <CardContent className="flex items-center justify-between border-t pt-4">
+          <CardContent className="glass-divider-t flex items-center justify-between pt-4">
             <Button
               variant="ghost"
               disabled={stepIndex === 0 || busy}

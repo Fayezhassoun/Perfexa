@@ -12,7 +12,7 @@ export default function AuditPage() {
   const page = trpc.audit.list.useQuery({ limit: 50, cursor });
 
   return (
-    <div className="space-y-4 p-6" data-testid="audit-page">
+    <div className="animate-page-in space-y-4 p-6" data-testid="audit-page">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Audit log</h1>
       <p className="text-sm text-muted-foreground">
         An immutable record of every agent action, approval, and API write — who, what, when, and a

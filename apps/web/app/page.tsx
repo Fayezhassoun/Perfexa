@@ -74,10 +74,10 @@ const STEPS = [
 export default function Home() {
   return (
     <main className="vox-backdrop min-h-screen overflow-x-hidden">
-      {/* Nav */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      {/* Nav — floating glass pill */}
+      <header className="glass-strong sticky top-4 z-50 mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full py-3 pl-6 pr-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl vox-gradient">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg shadow-primary/30 vox-gradient">
             <Mic className="h-5 w-5 text-white" />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">VoxMarketer</span>
@@ -133,7 +133,7 @@ export default function Home() {
               “I need an SEO specialist. I need my website to be top visible. I need to get leads.”
             </p>
           </div>
-          <div className="mt-5 rounded-xl border border-border/60 bg-secondary/50 p-4 text-sm text-muted-foreground">
+          <div className="glass-tile mt-5 p-4 text-sm text-muted-foreground">
             <span className="text-foreground">Your team:</span> I checked your site — mobile speed
             58/100, no lead form. I&apos;ll set up an SEO agent, a Google Ads agent, and a contact
             form. Suggested budget $500/mo. <span className="vox-gradient-text font-medium">Say “approve” to launch.</span>
@@ -210,7 +210,7 @@ export default function Home() {
         </Button>
       </section>
 
-      <footer className="border-t border-border/60">
+      <footer className="glass-divider-t">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
           <span className="flex items-center gap-2">
             <Mic className="h-4 w-4 text-primary" /> VoxMarketer

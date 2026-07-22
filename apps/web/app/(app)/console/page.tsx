@@ -75,10 +75,10 @@ export default function ConsolePage() {
   }, [messages.length, conversationProposals.length, sendMessage.isPending]);
 
   return (
-    <div className="flex h-screen">
-      {/* Conversation sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r lg:flex">
-        <div className="flex items-center justify-between border-b p-3">
+    <div className="animate-page-in flex h-[calc(100dvh-3.5rem)]">
+      {/* Conversation sidebar — floating glass panel */}
+      <aside className="glass-strong m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
+        <div className="glass-divider-b flex items-center justify-between p-3">
           <span className="text-sm font-medium">Conversations</span>
           <Button
             variant="ghost"
@@ -95,8 +95,9 @@ export default function ConsolePage() {
               key={c.id}
               onClick={() => setConversationId(c.id)}
               className={cn(
-                'mb-1 w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent',
-                conversationId === c.id && 'bg-accent',
+                'mb-1 w-full rounded-xl border border-transparent px-3 py-2 text-left text-sm transition-all duration-300 hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)]',
+                conversationId === c.id &&
+                  'border-[color:var(--glass-border-strong)] bg-[color:var(--glass-bg-subtle)] shadow-sm',
               )}
             >
               <span className="block truncate font-medium">{c.title ?? 'Conversation'}</span>
@@ -112,7 +113,7 @@ export default function ConsolePage() {
 
       {/* Main console */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-border/60 px-4">
+        <header className="glass-topbar flex h-14 items-center justify-between px-4">
           <h1 className="font-display font-semibold tracking-tight">Voice Console</h1>
           <div className="flex items-center gap-2">
             <Button
@@ -210,7 +211,7 @@ export default function ConsolePage() {
         </div>
 
         {/* Input row */}
-        <div className="border-t p-4">
+        <div className="glass-divider-t bg-[color:var(--glass-bg-subtle)] p-4 backdrop-blur-xl">
           {voice.partial && (
             <p className="mb-2 text-sm italic text-muted-foreground" data-testid="partial-transcript">
               {voice.partial}…

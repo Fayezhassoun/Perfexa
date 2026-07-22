@@ -89,7 +89,7 @@ export default function SocialPage() {
 
   const s = summary.data;
   return (
-    <div className="space-y-6 p-6" data-testid="social-page">
+    <div className="animate-page-in space-y-6 p-6" data-testid="social-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Social media</h1>
         <Button variant="outline" size="sm" disabled={refresh.isPending} onClick={() => refresh.mutate()}>
@@ -148,18 +148,18 @@ export default function SocialPage() {
             </div>
             <div className="space-y-1.5">
               <Label>How?</Label>
-              <div className="flex rounded-lg bg-muted p-1">
+              <div className="glass-subtle flex rounded-full p-1">
                 <button
                   type="button"
                   onClick={() => setMode('topic')}
-                  className={cn('rounded-md px-3 py-1 text-sm', mode === 'topic' && 'bg-background shadow')}
+                  className={cn('rounded-full px-3 py-1 text-sm transition-all duration-300', mode === 'topic' && 'tab-active')}
                 >
                   AI draft
                 </button>
                 <button
                   type="button"
                   onClick={() => setMode('write')}
-                  className={cn('rounded-md px-3 py-1 text-sm', mode === 'write' && 'bg-background shadow')}
+                  className={cn('rounded-full px-3 py-1 text-sm transition-all duration-300', mode === 'write' && 'tab-active')}
                 >
                   Write myself
                 </button>

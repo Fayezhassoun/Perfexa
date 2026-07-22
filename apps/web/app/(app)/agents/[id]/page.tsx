@@ -17,7 +17,7 @@ export default function AgentDetailPage() {
 
   const { agent, tools, memory, runs } = detail.data;
   return (
-    <div className="space-y-6 p-6">
+    <div className="animate-page-in space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">{agent.name ?? agent.type}</h1>
@@ -45,7 +45,7 @@ export default function AgentDetailPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {tools.map((tool) => (
-              <div key={tool.name} className="flex items-start justify-between gap-2 rounded-lg border p-3">
+              <div key={tool.name} className="glass-tile flex items-start justify-between gap-2 p-3">
                 <div>
                   <p className="font-mono text-sm">{tool.name}</p>
                   <p className="text-xs text-muted-foreground">{tool.description}</p>
@@ -61,7 +61,7 @@ export default function AgentDetailPage() {
             <CardTitle className="text-base">Memory & config</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs">
+            <pre className="glass-tile overflow-x-auto p-3 text-xs">
               {JSON.stringify({ config: agent.config, memory }, null, 2)}
             </pre>
           </CardContent>
@@ -74,7 +74,7 @@ export default function AgentDetailPage() {
         </CardHeader>
         <CardContent className="space-y-2">
           {runs.map((run) => (
-            <details key={run.id} className="rounded-lg border p-3">
+            <details key={run.id} className="glass-tile p-3">
               <summary className="flex cursor-pointer items-center justify-between text-sm">
                 <span className="truncate">{run.input ?? '(no input)'}</span>
                 <span className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function AgentDetailPage() {
                 {run.output && <p className="text-muted-foreground">{run.output}</p>}
                 {run.error && <p className="text-destructive">{run.error}</p>}
                 {!!run.toolCalls && (
-                  <pre className="overflow-x-auto rounded bg-muted p-2 text-xs">
+                  <pre className="glass-tile overflow-x-auto p-2 text-xs">
                     {JSON.stringify(run.toolCalls, null, 2)}
                   </pre>
                 )}

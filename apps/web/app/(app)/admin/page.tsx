@@ -10,7 +10,7 @@ export default function AdminPage() {
   const health = trpc.admin.health.useQuery();
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="animate-page-in space-y-6 p-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Admin</h1>
 
       <Card>

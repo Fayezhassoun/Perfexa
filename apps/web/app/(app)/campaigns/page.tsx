@@ -37,7 +37,7 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="space-y-4 p-6" data-testid="campaigns-page">
+    <div className="animate-page-in space-y-4 p-6" data-testid="campaigns-page">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Campaigns</h1>
         <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">
@@ -72,7 +72,7 @@ export default function CampaignsPage() {
                 conversions?: number;
               } | null;
               return (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                <div key={c.id} className="glass-tile flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
                     <p className="flex items-center gap-2 font-medium">
                       {c.name}

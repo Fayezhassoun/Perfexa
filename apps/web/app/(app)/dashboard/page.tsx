@@ -66,7 +66,7 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="space-y-6 p-6" data-testid="dashboard">
+    <div className="animate-page-in space-y-6 p-6" data-testid="dashboard">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
         <div className="flex items-center gap-2">
@@ -115,9 +115,13 @@ export default function DashboardPage() {
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      background: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: 8,
+                      background: 'rgba(20, 20, 28, 0.72)',
+                      backdropFilter: 'blur(16px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+                      color: '#fff',
                     }}
                   />
                   <Line type="monotone" dataKey="spend" stroke="hsl(258 90% 68%)" strokeWidth={2} name="Spend ($)" dot={false} />
@@ -139,7 +143,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {Object.entries(overview.data?.byPlatform ?? {}).map(([platform, t]) => (
-              <div key={platform} className="rounded-lg border p-3">
+              <div key={platform} className="glass-tile p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{PLATFORM_LABELS[platform] ?? platform}</span>
                   <span className="text-sm">{dollars(t.spendCents)}</span>
@@ -205,7 +209,7 @@ export default function DashboardPage() {
                     across {reviewStats.data.total} reviews
                   </span>
                 </p>
-                <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-foreground/10">
                   {reviewStats.data.total > 0 && (
                     <>
                       <div
@@ -247,7 +251,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2" data-testid="activity-feed">
             {(feed.data ?? []).map((item) => (
-              <div key={item.id} className="flex items-start justify-between gap-2 border-b pb-2 last:border-0">
+              <div key={item.id} className="glass-divider-b flex items-start justify-between gap-2 pb-2 last:border-0">
                 <div>
                   <p className="text-sm">{item.text}</p>
                   <p className="text-xs text-muted-foreground">
@@ -284,19 +288,19 @@ export default function DashboardPage() {
                 </div>
                 {seo.data.cwv && (
                   <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                    <div className="rounded border p-2">
+                    <div className="glass-tile p-2">
                       <p className="text-muted-foreground">LCP</p>
                       <p className="font-medium">{seo.data.cwv.lcpMs ? `${(seo.data.cwv.lcpMs / 1000).toFixed(1)}s` : '—'}</p>
                     </div>
-                    <div className="rounded border p-2">
+                    <div className="glass-tile p-2">
                       <p className="text-muted-foreground">CLS</p>
                       <p className="font-medium">{seo.data.cwv.cls ?? '—'}</p>
                     </div>
-                    <div className="rounded border p-2">
+                    <div className="glass-tile p-2">
                       <p className="text-muted-foreground">INP</p>
                       <p className="font-medium">{seo.data.cwv.inpMs ? `${seo.data.cwv.inpMs}ms` : '—'}</p>
                     </div>
-                    <div className="rounded border p-2">
+                    <div className="glass-tile p-2">
                       <p className="text-muted-foreground">FCP</p>
                       <p className="font-medium">{seo.data.cwv.fcpMs ? `${(seo.data.cwv.fcpMs / 1000).toFixed(1)}s` : '—'}</p>
                     </div>

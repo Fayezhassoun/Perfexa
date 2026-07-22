@@ -32,7 +32,7 @@ export default function CompetitorsPage() {
   const myScore = seo.data?.score ?? null;
 
   return (
-    <div className="space-y-6 p-6" data-testid="competitors-page">
+    <div className="animate-page-in space-y-6 p-6" data-testid="competitors-page">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Competitors</h1>
       <p className="text-sm text-muted-foreground">
         Track who you&apos;re up against. Each analysis compares their SEO health to yours

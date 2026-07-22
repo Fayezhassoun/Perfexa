@@ -39,7 +39,7 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="space-y-4 p-6" data-testid="leads-page">
+    <div className="animate-page-in space-y-4 p-6" data-testid="leads-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Leads</h1>
         <div className="flex items-center gap-2">

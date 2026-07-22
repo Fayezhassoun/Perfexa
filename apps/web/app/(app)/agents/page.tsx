@@ -21,7 +21,7 @@ export default function AgentsPage() {
   const agents = trpc.agents.list.useQuery();
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="animate-page-in space-y-4 p-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Your agents</h1>
       <p className="text-sm text-muted-foreground">
         Specialists created from plans you approved. Each one only has the tools its job needs.
@@ -29,10 +29,12 @@ export default function AgentsPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="agents-grid">
         {(agents.data ?? []).map((agent) => (
           <Link key={agent.id} href={`/agents/${agent.id}`}>
-            <Card className="h-full transition-colors hover:bg-accent/50">
+            <Card className="lift h-full">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <Bot className="h-5 w-5 text-primary" />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
+                    <Bot className="h-5 w-5 text-primary" />
+                  </span>
                   <Badge variant={agent.status === 'active' ? 'success' : 'secondary'}>{agent.status}</Badge>
                 </div>
                 <p className="mt-2 font-medium">{agent.name ?? TYPE_LABELS[agent.type ?? ''] ?? agent.type}</p>

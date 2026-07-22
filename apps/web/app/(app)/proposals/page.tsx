@@ -10,7 +10,7 @@ export default function ProposalsPage() {
   const proposals = trpc.proposals.list.useQuery();
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="animate-page-in space-y-4 p-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Proposals</h1>
       <p className="text-sm text-muted-foreground">
         Every plan your team suggests lands here. Nothing runs until you approve it.
@@ -20,7 +20,7 @@ export default function ProposalsPage() {
           const plan = p.plan as unknown as PlanShape;
           return (
             <Link key={p.id} href={`/proposals/${p.id}`} className="block">
-              <Card className="transition-colors hover:bg-accent/50">
+              <Card className="lift">
                 <CardContent className="flex items-center justify-between gap-3 p-4">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{plan.title}</p>

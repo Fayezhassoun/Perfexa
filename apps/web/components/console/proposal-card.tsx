@@ -70,7 +70,7 @@ export function ProposalCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg border p-3">
+          <div className="glass-tile p-3">
             <p className="text-xs uppercase text-muted-foreground">Budget — {dollars(plan.monthlyBudgetCents)}/mo</p>
             <ul className="mt-1 space-y-1 text-sm">
               {plan.budgetSplit.map((s) => (
@@ -81,7 +81,7 @@ export function ProposalCard({
               ))}
             </ul>
           </div>
-          <div className="rounded-lg border p-3">
+          <div className="glass-tile p-3">
             <p className="text-xs uppercase text-muted-foreground">Timeline</p>
             <p className="mt-1 text-sm">{plan.timeline}</p>
             {plan.geography && (
@@ -93,7 +93,7 @@ export function ProposalCard({
         <div className="space-y-2">
           <p className="text-xs uppercase text-muted-foreground">Your new team</p>
           {plan.agents.map((agent) => (
-            <div key={agent.type} className="flex gap-2 rounded-lg border p-3">
+            <div key={agent.type} className="glass-tile flex gap-2 p-3">
               <Bot className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div className="min-w-0">
                 <p className="text-sm font-medium">{agent.name}</p>
