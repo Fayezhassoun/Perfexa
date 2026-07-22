@@ -1,0 +1,59 @@
+# ── fly.toml — VoxMarketer on Fly.io ──────────────────────────────
+app = "voxmarketer"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  LLM_PROVIDER = "mock"
+  STT_PROVIDER = "mock"
+  TTS_PROVIDER = "mock"
+  SEO_AUDIT_MODE = "mock"
+  DEMO_SEED = "true"
+  NEXT_PUBLIC_STT_PROVIDER = "mock"
+  NEXT_PUBLIC_TTS_PROVIDER = "mock"
+  NEXT_PUBLIC_APP_URL = "https://voxmarketer.fly.dev"
+  AUTH_URL = "https://voxmarketer.fly.dev"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.tcp_checks]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "30s"
+
+# ── Volumes ────────────────────────────────────────────────────────
+# SQLite for embedded persistence (no external Postgres needed for demo)
+[mounts]
+  source = "voxmarketer_data"
+  destination = "/data"
