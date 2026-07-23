@@ -118,6 +118,35 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
     periodLabel: `${periodStart} → ${periodEnd}`,
   };
 
+  // LLM narrative (publication-grade): live providers rewrite the summary in
+  // plain language; any failure keeps the deterministic text (CONTRACTS §3).
+  if (ctx.llm.name !== 'mock') {
+    try {
+      const res = await ctx.llm.chat(
+        [
+          {
+            role: 'system',
+            content:
+              'You write one-paragraph weekly marketing summaries for small-business owners. ' +
+              'Plain language, no jargon, no hype, 2–3 sentences. Use only the numbers given — never invent results.',
+          },
+          {
+            role: 'user',
+            content:
+              `Week ${content.periodLabel}: spend USD ${(totals.spendCents / 100).toFixed(2)}, ` +
+              `${totals.impressions} impressions, ${totals.clicks} clicks, ${totals.conversions} conversions. ` +
+              `Highlights: ${highlights.join(' | ')}`,
+          },
+        ],
+        { maxTokens: 220, temperature: 0.4 },
+      );
+      const narrative = res.content.trim().replace(/\s+/g, ' ');
+      if (narrative.length > 20) content.summary = narrative;
+    } catch {
+      // deterministic summary stays
+    }
+  }
+
   const [report] = await ctx.db
     .insert(reports)
     .values({ orgId: ctx.orgId, type: 'weekly', content, periodStart: new Date(periodStart), periodEnd: now })

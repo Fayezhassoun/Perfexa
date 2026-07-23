@@ -251,7 +251,7 @@ async function startDraft(
 
 async function finalizeDraft(
   ctx: AgentContext,
-  org: { name: string; monthlyBudgetCeilingCents: number | null },
+  org: { name: string; websiteUrl?: string | null; monthlyBudgetCeilingCents: number | null },
   message: string,
   meta: ConversationMeta,
 ): Promise<OrchestratorResult> {
@@ -316,6 +316,8 @@ async function finalizeDraft(
               headline: `${org.name} — ${primaryKeyword} in ${geography}`,
               body: `Trusted ${primaryKeyword} in ${geography}. Get a free quote today.`,
             },
+            // live adapters attach a real ad only when they know where it points
+            ...(org.websiteUrl ? { landingUrl: org.websiteUrl } : {}),
           },
         },
         summary: `Launch a $${dollars(platformCents)}/month ${PLATFORM_LABEL[platform]} campaign targeting ${geography}`,

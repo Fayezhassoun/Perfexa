@@ -67,10 +67,14 @@ describe('Google Ads live adapter', () => {
     expect(calls[0]!.init?.headers?.['developer-token']).toBe('dev-tok');
   });
 
-  it('creates budget → campaign → ad group → keywords → ad, in order', async () => {
+  it('creates budget → campaign → geo → ad group → keywords → ad → negatives, in order', async () => {
     const { fetchImpl, calls } = fakeFetch({
       'campaignBudgets:mutate': { results: [{ resourceName: 'customers/1234567890/campaignBudgets/77' }] },
       'campaigns:mutate': { results: [{ resourceName: 'customers/1234567890/campaigns/555' }] },
+      'geoTargetConstants:suggest': {
+        geoTargetConstantSuggestions: [{ geoTargetConstant: { resourceName: 'geoTargetConstants/1023191' } }],
+      },
+      'campaignCriteria:mutate': { results: [{}] },
       'adGroups:mutate': { results: [{ resourceName: 'customers/1234567890/adGroups/88' }] },
       'adGroupCriteria:mutate': { results: [{}] },
       'adGroupAds:mutate': { results: [{}] },
@@ -80,7 +84,7 @@ describe('Google Ads live adapter', () => {
       name: 'Chicago Plumber',
       objective: 'leads',
       dailyBudgetCents: 1000,
-      targeting: { keywords: ['plumber chicago'] },
+      targeting: { geography: 'Chicago', keywords: ['plumber chicago'] },
       adCopy: { headline: 'Fast Plumber', body: 'We fix pipes same day.' },
       landingUrl: 'https://example.com/landing',
     });
@@ -89,9 +93,12 @@ describe('Google Ads live adapter', () => {
     expect(calls.map((c) => c.url)).toEqual([
       expect.stringContaining('campaignBudgets:mutate'),
       expect.stringContaining('campaigns:mutate'),
+      expect.stringContaining('geoTargetConstants:suggest'),
+      expect.stringContaining('campaignCriteria:mutate'), // location target
       expect.stringContaining('adGroups:mutate'),
       expect.stringContaining('adGroupCriteria:mutate'),
       expect.stringContaining('adGroupAds:mutate'),
+      expect.stringContaining('campaignCriteria:mutate'), // negative keywords
     ]);
 
     const budgetBody = parsedBody(calls[0]) as { operations: { create: { amountMicros: string } }[] };
@@ -104,22 +111,39 @@ describe('Google Ads live adapter', () => {
     expect(campaignBody.operations[0]!.create.campaignBudget).toBe('customers/1234567890/campaignBudgets/77');
     expect(campaignBody.operations[0]!.create.advertisingChannelType).toBe('SEARCH');
 
-    const criteriaBody = parsedBody(calls[3]) as {
+    const geoBody = parsedBody(calls[2]) as { locationNames: { names: string[] } };
+    expect(geoBody.locationNames.names).toEqual(['Chicago']);
+    const locationBody = parsedBody(calls[3]) as {
+      operations: { create: { campaign: string; location: { geoTargetConstant: string }; negative: boolean } }[];
+    };
+    expect(locationBody.operations[0]!.create.location.geoTargetConstant).toBe('geoTargetConstants/1023191');
+    expect(locationBody.operations[0]!.create.campaign).toBe('customers/1234567890/campaigns/555');
+
+    const criteriaBody = parsedBody(calls[5]) as {
       operations: { create: { keyword: { text: string; matchType: string } } }[];
     };
     expect(criteriaBody.operations[0]!.create.keyword).toEqual({ text: 'plumber chicago', matchType: 'PHRASE' });
 
-    const adBody = parsedBody(calls[4]) as {
+    const adBody = parsedBody(calls[6]) as {
       operations: { create: { ad: { finalUrls: string[]; responsiveSearchAd: { headlines: unknown[] } } } }[];
     };
     expect(adBody.operations[0]!.create.ad.finalUrls).toEqual(['https://example.com/landing']);
     expect(adBody.operations[0]!.create.ad.responsiveSearchAd.headlines.length).toBeGreaterThanOrEqual(3);
+
+    const negativeBody = parsedBody(calls[7]) as {
+      operations: { create: { negative: boolean; keyword: { text: string; matchType: string } } }[];
+    };
+    expect(negativeBody.operations).toHaveLength(7);
+    expect(negativeBody.operations.every((op) => op.create.negative)).toBe(true);
+    expect(negativeBody.operations.map((op) => op.create.keyword.text)).toContain('free');
+    expect(negativeBody.operations[0]!.create.keyword.matchType).toBe('PHRASE');
   });
 
-  it('creates only the campaign shell when no copy/keywords are given', async () => {
+  it('creates only the campaign shell (+ negatives) when no copy/keywords are given', async () => {
     const { fetchImpl, calls } = fakeFetch({
       'campaignBudgets:mutate': { results: [{ resourceName: 'customers/1234567890/campaignBudgets/77' }] },
       'campaigns:mutate': { results: [{ resourceName: 'customers/1234567890/campaigns/556' }] },
+      'campaignCriteria:mutate': { results: [{}] },
     });
     const adapter = createGoogleAdsLiveAdapter(googleDeps(fetchImpl));
     const campaign = await adapter.createCampaign({
@@ -129,7 +153,8 @@ describe('Google Ads live adapter', () => {
       targeting: {},
     });
     expect(campaign.externalId).toBe('556');
-    expect(calls).toHaveLength(2);
+    expect(calls).toHaveLength(3); // budget, campaign, negatives — no geo/ad-group calls
+    expect(calls[2]!.url).toContain('campaignCriteria:mutate');
   });
 
 

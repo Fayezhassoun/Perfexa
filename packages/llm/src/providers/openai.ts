@@ -18,20 +18,30 @@ function toOAIMessages(messages: ChatMessage[]): OAIMessage[] {
   });
 }
 
-export function createOpenAIProvider(): LLMProvider {
+export interface OpenAIProviderOptions {
+  /** Defaults to OPENAI_API_KEY. */
+  apiKey?: string;
+  /** Defaults to LLM_MODEL, then gpt-4o-mini. */
+  model?: string;
+  /** Injectable fetch — used by tests; production uses the SDK default. */
+  fetch?: typeof fetch;
+}
+
+export function createOpenAIProvider(options?: OpenAIProviderOptions): LLMProvider {
   let client: OpenAI | null = null;
   const getClient = () => {
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = options?.apiKey ?? process.env.OPENAI_API_KEY;
+    if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not set. Set it or use LLM_PROVIDER=mock.');
     }
-    client ??= new OpenAI();
+    client ??= new OpenAI({ apiKey, ...(options?.fetch ? { fetch: options.fetch } : {}) });
     return client;
   };
 
   return {
     name: 'openai',
     async chat(messages: ChatMessage[], opts?: ChatOptions): Promise<LLMResponse> {
-      const model = process.env.LLM_MODEL || 'gpt-4o-mini';
+      const model = options?.model ?? process.env.LLM_MODEL ?? 'gpt-4o-mini';
       const res = await getClient().chat.completions.create({
         model,
         messages: toOAIMessages(messages) as OpenAI.ChatCompletionMessageParam[],

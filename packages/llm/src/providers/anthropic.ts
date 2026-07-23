@@ -3,20 +3,30 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ChatMessage, ChatOptions, LLMProvider, LLMResponse, ToolCall } from '../types.js';
 
-export function createAnthropicProvider(): LLMProvider {
+export interface AnthropicProviderOptions {
+  /** Defaults to ANTHROPIC_API_KEY. */
+  apiKey?: string;
+  /** Defaults to LLM_MODEL, then claude-3-5-haiku. */
+  model?: string;
+  /** Injectable fetch — used by tests; production uses the SDK default. */
+  fetch?: typeof fetch;
+}
+
+export function createAnthropicProvider(options?: AnthropicProviderOptions): LLMProvider {
   let client: Anthropic | null = null;
   const getClient = () => {
-    if (!process.env.ANTHROPIC_API_KEY) {
+    const apiKey = options?.apiKey ?? process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY is not set. Set it or use LLM_PROVIDER=mock.');
     }
-    client ??= new Anthropic();
+    client ??= new Anthropic({ apiKey, ...(options?.fetch ? { fetch: options.fetch } : {}) });
     return client;
   };
 
   return {
     name: 'anthropic',
     async chat(messages: ChatMessage[], opts?: ChatOptions): Promise<LLMResponse> {
-      const model = process.env.LLM_MODEL || 'claude-3-5-haiku-20241022';
+      const model = options?.model ?? process.env.LLM_MODEL ?? 'claude-haiku-4-5';
       const system = messages
         .filter((m) => m.role === 'system')
         .map((m) => m.content)

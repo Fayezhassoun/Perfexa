@@ -45,6 +45,9 @@ interface StreamRow {
   };
 }
 
+/** Starter negatives every new campaign gets (see the negative-keywords knowledge doc). */
+export const NEGATIVE_KEYWORD_STARTER = ['free', 'jobs', 'career', 'diy', 'course', 'pdf', 'images'];
+
 function requireNumericId(externalId: string): string {
   if (!/^\d+$/.test(externalId)) {
     throw new AdapterError(`Invalid Google Ads campaign id "${externalId}".`, 'google_ads');
@@ -171,6 +174,24 @@ export function createGoogleAdsLiveAdapter(deps: LiveAdapterDeps): AdAdapter {
       );
       const externalId = campaignRn.match(/campaigns\/(\d+)$/)?.[1] ?? campaignRn;
 
+      // Geo targeting: resolve the free-text geography to a geo target constant
+      // and attach it to the campaign. Unresolvable → stays untargeted (safe).
+      if (input.targeting.geography) {
+        const suggest = await call<{
+          geoTargetConstantSuggestions?: { geoTargetConstant?: { resourceName?: string } }[];
+        }>(`/customers/${customerId}/geoTargetConstants:suggest`, {
+          locationNames: { names: [input.targeting.geography] },
+          locale: 'en',
+          countryCode: 'US',
+        });
+        const geoRn = suggest?.geoTargetConstantSuggestions?.[0]?.geoTargetConstant?.resourceName;
+        if (geoRn) {
+          await call(`/customers/${customerId}/campaignCriteria:mutate`, {
+            operations: [{ create: { campaign: campaignRn, location: { geoTargetConstant: geoRn }, negative: false } }],
+          });
+        }
+      }
+
       // An ad group is required for a SEARCH campaign to serve; attach the ad
       // itself only when we have both copy and a landing page.
       const keywords = input.targeting.keywords ?? [];
@@ -219,6 +240,14 @@ export function createGoogleAdsLiveAdapter(deps: LiveAdapterDeps): AdAdapter {
         }
       }
 
+      // Negative keyword starter set (from the negative-keywords knowledge
+      // doc): blocks clearly irrelevant traffic from day one, campaign-level.
+      await call(`/customers/${customerId}/campaignCriteria:mutate`, {
+        operations: NEGATIVE_KEYWORD_STARTER.map((text) => ({
+          create: { campaign: campaignRn, negative: true, keyword: { text, matchType: 'PHRASE' } },
+        })),
+      });
+
       return {
         externalId,
         platform: 'google_ads',
@@ -228,7 +257,6 @@ export function createGoogleAdsLiveAdapter(deps: LiveAdapterDeps): AdAdapter {
         metrics: { impressions: 0, clicks: 0, spendCents: 0, conversions: 0 },
       };
     },
-
 
     async pauseCampaign(externalId: string): Promise<void> {
       const id = requireNumericId(externalId);

@@ -107,6 +107,34 @@ the dashboard, activity feed, and audit log.
 4. **Tests** — unit-test the tool in `packages/agents/test/` (the approval gate and
    Guardian tests show the pattern).
 
+## Going to production
+
+`pnpm build` produces the deployable artifacts (Next.js production build + worker).
+Checklist for a real deployment:
+
+1. **Secrets** — set a strong `AUTH_SECRET` and a unique `ENCRYPTION_KEY`
+   (`openssl rand -hex 32`; back it up — losing it orphans stored OAuth tokens).
+   Set `CRON_SECRET` for the cron endpoint.
+2. **URLs** — `NEXT_PUBLIC_APP_URL` / `AUTH_URL` to your public origin (OAuth
+   redirect URIs derive from it: `/api/integrations/{platform}/callback`).
+3. **LLM** — `LLM_PROVIDER=openai|anthropic` + the matching key. Mock stays the
+   fallback for the voice dialog reference flow.
+4. **Integrations** (only what you'll offer live): Google OAuth client with the
+   Google Ads / Analytics / Search Console APIs enabled + `GOOGLE_ADS_DEVELOPER_TOKEN`;
+   Meta app with Marketing API (`META_APP_ID/SECRET`); TikTok for Business app
+   (`TIKTOK_APP_ID/SECRET`). Anything unconfigured stays in safe sandbox.
+5. **Email** — `RESEND_API_KEY` + `EMAIL_FROM` (verified domain) for weekly reports;
+   schedule `POST /api/cron/weekly-report` weekly with `Authorization: Bearer $CRON_SECRET`
+   (or run the worker — its `email` queue fires Mondays 09:00).
+6. **Services** — Postgres 16+ and Redis 7+. `docker compose up` runs everything;
+   otherwise `pnpm db:migrate && pnpm build && pnpm start` (web) plus the worker
+   for metric polling / optimization / email queues. The web works without the
+   worker; queues just don't tick.
+
+Safety invariants to never relax: gated tools require approved approvals, the
+Budget Guardian pre-flights every spend action, every write is audit-logged, and
+live mode always requires an OAuth-connected account + typing LIVE.
+
 ## Environment variables
 
 Everything works with the defaults from `cp .env.example .env` — no keys, no network.
@@ -162,5 +190,10 @@ scripts             dev-services (embedded pg+redis), wait-and-migrate
   also `POST /api/cron/weekly-report` behind CRON_SECRET), and an expanded RAG
   corpus (23 docs: TikTok objectives/budgets/pixel, RSA, pacing, learning phase,
   special ad categories, billing safety).
-- **Phase 4 (ideas):** live ad-set/creative creation, LLM-driven optimization
-  narratives, Slack/SMS approvals, multi-org agency mode.
+- **Phase 4 (this repo, done — publication readiness):** verified production build,
+  live LLM providers test-covered (injectable fetch), complete Google campaign
+  delivery (geo targeting via geoTargetConstants, RSA ads from the org website,
+  negative-keyword starter set), LLM-narrated weekly reports with deterministic
+  fallback, and a deployment checklist (above).
+- **Phase 5 (ideas):** Meta/TikTok ad-set + creative automation (needs per-org
+  page/pixel/asset wiring), Slack/SMS approvals, multi-org agency mode.

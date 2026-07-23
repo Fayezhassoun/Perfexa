@@ -475,11 +475,14 @@ button on dashboard (dev only) that calls the same service directly.
 
 ## 12. Testing contracts
 
-- Vitest projects: `packages/agents`, `packages/integrations`, `apps/web` (services).
+- Vitest projects: `packages/agents`, `packages/integrations`, `packages/llm`, `apps/web` (services).
   Coverage targets: orchestrator intents + §12 state machine, guardian (overspend block,
   velocity pause, zero-conversion pause), approval gate (gated tool without approval throws;
   with approved row succeeds), crypto round-trip, mock adapter determinism, audit hash,
-  budget-change>20% approval creation, CSV export, knowledge cosine search.
+  budget-change>20% approval creation, CSV export, knowledge cosine search,
+  OAuth state/exchange/discovery, live adapter request mapping (Google/Meta/TikTok/GA4/GSC),
+  token refresh persistence, optimization approval rules, weekly report + email,
+  LLM provider request mapping (OpenAI/Anthropic).
   DB tests use embedded postgres (helpers in `packages/db/src/test-utils.ts`) or a shared
   dev-services instance via env `DATABASE_URL`.
 - Playwright (`e2e/`): starts dev-services + web (global setup), seeds fresh db per run.

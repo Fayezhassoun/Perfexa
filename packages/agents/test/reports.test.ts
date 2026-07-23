@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { auditLogs, campaignsMirror, reports, users } from '@voxmarketer/db';
 import type { FetchLike } from '@voxmarketer/integrations';
+import type { LLMProvider } from '@voxmarketer/llm';
+import { createAgentContext } from '../src/context.js';
 import { buildWeeklyReport, runWeeklyReportsForAllOrgs } from '../src/services/reports.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 
@@ -77,6 +79,36 @@ describe('buildWeeklyReport', () => {
     const { content } = await buildWeeklyReport(ctx, NOW);
     expect(content.summary).toBe('No ad spend this week.');
     expect(content.highlights).toEqual(['A quiet week — nothing needed your attention.']);
+  });
+
+  it('narrates the summary when a live LLM provider is configured', async () => {
+    const { orgId } = await freshOrg();
+    await seedMirror(orgId, [historyEntry(1, 1500, 3)]);
+    const llm: LLMProvider = {
+      name: 'openai',
+      chat: async () => ({ content: 'You spent fifteen dollars and earned three leads — Google was your best channel.' }),
+    };
+    const ctx = createAgentContext({ db, orgId, llm });
+    const { content } = await buildWeeklyReport(ctx, NOW);
+
+    expect(content.summary).toBe('You spent fifteen dollars and earned three leads — Google was your best channel.');
+    // deterministic parts are untouched by the narrative
+    expect(content.totals).toEqual({ spendCents: 1500, impressions: 100, clicks: 10, conversions: 3 });
+    expect(content.highlights.some((h) => h.includes('google_ads'))).toBe(true);
+  });
+
+  it('keeps the deterministic summary when the LLM fails', async () => {
+    const { orgId } = await freshOrg();
+    await seedMirror(orgId, [historyEntry(1, 1500, 3)]);
+    const llm: LLMProvider = {
+      name: 'anthropic',
+      chat: async () => {
+        throw new Error('provider down');
+      },
+    };
+    const ctx = createAgentContext({ db, orgId, llm });
+    const { content } = await buildWeeklyReport(ctx, NOW);
+    expect(content.summary).toBe('This week you spent $15.00 for 3 conversions.');
   });
 });
 

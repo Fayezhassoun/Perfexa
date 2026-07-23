@@ -20,3 +20,5 @@ export function getLLM(): LLMProvider {
 }
 
 export { createMockProvider, createOpenAIProvider, createAnthropicProvider };
+export type { OpenAIProviderOptions } from './providers/openai.js';
+export type { AnthropicProviderOptions } from './providers/anthropic.js';
