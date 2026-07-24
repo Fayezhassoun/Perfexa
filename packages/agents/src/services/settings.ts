@@ -2,7 +2,8 @@
 // budget caps (>20% → approval), members, notifications.
 
 import { and, eq } from 'drizzle-orm';
-import { approvals, budgets, connectedAccounts, orgMembers, organizations, users, type Budget, type ConnectedAccount } from '@voxmarketer/db';
+import { approvals, budgets, connectedAccounts, orgInvites, orgMembers, organizations, users, type Budget, type ConnectedAccount } from '@voxmarketer/db';
+import { sendEmail, type FetchLike } from '@voxmarketer/integrations';
 import type { AgentContext } from '../types.js';
 import { isOAuthConfigured } from '../live.js';
 
@@ -237,19 +238,105 @@ export async function listMembers(ctx: AgentContext): Promise<MemberRow[]> {
   return rows.map((r) => ({ ...r, userId: r.userId! }));
 }
 
-/** Phase-1 stub (CONTRACTS §5): invites are recorded but no email goes out. */
-export async function inviteMember(ctx: AgentContext, email: string): Promise<{ invited: boolean; message: string }> {
+/** The caller's role in the active org (null when somehow not a member). */
+async function callerRole(ctx: AgentContext): Promise<string | null> {
+  if (!ctx.userId) return null;
+  const [row] = await ctx.db
+    .select({ role: orgMembers.role })
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, ctx.orgId), eq(orgMembers.userId, ctx.userId)))
+    .limit(1);
+  return row?.role ?? null;
+}
+
+function requireOwnerOrAdmin(role: string | null): void {
+  if (role !== 'owner' && role !== 'admin') {
+    throw new Error('Only owners and admins can manage team members.');
+  }
+}
+
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface InviteMemberResult {
+  invited: boolean;
+  message: string;
+  /** Copy-pasteable accept link (dev has no email key by default). */
+  acceptUrl: string;
+}
+
+/**
+ * Invite a teammate (CONTRACTS §5): creates a pending org_invites row with a
+ * 7-day expiry and emails the accept link via Resend when RESEND_API_KEY is
+ * set (log-only otherwise — §3). Caller must be owner/admin of the org.
+ */
+export async function inviteMember(
+  ctx: AgentContext,
+  email: string,
+  role: 'admin' | 'member' = 'member',
+  opts?: { env?: NodeJS.ProcessEnv; fetchImpl?: FetchLike },
+): Promise<InviteMemberResult> {
+  requireOwnerOrAdmin(await callerRole(ctx));
+  const env = opts?.env ?? process.env;
+  const now = ctx.now ?? new Date();
+  const normalized = email.toLowerCase().trim();
+
+  // Already a member of this org? Then there's nothing to invite.
+  const [existingUser] = await ctx.db.select({ id: users.id }).from(users).where(eq(users.email, normalized)).limit(1);
+  if (existingUser) {
+    const [existingMember] = await ctx.db
+      .select({ id: orgMembers.id })
+      .from(orgMembers)
+      .where(and(eq(orgMembers.orgId, ctx.orgId), eq(orgMembers.userId, existingUser.id)))
+      .limit(1);
+    if (existingMember) throw new Error('That person is already a member of this organization.');
+  }
+
+  const token = crypto.randomUUID();
+  const [invite] = await ctx.db
+    .insert(orgInvites)
+    .values({ orgId: ctx.orgId, email: normalized, role, token, status: 'pending', expiresAt: new Date(now.getTime() + INVITE_TTL_MS) })
+    .returning();
+  const appUrl = env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const acceptUrl = `${appUrl}/invite/${token}`;
+
+  const apiKey = env.RESEND_API_KEY ?? '';
+  let emailed = false;
+  if (apiKey) {
+    try {
+      await sendEmail({
+        apiKey,
+        from: env.EMAIL_FROM ?? 'VoxMarketer <reports@voxmarketer.dev>',
+        to: normalized,
+        subject: 'You have been invited to VoxMarketer',
+        html: `<p>You have been invited to join a team on VoxMarketer.</p><p><a href="${acceptUrl}">Accept the invite</a> (expires in 7 days).</p>`,
+        fetchImpl: opts?.fetchImpl,
+      });
+      emailed = true;
+    } catch (err) {
+      // The invite row is the source of truth — a mail failure must not lose it.
+      console.warn('[settings] invite email failed:', err instanceof Error ? err.message : err);
+    }
+  } else {
+    console.log(`[settings] RESEND_API_KEY not set — invite link for ${normalized}: ${acceptUrl}`);
+  }
+
   await ctx.audit.log({
     actorType: 'user',
     actorId: ctx.userId ?? 'unknown',
-    action: 'member.invite_stub',
-    entityType: 'org_member',
-    payload: { email },
+    action: 'member.invited',
+    entityType: 'org_invite',
+    entityId: invite!.id,
+    payload: { email: normalized, role, emailed },
   });
-  return { invited: false, message: 'Team invites are coming soon — for now everyone can use the demo account.' };
+  return {
+    invited: true,
+    message: emailed ? `Invite emailed to ${normalized}.` : `Invite created — share this link: ${acceptUrl}`,
+    acceptUrl,
+  };
 }
 
 export async function removeMember(ctx: AgentContext, memberId: string): Promise<{ ok: true }> {
+  requireOwnerOrAdmin(await callerRole(ctx));
   const [member] = await ctx.db
     .select()
     .from(orgMembers)
@@ -257,6 +344,13 @@ export async function removeMember(ctx: AgentContext, memberId: string): Promise
     .limit(1);
   if (!member) throw new Error('Member not found');
   if (member.userId === ctx.userId) throw new Error('You cannot remove yourself');
+  if (member.role === 'owner') {
+    const owners = await ctx.db
+      .select({ id: orgMembers.id })
+      .from(orgMembers)
+      .where(and(eq(orgMembers.orgId, ctx.orgId), eq(orgMembers.role, 'owner')));
+    if (owners.length <= 1) throw new Error('You cannot remove the last owner of an organization.');
+  }
   await ctx.db.delete(orgMembers).where(eq(orgMembers.id, memberId));
   await ctx.audit.log({
     actorType: 'user',

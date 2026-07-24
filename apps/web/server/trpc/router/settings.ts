@@ -27,8 +27,14 @@ const membersRouter = router({
   list: orgProcedure.query(({ ctx }) => services.settings.listMembers(ctx.agentCtx)),
 
   invite: orgProcedure
-    .input(z.object({ email: z.string().email(), idempotencyKey: z.string().optional() }))
-    .mutation(({ ctx, input }) => services.settings.inviteMember(ctx.agentCtx, input.email)),
+    .input(
+      z.object({
+        email: z.string().email(),
+        role: z.enum(['admin', 'member']).optional(),
+        idempotencyKey: z.string().optional(),
+      }),
+    )
+    .mutation(({ ctx, input }) => services.settings.inviteMember(ctx.agentCtx, input.email, input.role)),
 
   remove: orgProcedure
     .input(z.object({ id: z.string().uuid(), idempotencyKey: z.string().optional() }))

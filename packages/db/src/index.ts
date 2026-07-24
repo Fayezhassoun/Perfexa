@@ -17,6 +17,7 @@ export type VerificationToken = InferSelectModel<typeof schema.verificationToken
 export type Organization = InferSelectModel<typeof schema.organizations>;
 export type NewOrganization = InferInsertModel<typeof schema.organizations>;
 export type OrgMember = InferSelectModel<typeof schema.orgMembers>;
+export type OrgInvite = InferSelectModel<typeof schema.orgInvites>;
 export type ConnectedAccount = InferSelectModel<typeof schema.connectedAccounts>;
 export type Website = InferSelectModel<typeof schema.websites>;
 export type Agent = InferSelectModel<typeof schema.agents>;

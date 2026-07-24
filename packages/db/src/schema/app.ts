@@ -33,6 +33,19 @@ export const orgMembers = pgTable(
   (t) => [unique('org_members_org_user_unique').on(t.orgId, t.userId)],
 );
 
+export const orgInvites = pgTable('org_invites', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  email: text('email').notNull(),
+  role: text('role').default('member'),
+  token: text('token').notNull().unique(),
+  status: text('status').default('pending'),
+  expiresAt: timestamp('expires_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
 export const connectedAccounts = pgTable('connected_accounts', {
   id: uuid('id').defaultRandom().primaryKey(),
   orgId: uuid('org_id')

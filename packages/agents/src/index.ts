@@ -39,6 +39,7 @@ export { leadsToCsv } from './services/leads.js';
 export type { LeadField } from './services/leads.js';
 export type { SendMessageInput, SendMessageResult, ConversationSummary } from './services/conversations.js';
 export type { OverviewResult, ActivityItem, SeoTrackerResult } from './services/dashboard.js';
-export type { IntegrationStatus, BudgetUpdateResult, MemberRow } from './services/settings.js';
+export type { IntegrationStatus, BudgetUpdateResult, MemberRow, InviteMemberResult } from './services/settings.js';
+export type { UserOrg, AcceptInviteResult } from './services/orgs.js';
 export type { SystemHealth, AdminUserRow } from './services/admin.js';
 export type { AuditPage } from './services/audit-log.js';

@@ -3,28 +3,27 @@
 // until the wizard is done.
 
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { Mic } from 'lucide-react';
-import { db, organizations, orgMembers } from '@voxmarketer/db';
+import { db, organizations } from '@voxmarketer/db';
 import { auth, signOut } from '@/auth';
+import { resolveActiveOrg } from '@/server/org-resolution';
 import { Button } from '@/components/ui/button';
 import { AppNav, ThemeToggle } from '@/components/app-nav';
+import { OrgSwitcher } from '@/components/org-switcher';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
-  const [membership] = await db
-    .select({ orgId: orgMembers.orgId })
-    .from(orgMembers)
-    .where(eq(orgMembers.userId, session.user.id))
-    .limit(1);
-  if (!membership) redirect('/onboarding');
-  const [org] = await db
-    .select()
+  const { orgId, memberships } = await resolveActiveOrg(db, session.user.id);
+  if (!orgId) redirect('/onboarding');
+  const orgIds = memberships.map((m) => m.orgId);
+  const orgRows = await db
+    .select({ id: organizations.id, name: organizations.name, onboardingStep: organizations.onboardingStep })
     .from(organizations)
-    .where(eq(organizations.id, membership.orgId))
-    .limit(1);
+    .where(inArray(organizations.id, orgIds));
+  const org = orgRows.find((o) => o.id === orgId) ?? null;
   if (org && org.onboardingStep !== 'done') redirect('/onboarding');
 
   return (
@@ -39,8 +38,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
         <AppNav />
         <div className="glass-divider-t p-4">
-          <div className="glass-subtle mb-3 rounded-xl px-3 py-2.5">
-            <p className="truncate text-xs font-medium">{org?.name}</p>
+          <div className="glass-subtle mb-3 space-y-2 rounded-xl px-3 py-2.5">
+            <OrgSwitcher
+              orgs={orgRows.map((o) => ({ id: o.id, name: o.name }))}
+              activeOrgId={orgId}
+            />
             <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>
           </div>
           <div className="flex items-center gap-2">

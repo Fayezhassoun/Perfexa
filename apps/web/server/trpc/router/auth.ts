@@ -24,15 +24,11 @@ export const authRouter = router({
       .where(eq(users.id, ctx.userId))
       .limit(1);
     if (!user) return null;
-    const [membership] = await ctx.db
-      .select()
-      .from(orgMembers)
-      .where(eq(orgMembers.userId, ctx.userId))
-      .limit(1);
-    const org = membership
-      ? ((await ctx.db.select().from(organizations).where(eq(organizations.id, membership.orgId)).limit(1))[0] ??
-        null)
+    // Memberships come from active-org resolution (vox_org cookie, §5).
+    const membership = ctx.memberships.find((m) => m.orgId === ctx.orgId) ?? null;
+    const org = ctx.orgId
+      ? ((await ctx.db.select().from(organizations).where(eq(organizations.id, ctx.orgId)).limit(1))[0] ?? null)
       : null;
-    return { user, org, membership: membership ?? null };
+    return { user, org, membership, memberships: ctx.memberships };
   }),
 });

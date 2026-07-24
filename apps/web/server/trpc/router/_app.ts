@@ -1,5 +1,6 @@
 import { router } from '../trpc';
 import { authRouter } from './auth';
+import { orgsRouter } from './orgs';
 import { onboardingRouter } from './onboarding';
 import { conversationsRouter } from './conversations';
 import { proposalsRouter } from './proposals';
@@ -19,6 +20,7 @@ import { reviewsRouter } from './reviews';
 
 export const appRouter = router({
   auth: authRouter,
+  orgs: orgsRouter,
   onboarding: onboardingRouter,
   conversations: conversationsRouter,
   proposals: proposalsRouter,

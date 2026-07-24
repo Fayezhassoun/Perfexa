@@ -9,6 +9,7 @@ export * as agents from './agents.js';
 export * as leads from './leads.js';
 export * as knowledge from './knowledge.js';
 export * as settings from './settings.js';
+export * as orgs from './orgs.js';
 export * as oauth from './oauth.js';
 export * as optimize from './optimize.js';
 export * as reports from './reports.js';
