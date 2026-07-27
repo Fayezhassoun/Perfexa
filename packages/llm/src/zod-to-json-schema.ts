@@ -8,6 +8,7 @@ interface ZodDef {
   description?: string;
   innerType?: ZodTypeAny;
   type?: ZodTypeAny; // array element
+  valueType?: ZodTypeAny; // record value
   shape?: () => Record<string, ZodTypeAny>;
   values?: string[];
   checks?: { kind: string; value?: number }[];
@@ -63,6 +64,11 @@ function convert(schema: ZodTypeAny): Record<string, unknown> {
       }
       return { type: 'object', properties, required };
     }
+    case 'ZodUnknown':
+    case 'ZodAny':
+      return {};
+    case 'ZodRecord':
+      return { type: 'object', additionalProperties: d.valueType ? zodToJsonSchema(d.valueType as ZodTypeAny) : true };
     case 'ZodOptional':
     case 'ZodNullable':
       return d.innerType ? zodToJsonSchema(d.innerType) : {};
