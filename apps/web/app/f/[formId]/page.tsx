@@ -1,7 +1,7 @@
 // Public hosted lead form (CONTRACTS §10 /f/[formId]) — no auth.
 
-import { db } from '@voxmarketer/db';
-import { services } from '@voxmarketer/agents';
+import { db } from '@sayso/db';
+import { services } from '@sayso/agents';
 import { PublicLeadForm } from './public-form';
 
 export const dynamic = 'force-dynamic';

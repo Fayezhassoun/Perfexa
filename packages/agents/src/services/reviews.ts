@@ -1,7 +1,7 @@
 // Reputation services: sync reviews, sentiment stats, gated reply posting.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, reviews, type Review } from '@voxmarketer/db';
+import { approvals, reviews, type Review } from '@sayso/db';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 import { getOrCreateAgent } from '../execute-plan.js';

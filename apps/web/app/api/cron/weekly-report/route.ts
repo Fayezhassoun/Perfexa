@@ -2,8 +2,8 @@
 // every org and emails owners when RESEND_API_KEY is set. Behind CRON_SECRET.
 
 import { NextResponse } from 'next/server';
-import { db } from '@voxmarketer/db';
-import { services } from '@voxmarketer/agents';
+import { db } from '@sayso/db';
+import { services } from '@sayso/agents';
 
 export async function POST(req: Request) {
   const secret = process.env.CRON_SECRET;

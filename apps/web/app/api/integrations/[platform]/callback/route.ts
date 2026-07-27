@@ -4,8 +4,8 @@
 // live still needs the explicit LIVE-confirm switch in Settings.
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { createAgentContext, services } from '@voxmarketer/agents';
-import { isConnectablePlatform } from '@voxmarketer/integrations';
+import { createAgentContext, services } from '@sayso/agents';
+import { isConnectablePlatform } from '@sayso/integrations';
 import { createContext } from '@/server/trpc/context';
 
 export async function GET(req: NextRequest, { params }: { params: { platform: string } }) {

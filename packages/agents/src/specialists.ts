@@ -3,8 +3,8 @@
 // (plan execution, worker polls, dashboard "simulate"). Not long-running daemons.
 
 import { eq } from 'drizzle-orm';
-import { agentRuns } from '@voxmarketer/db';
-import type { SeoAudit } from '@voxmarketer/integrations';
+import { agentRuns } from '@sayso/db';
+import type { SeoAudit } from '@sayso/integrations';
 import type { AgentContext, AgentType } from './types.js';
 import { executeTool } from './tools.js';
 import { getOrCreateAgent } from './execute-plan.js';

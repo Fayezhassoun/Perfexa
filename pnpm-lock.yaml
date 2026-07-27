@@ -50,6 +50,18 @@ importers:
       '@radix-ui/react-slot':
         specifier: 1.2.4
         version: 1.2.4(@types/react@18.3.31)(react@18.3.1)
+      '@sayso/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
+      '@sayso/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@sayso/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
+      '@sayso/llm':
+        specifier: workspace:*
+        version: link:../../packages/llm
       '@tanstack/react-query':
         specifier: 5.59.20
         version: 5.59.20(react@18.3.1)
@@ -62,18 +74,6 @@ importers:
       '@trpc/server':
         specifier: 11.4.3
         version: 11.4.3(typescript@5.6.3)
-      '@voxmarketer/agents':
-        specifier: workspace:*
-        version: link:../../packages/agents
-      '@voxmarketer/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@voxmarketer/integrations':
-        specifier: workspace:*
-        version: link:../../packages/integrations
-      '@voxmarketer/llm':
-        specifier: workspace:*
-        version: link:../../packages/llm
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -147,10 +147,10 @@ importers:
       '@hono/node-server':
         specifier: 2.0.10
         version: 2.0.10(hono@4.6.20)
-      '@voxmarketer/agents':
+      '@sayso/agents':
         specifier: workspace:*
         version: link:../../packages/agents
-      '@voxmarketer/db':
+      '@sayso/db':
         specifier: workspace:*
         version: link:../../packages/db
       bullmq:
@@ -193,13 +193,13 @@ importers:
 
   packages/agents:
     dependencies:
-      '@voxmarketer/db':
+      '@sayso/db':
         specifier: workspace:*
         version: link:../db
-      '@voxmarketer/integrations':
+      '@sayso/integrations':
         specifier: workspace:*
         version: link:../integrations
-      '@voxmarketer/llm':
+      '@sayso/llm':
         specifier: workspace:*
         version: link:../llm
       drizzle-orm:
@@ -221,7 +221,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@voxmarketer/integrations':
+      '@sayso/integrations':
         specifier: workspace:*
         version: link:../integrations
       bcryptjs:

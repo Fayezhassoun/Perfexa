@@ -4,7 +4,7 @@
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { db, users, organizations, orgMembers } from '@voxmarketer/db';
+import { db, users, organizations, orgMembers } from '@sayso/db';
 
 export interface RegisterInput {
   name: string;

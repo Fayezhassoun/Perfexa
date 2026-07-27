@@ -2,7 +2,7 @@
 // (budget row from ceiling, initial crawl — fast and failable).
 
 import { and, eq } from 'drizzle-orm';
-import { budgets, organizations, type Organization } from '@voxmarketer/db';
+import { budgets, organizations, type Organization } from '@sayso/db';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 

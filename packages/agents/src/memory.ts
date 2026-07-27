@@ -1,7 +1,7 @@
 // Per-org long-term memory: organizations.settings.memory (CONTRACTS §8).
 
 import { eq } from 'drizzle-orm';
-import { organizations } from '@voxmarketer/db';
+import { organizations } from '@sayso/db';
 import type { AgentContext } from './types.js';
 
 type MemoryStore = Record<string, unknown>;

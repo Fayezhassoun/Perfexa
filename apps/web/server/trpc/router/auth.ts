@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { organizations, orgMembers, users } from '@voxmarketer/db';
+import { organizations, orgMembers, users } from '@sayso/db';
 import { router, publicProcedure } from '../trpc';
 import { registerUser } from '@/server/auth-service';
 

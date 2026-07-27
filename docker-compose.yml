@@ -1,4 +1,4 @@
-name: voxmarketer
+name: sayso
 
 services:
   db:
@@ -6,11 +6,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: voxmarketer
+      POSTGRES_DB: sayso
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d voxmarketer']
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d sayso']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -24,13 +24,13 @@ services:
       retries: 10
 
   migrate:
-    image: voxmarketer-web
+    image: sayso-web
     build:
       context: .
       dockerfile: Dockerfile.web
     command: ['node', 'scripts/wait-and-migrate.mjs']
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/voxmarketer
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sayso
       DEMO_SEED: ${DEMO_SEED:-true}
     depends_on:
       db:
@@ -38,7 +38,7 @@ services:
     restart: 'no'
 
   web:
-    image: voxmarketer-web
+    image: sayso-web
     build:
       context: .
       dockerfile: Dockerfile.web
@@ -46,7 +46,7 @@ services:
       - '3000:3000'
     environment:
       # compose-internal hosts/ports override the .env dev defaults (5433/6380)
-      DATABASE_URL: postgres://postgres:postgres@db:5432/voxmarketer
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sayso
       REDIS_URL: redis://redis:6379
       AUTH_URL: http://localhost:3000
       NEXT_PUBLIC_APP_URL: http://localhost:3000
@@ -59,7 +59,7 @@ services:
       context: .
       dockerfile: Dockerfile.worker
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/voxmarketer
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sayso
       REDIS_URL: redis://redis:6379
       PORT: '3001'
     depends_on:

@@ -5,7 +5,7 @@
 // fallback otherwise) and the OAuth env-config check.
 
 import { and, eq } from 'drizzle-orm';
-import { connectedAccounts, type Db } from '@voxmarketer/db';
+import { connectedAccounts, type Db } from '@sayso/db';
 import {
   createGa4LiveAdapter,
   createGscLiveAdapter,
@@ -19,7 +19,7 @@ import {
   type Ga4TrafficPoint,
   type GscQueryRow,
   type LiveAdapterDeps,
-} from '@voxmarketer/integrations';
+} from '@sayso/integrations';
 
 export interface OAuthClientConfig {
   clientId: string;

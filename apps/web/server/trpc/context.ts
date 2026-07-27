@@ -2,7 +2,7 @@
 // active-org resolution (vox_org cookie + memberships, see org-resolution.ts).
 
 import type { Session } from 'next-auth';
-import { db, type Db, type OrgMember } from '@voxmarketer/db';
+import { db, type Db, type OrgMember } from '@sayso/db';
 import { auth } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 

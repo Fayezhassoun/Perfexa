@@ -4,9 +4,9 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, campaignsMirror, reports, users } from '@voxmarketer/db';
-import type { FetchLike } from '@voxmarketer/integrations';
-import type { LLMProvider } from '@voxmarketer/llm';
+import { auditLogs, campaignsMirror, reports, users } from '@sayso/db';
+import type { FetchLike } from '@sayso/integrations';
+import type { LLMProvider } from '@sayso/llm';
 import { createAgentContext } from '../src/context.js';
 import { buildWeeklyReport, runWeeklyReportsForAllOrgs } from '../src/services/reports.js';
 import { db, freshOrg, truncateAll } from './helpers.js';

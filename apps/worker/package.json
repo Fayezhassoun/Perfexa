@@ -1,5 +1,5 @@
 {
-  "name": "@voxmarketer/worker",
+  "name": "@sayso/worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@hono/node-server": "2.0.10",
-    "@voxmarketer/agents": "workspace:*",
-    "@voxmarketer/db": "workspace:*",
+    "@sayso/agents": "workspace:*",
+    "@sayso/db": "workspace:*",
     "bullmq": "5.34.10",
     "hono": "4.6.20",
     "ioredis": "5.4.2"

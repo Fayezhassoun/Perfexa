@@ -1,4 +1,4 @@
-import { services } from '@voxmarketer/agents';
+import { services } from '@sayso/agents';
 import { router, orgProcedure } from '../trpc';
 
 export const adminRouter = router({

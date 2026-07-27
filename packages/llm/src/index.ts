@@ -1,4 +1,4 @@
-// @voxmarketer/llm — provider-agnostic LLM wrapper with function calling.
+// @sayso/llm — provider-agnostic LLM wrapper with function calling.
 
 export * from './types.js';
 export { zodToJsonSchema } from './zod-to-json-schema.js';

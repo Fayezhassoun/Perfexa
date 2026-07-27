@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 import { cookies } from 'next/headers';
-import { services } from '@voxmarketer/agents';
+import { services } from '@sayso/agents';
 import { router, protectedProcedure } from '../trpc';
 import { ACTIVE_ORG_COOKIE } from '@/server/org-resolution';
 

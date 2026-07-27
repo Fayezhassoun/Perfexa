@@ -1,7 +1,7 @@
 // Immutable audit logging (CONTRACTS §8). payloadHash = sha256 of canonical JSON.
 
 import { createHash } from 'node:crypto';
-import { auditLogs, type Db } from '@voxmarketer/db';
+import { auditLogs, type Db } from '@sayso/db';
 
 /** JSON.stringify with recursively sorted object keys — stable for hashing. */
 export function canonicalJson(value: unknown): string {

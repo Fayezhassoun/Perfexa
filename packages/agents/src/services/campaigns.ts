@@ -3,8 +3,8 @@
 // auto-recorded approval; live mode creates a pending approval instead.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, campaignsMirror, type CampaignMirror } from '@voxmarketer/db';
-import type { AdPlatform } from '@voxmarketer/integrations';
+import { approvals, campaignsMirror, type CampaignMirror } from '@sayso/db';
+import type { AdPlatform } from '@sayso/integrations';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 

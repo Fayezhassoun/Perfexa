@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { knowledgeDocuments } from '@voxmarketer/db';
-import { KNOWLEDGE_SEED_DOCS, embedText } from '@voxmarketer/integrations';
+import { knowledgeDocuments } from '@sayso/db';
+import { KNOWLEDGE_SEED_DOCS, embedText } from '@sayso/integrations';
 import { searchKnowledge } from '../src/services/knowledge.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

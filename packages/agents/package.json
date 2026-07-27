@@ -1,5 +1,5 @@
 {
-  "name": "@voxmarketer/agents",
+  "name": "@sayso/agents",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@voxmarketer/db": "workspace:*",
-    "@voxmarketer/integrations": "workspace:*",
-    "@voxmarketer/llm": "workspace:*",
+    "@sayso/db": "workspace:*",
+    "@sayso/integrations": "workspace:*",
+    "@sayso/llm": "workspace:*",
     "drizzle-orm": "0.36.4",
     "zod": "3.23.8"
   },

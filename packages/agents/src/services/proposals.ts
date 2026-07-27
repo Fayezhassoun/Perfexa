@@ -2,7 +2,7 @@
 // Execution itself lives in execute-plan.ts — nothing spends without approvals.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { proposals, type Proposal } from '@voxmarketer/db';
+import { proposals, type Proposal } from '@sayso/db';
 import type { AgentContext, OrchestratorResult } from '../types.js';
 import { approveProposal, type ApproveProposalResult } from '../execute-plan.js';
 import { handleUserMessage } from '../orchestrator.js';

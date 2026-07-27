@@ -2,8 +2,8 @@
 // form's own field definitions, scored, audit-logged.
 
 import { NextResponse } from 'next/server';
-import { db } from '@voxmarketer/db';
-import { services } from '@voxmarketer/agents';
+import { db } from '@sayso/db';
+import { services } from '@sayso/agents';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 
 const cors = {

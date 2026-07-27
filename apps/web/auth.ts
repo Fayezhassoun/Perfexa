@@ -4,7 +4,7 @@ import Google from 'next-auth/providers/google';
 import { DrizzleAdapter } from '@auth/drizzle-adapter';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { db, users, accounts, sessions, verificationTokens } from '@voxmarketer/db';
+import { db, users, accounts, sessions, verificationTokens } from '@sayso/db';
 
 const providers = [
   Credentials({

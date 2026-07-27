@@ -4,9 +4,9 @@
 // prompt plus the orchestrator tool set.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { conversations, messages as messagesTable, organizations, proposals, websites } from '@voxmarketer/db';
-import type { SeoAudit } from '@voxmarketer/integrations';
-import type { ChatMessage } from '@voxmarketer/llm';
+import { conversations, messages as messagesTable, organizations, proposals, websites } from '@sayso/db';
+import type { SeoAudit } from '@sayso/integrations';
+import type { ChatMessage } from '@sayso/llm';
 import type {
   AgentContext,
   ConversationDraft,
@@ -413,7 +413,7 @@ async function websiteFromDb(ctx: AgentContext): Promise<string | null> {
 // LLM provider path (openai/anthropic) — same flow, model-driven.
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are the VoxMarketer Orchestrator for a small business owner who knows nothing about advertising.
+const SYSTEM_PROMPT = `You are the Sayso Orchestrator for a small business owner who knows nothing about advertising.
 Style: simple, reassuring, jargon-free. Short sentences. Never invent numbers.
 
 Flow you must follow:
@@ -425,7 +425,7 @@ Flow you must follow:
 async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voice' | 'text'): Promise<OrchestratorResult> {
   void modality;
   const { getToolsForAgent } = await import('./tools.js');
-  const { zodToJsonSchema } = await import('@voxmarketer/llm');
+  const { zodToJsonSchema } = await import('@sayso/llm');
   const tools = getToolsForAgent('orchestrator');
   const specs = tools.map((t) => ({ name: t.name, description: t.description, parameters: zodToJsonSchema(t.schema) }));
 

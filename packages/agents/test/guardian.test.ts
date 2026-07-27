@@ -3,8 +3,8 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, campaignsMirror } from '@voxmarketer/db';
-import { BudgetCapExceeded } from '@voxmarketer/integrations';
+import { auditLogs, campaignsMirror } from '@sayso/db';
+import { BudgetCapExceeded } from '@sayso/integrations';
 import { checkSpend, tick, projectMonthEnd, wouldExceed } from '../src/guardian.js';
 import { executeTool } from '../src/tools.js';
 import { db, freshOrg, truncateAll, type TestOrg } from './helpers.js';
@@ -22,7 +22,7 @@ async function launchCampaign(org: TestOrg, dailyBudgetCents: number) {
       targeting: { geography: 'Chicago' },
     },
   };
-  const { approvals } = await import('@voxmarketer/db');
+  const { approvals } = await import('@sayso/db');
   const [approval] = await db
     .insert(approvals)
     .values({
@@ -79,7 +79,7 @@ describe('checkSpend', () => {
         targeting: {},
       },
     };
-    const { approvals } = await import('@voxmarketer/db');
+    const { approvals } = await import('@sayso/db');
     const [approval] = await db
       .insert(approvals)
       .values({

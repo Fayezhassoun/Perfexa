@@ -3,8 +3,8 @@
 // (deterministic — replaces the old unordered LIMIT 1 lookups).
 
 import { cookies } from 'next/headers';
-import type { Db, OrgMember } from '@voxmarketer/db';
-import { services } from '@voxmarketer/agents';
+import type { Db, OrgMember } from '@sayso/db';
+import { services } from '@sayso/agents';
 
 export const ACTIVE_ORG_COOKIE = 'vox_org';
 

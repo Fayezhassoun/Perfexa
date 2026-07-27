@@ -2,8 +2,8 @@
 // budget caps (>20% → approval), members, notifications.
 
 import { and, eq } from 'drizzle-orm';
-import { approvals, budgets, connectedAccounts, orgInvites, orgMembers, organizations, users, type Budget, type ConnectedAccount } from '@voxmarketer/db';
-import { sendEmail, type FetchLike } from '@voxmarketer/integrations';
+import { approvals, budgets, connectedAccounts, orgInvites, orgMembers, organizations, users, type Budget, type ConnectedAccount } from '@sayso/db';
+import { sendEmail, type FetchLike } from '@sayso/integrations';
 import type { AgentContext } from '../types.js';
 import { isOAuthConfigured } from '../live.js';
 
@@ -305,10 +305,10 @@ export async function inviteMember(
     try {
       await sendEmail({
         apiKey,
-        from: env.EMAIL_FROM ?? 'VoxMarketer <reports@voxmarketer.dev>',
+        from: env.EMAIL_FROM ?? 'Sayso <reports@sayso.dev>',
         to: normalized,
-        subject: 'You have been invited to VoxMarketer',
-        html: `<p>You have been invited to join a team on VoxMarketer.</p><p><a href="${acceptUrl}">Accept the invite</a> (expires in 7 days).</p>`,
+        subject: 'You have been invited to Sayso',
+        html: `<p>You have been invited to join a team on Sayso.</p><p><a href="${acceptUrl}">Accept the invite</a> (expires in 7 days).</p>`,
         fetchImpl: opts?.fetchImpl,
       });
       emailed = true;

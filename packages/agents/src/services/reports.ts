@@ -4,13 +4,13 @@
 // adapter. Without a key it logs-only, per the zero-config rule (§3).
 
 import { and, eq, inArray } from 'drizzle-orm';
-import { campaignsMirror, organizations, orgMembers, reports, users, type Db, type Report } from '@voxmarketer/db';
+import { campaignsMirror, organizations, orgMembers, reports, users, type Db, type Report } from '@sayso/db';
 import {
   renderWeeklyReportEmail,
   sendEmail,
   type FetchLike,
   type WeeklyReportContent,
-} from '@voxmarketer/integrations';
+} from '@sayso/integrations';
 import { createAuditLogger } from '../audit.js';
 import { createAgentContext } from '../context.js';
 import type { AgentContext } from '../types.js';
@@ -184,7 +184,7 @@ export async function runWeeklyReportsForAllOrgs(
 ): Promise<WeeklyReportsRun> {
   const env = opts?.env ?? process.env;
   const apiKey = env.RESEND_API_KEY ?? '';
-  const from = env.EMAIL_FROM ?? 'VoxMarketer <reports@voxmarketer.dev>';
+  const from = env.EMAIL_FROM ?? 'Sayso <reports@sayso.dev>';
   const now = opts?.now ?? new Date();
 
   const orgs = await db.select({ id: organizations.id, name: organizations.name }).from(organizations);
@@ -209,7 +209,7 @@ export async function runWeeklyReportsForAllOrgs(
         apiKey,
         from,
         to,
-        subject: `Your week at ${org.name} — VoxMarketer report`,
+        subject: `Your week at ${org.name} — Sayso report`,
         html: renderWeeklyReportEmail(org.name, content),
         fetchImpl: opts?.fetchImpl,
       });

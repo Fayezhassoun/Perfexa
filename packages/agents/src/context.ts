@@ -1,7 +1,7 @@
 // AgentContext factory (CONTRACTS §8) — shared by web routers and the worker.
 
-import type { Db } from '@voxmarketer/db';
-import { getLLM, type LLMProvider } from '@voxmarketer/llm';
+import type { Db } from '@sayso/db';
+import { getLLM, type LLMProvider } from '@sayso/llm';
 import type { AgentContext } from './types.js';
 import { createAuditLogger } from './audit.js';
 

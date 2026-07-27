@@ -1,5 +1,5 @@
 {
-  "name": "voxmarketer",
+  "name": "sayso",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.0.9",
@@ -7,15 +7,15 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "concurrently -n web,worker -c blue,magenta \"pnpm dev:web\" \"pnpm --filter @voxmarketer/worker dev\"",
-    "dev:web": "pnpm --filter @voxmarketer/web dev",
+    "dev": "concurrently -n web,worker -c blue,magenta \"pnpm dev:web\" \"pnpm --filter @sayso/worker dev\"",
+    "dev:web": "pnpm --filter @sayso/web dev",
     "dev:services": "node scripts/dev-services.mjs",
-    "db:generate": "pnpm --filter @voxmarketer/db db:generate",
-    "db:migrate": "pnpm --filter @voxmarketer/db db:migrate",
-    "db:seed": "pnpm --filter @voxmarketer/db db:seed",
+    "db:generate": "pnpm --filter @sayso/db db:generate",
+    "db:migrate": "pnpm --filter @sayso/db db:migrate",
+    "db:seed": "pnpm --filter @sayso/db db:seed",
     "build": "pnpm -r --if-present build",
     "test": "pnpm -r --if-present test",
-    "e2e": "pnpm --filter @voxmarketer/e2e e2e",
+    "e2e": "pnpm --filter @sayso/e2e e2e",
     "typecheck": "pnpm -r --if-present typecheck"
   },
   "devDependencies": {

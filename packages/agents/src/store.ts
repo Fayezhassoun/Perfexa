@@ -6,7 +6,7 @@
 // relational table — a true mirror of what the "platform API" holds.
 
 import { and, eq } from 'drizzle-orm';
-import { campaignsMirror, connectedAccounts, organizations, type Db } from '@voxmarketer/db';
+import { campaignsMirror, connectedAccounts, organizations, type Db } from '@sayso/db';
 import {
   getAdAdapter,
   type AdAdapter,
@@ -16,7 +16,7 @@ import {
   type CampaignMetrics,
   type ConnectablePlatform,
   type FetchLike,
-} from '@voxmarketer/integrations';
+} from '@sayso/integrations';
 import { loadLiveDeps } from './live.js';
 
 interface StoredCampaignView {

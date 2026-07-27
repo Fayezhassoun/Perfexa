@@ -2,7 +2,7 @@
 // The log is immutable — this module is read-only by construction.
 
 import { and, desc, eq, lt } from 'drizzle-orm';
-import { auditLogs, type AuditLog } from '@voxmarketer/db';
+import { auditLogs, type AuditLog } from '@sayso/db';
 import type { AgentContext } from '../types.js';
 
 export interface AuditPage {

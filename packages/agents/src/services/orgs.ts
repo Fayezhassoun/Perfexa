@@ -4,7 +4,7 @@
 // of AgentContext. Invite creation/removal lives in settings.ts (org-scoped).
 
 import { and, asc, eq } from 'drizzle-orm';
-import { orgInvites, orgMembers, organizations, type Db, type OrgMember, type Organization } from '@voxmarketer/db';
+import { orgInvites, orgMembers, organizations, type Db, type OrgMember, type Organization } from '@sayso/db';
 import { createAuditLogger } from '../audit.js';
 
 /** All of a user's memberships, oldest first (deterministic active-org fallback). */

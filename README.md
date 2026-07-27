@@ -1,6 +1,6 @@
-# VoxMarketer
+# Sayso
 
-**Talk to your marketing team.** VoxMarketer is a voice-first SaaS where small-business
+**Talk to your marketing team.** Sayso is a voice-first SaaS where small-business
 owners direct a team of AI marketing specialists by speaking: *"I need an SEO specialist.
 I need my website to be top visible. I need to get leads."* The orchestrator understands
 the intent, audits your site, proposes a concrete plan with budgets — and only after your
@@ -141,7 +141,7 @@ Everything works with the defaults from `cp .env.example .env` — no keys, no n
 
 | Var | Default | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5433/voxmarketer` | Postgres (dev-services port 5433; compose 5432) |
+| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5433/sayso` | Postgres (dev-services port 5433; compose 5432) |
 | `REDIS_URL` | `redis://localhost:6380` | BullMQ queues |
 | `AUTH_SECRET` / `AUTH_URL` | dev secret / `http://localhost:3000` | Auth.js |
 | `GOOGLE_CLIENT_ID/SECRET` | empty | optional Google OAuth login; also the OAuth client for google_ads / ga4 / gsc connects |

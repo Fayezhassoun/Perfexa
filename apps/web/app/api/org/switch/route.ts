@@ -5,8 +5,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { cookies } from 'next/headers';
-import { db } from '@voxmarketer/db';
-import { services } from '@voxmarketer/agents';
+import { db } from '@sayso/db';
+import { services } from '@sayso/agents';
 import { auth } from '@/auth';
 import { ACTIVE_ORG_COOKIE } from '@/server/org-resolution';
 

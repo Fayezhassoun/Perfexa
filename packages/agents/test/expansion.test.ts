@@ -3,8 +3,8 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, socialPosts } from '@voxmarketer/db';
-import { ApprovalRequired } from '@voxmarketer/integrations';
+import { auditLogs, socialPosts } from '@sayso/db';
+import { ApprovalRequired } from '@sayso/integrations';
 import { executeTool } from '../src/tools.js';
 import * as social from '../src/services/social.js';
 import * as content from '../src/services/content.js';

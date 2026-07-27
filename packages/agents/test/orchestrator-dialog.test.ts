@@ -3,7 +3,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { agents, auditLogs, campaignsMirror, proposals } from '@voxmarketer/db';
+import { agents, auditLogs, campaignsMirror, proposals } from '@sayso/db';
 import { sendChatMessage } from '../src/services/conversations.js';
 import type { Plan } from '../src/types.js';
 import { db, freshOrg, truncateAll, type TestOrg } from './helpers.js';

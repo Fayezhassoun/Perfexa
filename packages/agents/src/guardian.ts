@@ -3,8 +3,8 @@
 // ads tool before the adapter write.
 
 import { and, eq } from 'drizzle-orm';
-import { budgets, campaignsMirror } from '@voxmarketer/db';
-import type { AdPlatform } from '@voxmarketer/integrations';
+import { budgets, campaignsMirror } from '@sayso/db';
+import type { AdPlatform } from '@sayso/integrations';
 import type { AgentContext } from './types.js';
 import { getOrgAdapter } from './store.js';
 import type { MirrorMetrics } from './store.js';

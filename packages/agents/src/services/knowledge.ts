@@ -2,8 +2,8 @@
 // distilled best-practice docs. knowledge_documents is GLOBAL (no orgId).
 
 import { desc, eq, isNull } from 'drizzle-orm';
-import { knowledgeDocuments, type KnowledgeDocument } from '@voxmarketer/db';
-import { cosineSimilarity, embedText } from '@voxmarketer/integrations';
+import { knowledgeDocuments, type KnowledgeDocument } from '@sayso/db';
+import { cosineSimilarity, embedText } from '@sayso/integrations';
 import type { AgentContext } from '../types.js';
 
 export async function listKnowledge(ctx: AgentContext, source?: string): Promise<KnowledgeDocument[]> {

@@ -80,7 +80,7 @@ export default function Home() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg shadow-primary/30 vox-gradient">
             <Mic className="h-5 w-5 text-white" />
           </span>
-          <span className="font-display text-lg font-semibold tracking-tight">VoxMarketer</span>
+          <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
         </div>
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild>
@@ -213,7 +213,7 @@ export default function Home() {
       <footer className="glass-divider-t">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
           <span className="flex items-center gap-2">
-            <Mic className="h-4 w-4 text-primary" /> VoxMarketer
+            <Mic className="h-4 w-4 text-primary" /> Sayso
           </span>
           <span>Built for people who&apos;d rather run their business than learn ad platforms.</span>
         </div>

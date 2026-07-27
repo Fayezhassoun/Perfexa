@@ -1,5 +1,5 @@
-# ── fly.toml — VoxMarketer on Fly.io ──────────────────────────────
-app = "voxmarketer"
+# ── fly.toml — Sayso on Fly.io ──────────────────────────────
+app = "sayso"
 primary_region = "fra"
 
 [build]
@@ -16,8 +16,8 @@ primary_region = "fra"
   DEMO_SEED = "true"
   NEXT_PUBLIC_STT_PROVIDER = "mock"
   NEXT_PUBLIC_TTS_PROVIDER = "mock"
-  NEXT_PUBLIC_APP_URL = "https://voxmarketer.fly.dev"
-  AUTH_URL = "https://voxmarketer.fly.dev"
+  NEXT_PUBLIC_APP_URL = "https://sayso.fly.dev"
+  AUTH_URL = "https://sayso.fly.dev"
 
 [http_service]
   internal_port = 3000
@@ -56,5 +56,5 @@ primary_region = "fra"
 # ── Volumes ────────────────────────────────────────────────────────
 # SQLite for embedded persistence (no external Postgres needed for demo)
 [mounts]
-  source = "voxmarketer_data"
+  source = "sayso_data"
   destination = "/data"

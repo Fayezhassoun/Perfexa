@@ -6,7 +6,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
-import { connectedAccounts, type ConnectedAccount } from '@voxmarketer/db';
+import { connectedAccounts, type ConnectedAccount } from '@sayso/db';
 import {
   AdapterError,
   buildAuthorizationUrl,
@@ -18,7 +18,7 @@ import {
   verifyOAuthState,
   type ConnectablePlatform,
   type FetchLike,
-} from '@voxmarketer/integrations';
+} from '@sayso/integrations';
 import type { AgentContext } from '../types.js';
 import { oauthClientConfigFor } from '../live.js';
 

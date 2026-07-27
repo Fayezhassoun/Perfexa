@@ -6,7 +6,7 @@
 // check at execution time anyway.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, campaignsMirror, type CampaignMirror } from '@voxmarketer/db';
+import { approvals, campaignsMirror, type CampaignMirror } from '@sayso/db';
 import type { MirrorMetrics } from '../store.js';
 import { payloadHash } from '../audit.js';
 import type { AgentContext } from '../types.js';

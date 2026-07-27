@@ -5,7 +5,7 @@
 import { redirect } from 'next/navigation';
 import { eq, inArray } from 'drizzle-orm';
 import { Mic } from 'lucide-react';
-import { db, organizations } from '@voxmarketer/db';
+import { db, organizations } from '@sayso/db';
 import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <span className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg shadow-primary/30 vox-gradient">
             <Mic className="h-4 w-4 text-white" />
           </span>
-          <span className="font-display text-lg font-semibold tracking-tight">VoxMarketer</span>
+          <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
         </div>
         <AppNav />
         <div className="glass-divider-t p-4">
@@ -69,7 +69,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <span className="flex h-7 w-7 items-center justify-center rounded-lg vox-gradient">
               <Mic className="h-3.5 w-3.5 text-white" />
             </span>
-            <span className="font-display text-sm font-semibold tracking-tight">VoxMarketer</span>
+            <span className="font-display text-sm font-semibold tracking-tight">Sayso</span>
           </span>
           <span className="hidden truncate text-sm text-muted-foreground md:block">
             {org?.name}

@@ -1,7 +1,7 @@
-# ── Dockerfile — VoxMarketer ──────────────────────────────────────
+# ── Dockerfile — Sayso ──────────────────────────────────────
 # Multi-stage build: install deps → build all packages → slim runtime
 #
-# VoxMarketer is a pnpm monorepo (Next.js 14 web + Hono worker + shared
+# Sayso is a pnpm monorepo (Next.js 14 web + Hono worker + shared
 # packages). This Dockerfile builds the web app and runs it standalone.
 
 # ── Stage 1: deps ──────────────────────────────────────────────────
@@ -49,14 +49,14 @@ ENV TTS_PROVIDER=mock
 ENV SEO_AUDIT_MODE=mock
 ENV NEXT_PUBLIC_STT_PROVIDER=mock
 ENV NEXT_PUBLIC_TTS_PROVIDER=mock
-ENV NEXT_PUBLIC_APP_URL=https://voxmarketer.fly.dev
-ENV DATABASE_URL=postgres://placeholder:placeholder@localhost:5432/voxmarketer
+ENV NEXT_PUBLIC_APP_URL=https://sayso.fly.dev
+ENV DATABASE_URL=postgres://placeholder:placeholder@localhost:5432/sayso
 ENV REDIS_URL=redis://localhost:6379
 
 # Create minimal .env before build (Next.js requires it to exist)
 RUN touch /app/apps/web/.env
 
-RUN pnpm --filter @voxmarketer/web build
+RUN pnpm --filter @sayso/web build
 
 # ── Stage 3: runtime ───────────────────────────────────────────────
 FROM node:22-slim AS runtime

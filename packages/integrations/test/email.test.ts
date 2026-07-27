@@ -33,7 +33,7 @@ describe('sendEmail', () => {
     const { fetchImpl, calls } = fakeFetch(() => ({ body: { id: 'msg-1' } }));
     const result = await sendEmail({
       apiKey: 're_key',
-      from: 'VoxMarketer <reports@voxmarketer.dev>',
+      from: 'Sayso <reports@sayso.dev>',
       to: ['owner@test.dev'],
       subject: 'Report',
       html: '<p>hi</p>',
@@ -45,7 +45,7 @@ describe('sendEmail', () => {
     expect(calls[0]!.init?.method).toBe('POST');
     expect(calls[0]!.init?.headers?.authorization).toBe('Bearer re_key');
     const body = JSON.parse(calls[0]!.init?.body ?? '{}') as Record<string, unknown>;
-    expect(body).toMatchObject({ from: 'VoxMarketer <reports@voxmarketer.dev>', to: ['owner@test.dev'], subject: 'Report' });
+    expect(body).toMatchObject({ from: 'Sayso <reports@sayso.dev>', to: ['owner@test.dev'], subject: 'Report' });
   });
 
   it('throws AdapterError on HTTP errors', async () => {

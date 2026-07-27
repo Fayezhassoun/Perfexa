@@ -7,7 +7,7 @@ export default defineConfig({
   dbCredentials: {
     url:
       process.env.DATABASE_URL ??
-      'postgres://postgres:postgres@localhost:5433/voxmarketer',
+      'postgres://postgres:postgres@localhost:5433/sayso',
   },
   verbose: false,
   strict: true,

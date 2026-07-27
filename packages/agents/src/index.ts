@@ -1,4 +1,4 @@
-// @voxmarketer/agents — public surface.
+// @sayso/agents — public surface.
 
 export * from './types.js';
 export * from './errors.js';

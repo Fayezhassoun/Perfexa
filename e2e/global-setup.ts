@@ -6,10 +6,10 @@ import os from 'node:os';
 import path from 'node:path';
 
 const PORT = 5601;
-const DB = 'voxmarketer_e2e';
+const DB = 'sayso_e2e';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'voxmarketer-e2e-pg-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sayso-e2e-pg-'));
   const { default: EmbeddedPostgres } = await import('embedded-postgres');
   const pg = new EmbeddedPostgres({
     databaseDir: dataDir,

@@ -6,7 +6,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   DATABASE_URL: z
     .string()
-    .default('postgres://postgres:postgres@localhost:5433/voxmarketer'),
+    .default('postgres://postgres:postgres@localhost:5433/sayso'),
   REDIS_URL: z.string().default('redis://localhost:6380'),
   AUTH_SECRET: z.string().default('dev-secret-change-me-32-bytes-minimum!!'),
   AUTH_URL: z.string().default('http://localhost:3000'),
@@ -28,7 +28,7 @@ const envSchema = z.object({
   SEO_AUDIT_MODE: z.enum(['live', 'mock']).default('live'),
   PAGESPEED_API_KEY: z.string().default(''),
   RESEND_API_KEY: z.string().default(''),
-  EMAIL_FROM: z.string().default('VoxMarketer <reports@voxmarketer.dev>'),
+  EMAIL_FROM: z.string().default('Sayso <reports@sayso.dev>'),
   DEMO_SEED: z
     .enum(['true', 'false'])
     .default('true')

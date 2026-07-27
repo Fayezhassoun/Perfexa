@@ -2,10 +2,10 @@
 const nextConfig = {
   output: 'standalone',
   transpilePackages: [
-    '@voxmarketer/db',
-    '@voxmarketer/llm',
-    '@voxmarketer/agents',
-    '@voxmarketer/integrations',
+    '@sayso/db',
+    '@sayso/llm',
+    '@sayso/agents',
+    '@sayso/integrations',
   ],
   eslint: {
     // no eslint config in wave 1 — don't let builds fail on it

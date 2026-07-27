@@ -3,8 +3,8 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
-import { db, organizations } from '@voxmarketer/db';
-import { createAgentContext, services } from '@voxmarketer/agents';
+import { db, organizations } from '@sayso/db';
+import { createAgentContext, services } from '@sayso/agents';
 
 // zero-config local dev: pick up repo-root .env when present
 try {

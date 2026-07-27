@@ -1,8 +1,8 @@
 // Dashboard services (CONTRACTS §5): unified overview, activity feed, SEO tracker.
 
 import { desc, eq, like, and } from 'drizzle-orm';
-import { agentRuns, agents, auditLogs, campaignsMirror, organizations, websites } from '@voxmarketer/db';
-import { type AdPlatform } from '@voxmarketer/integrations';
+import { agentRuns, agents, auditLogs, campaignsMirror, organizations, websites } from '@sayso/db';
+import { type AdPlatform } from '@sayso/integrations';
 import { getOrgGscQueries } from '../live.js';
 import type { AgentContext } from '../types.js';
 import type { MirrorMetrics } from '../store.js';

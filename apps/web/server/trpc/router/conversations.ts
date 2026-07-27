@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { services } from '@voxmarketer/agents';
+import { services } from '@sayso/agents';
 import { router, orgProcedure } from '../trpc';
 import { rateLimit } from '@/lib/rate-limit';
 

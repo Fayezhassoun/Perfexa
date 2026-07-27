@@ -3,7 +3,7 @@
 // sandbox executes immediately but always behind a recorded approval.
 
 import { and, asc, desc, eq } from 'drizzle-orm';
-import { approvals, socialPosts, type SocialPost } from '@voxmarketer/db';
+import { approvals, socialPosts, type SocialPost } from '@sayso/db';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 import { getOrCreateAgent } from '../execute-plan.js';
