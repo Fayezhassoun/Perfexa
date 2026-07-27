@@ -8,7 +8,7 @@ primary_region = "fra"
 [env]
   PORT = "3000"
   NODE_ENV = "production"
-  LLM_PROVIDER = "deepseek"
+  LLM_PROVIDER = "mock"
   LLM_MODEL = "deepseek-chat"
   STT_PROVIDER = "mock"
   TTS_PROVIDER = "mock"
