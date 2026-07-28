@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const TYPES = [
   { key: 'blog', label: 'Blog post' },
@@ -34,12 +35,12 @@ export default function ContentPage() {
   const [editBody, setEditBody] = useState('');
 
   return (
-    <div className="page-shell animate-page-in space-y-6" data-testid="content-page">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Content studio</h1>
-      <p className="text-sm text-muted-foreground">
-        Drafts are grounded on your site audit and the best-practice knowledge base. Nothing is used
-        anywhere until you approve it.
-      </p>
+    <PageShell className="space-y-6" data-testid="content-page">
+      <PageHeader
+        eyebrow="Creative"
+        title="Content studio"
+        description="Drafts are grounded on your site audit and knowledge base. Nothing is published until you approve it."
+      />
 
       <Card className="glass rounded-2xl">
         <CardHeader>
@@ -163,6 +164,6 @@ export default function ContentPage() {
           </p>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { PageShell } from '@/components/page-shell';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 function dollars(cents: number): string {
   return `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
@@ -68,29 +68,29 @@ export default function DashboardPage() {
 
   return (
     <PageShell className="space-y-6" data-testid="dashboard">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">Overview</p>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-2 text-sm text-muted-foreground">A decision-ready view of growth, spend, and operator activity.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-36" />
-          <span className="text-sm text-muted-foreground">to</span>
-          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-36" />
-          {process.env.NODE_ENV !== 'production' && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={simulate.isPending}
-              onClick={() => simulate.mutate()}
-              data-testid="simulate-tick"
-            >
-              <RefreshCw className={simulate.isPending ? 'animate-spin' : ''} /> Simulate poll
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="A decision-ready view of growth, spend, and operator activity."
+        actions={
+          <div className="flex items-center gap-2">
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-36" />
+            <span className="text-sm text-muted-foreground">to</span>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-36" />
+            {process.env.NODE_ENV !== 'production' && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={simulate.isPending}
+                onClick={() => simulate.mutate()}
+                data-testid="simulate-tick"
+              >
+                <RefreshCw className={simulate.isPending ? 'animate-spin' : ''} /> Simulate poll
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8" data-testid="kpi-cards">
         {kpis.map((kpi, i) => (
@@ -120,18 +120,18 @@ export default function DashboardPage() {
                   <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      background: 'rgba(20, 20, 28, 0.72)',
+                      background: 'var(--glass-bg-strong)',
                       backdropFilter: 'blur(16px) saturate(180%)',
                       WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                      border: '1px solid rgba(255, 255, 255, 0.14)',
+                      border: '1px solid var(--glass-border-strong)',
                       borderRadius: 12,
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
-                      color: '#fff',
+                      boxShadow: 'var(--glass-shadow)',
+                      color: 'hsl(var(--foreground))',
                     }}
                   />
-                  <Line type="monotone" dataKey="spend" stroke="hsl(258 90% 68%)" strokeWidth={2} name="Spend ($)" dot={false} />
-                  <Line type="monotone" dataKey="clicks" stroke="hsl(190 90% 55%)" strokeWidth={2} name="Clicks" dot={false} />
-                  <Line type="monotone" dataKey="conversions" stroke="hsl(150 70% 55%)" strokeWidth={2} name="Conversions" dot={false} />
+                  <Line type="monotone" dataKey="spend" stroke="hsl(224 88% 56%)" strokeWidth={2} name="Spend ($)" dot={false} />
+                  <Line type="monotone" dataKey="clicks" stroke="hsl(190 82% 46%)" strokeWidth={2} name="Clicks" dot={false} />
+                  <Line type="monotone" dataKey="conversions" stroke="hsl(158 64% 40%)" strokeWidth={2} name="Conversions" dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (

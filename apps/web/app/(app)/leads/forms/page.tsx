@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 interface FieldDraft {
   key: string;
@@ -45,8 +46,12 @@ export default function LeadFormsPage() {
   }
 
   return (
-    <div className="page-shell animate-page-in space-y-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Lead capture forms</h1>
+    <PageShell className="space-y-6">
+      <PageHeader
+        eyebrow="Conversion"
+        title="Lead capture forms"
+        description="Build custom forms, grab embed codes for your site, or use hosted landing URLs."
+      />
 
       <Card>
         <CardHeader>
@@ -130,7 +135,7 @@ export default function LeadFormsPage() {
           />
         ))}
       </div>
-    </div>
+    </PageShell>
   );
 }
 

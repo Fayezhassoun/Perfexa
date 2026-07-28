@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const SOURCES = [
   { key: 'google_ads_help', label: 'Google Ads Help' },
@@ -31,11 +32,12 @@ export default function KnowledgePage() {
     : (list.data ?? []);
 
   return (
-    <div className="page-shell animate-page-in space-y-4">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Knowledge base</h1>
-      <p className="text-sm text-muted-foreground">
-        The best-practice library your agents ground their advice on.
-      </p>
+    <PageShell className="space-y-4">
+      <PageHeader
+        eyebrow="Intelligence"
+        title="Knowledge base"
+        description="The best-practice library your agents ground their advice on."
+      />
       <div className="flex flex-wrap gap-2">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -75,6 +77,6 @@ export default function KnowledgePage() {
         ))}
         {docs.length === 0 && <p className="text-sm text-muted-foreground">Nothing found.</p>}
       </div>
-    </div>
+    </PageShell>
   );
 }

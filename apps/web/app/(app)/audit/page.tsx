@@ -5,6 +5,7 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 export default function AuditPage() {
   const [cursors, setCursors] = useState<string[]>([]);
@@ -12,12 +13,12 @@ export default function AuditPage() {
   const page = trpc.audit.list.useQuery({ limit: 50, cursor });
 
   return (
-    <div className="page-shell animate-page-in space-y-4" data-testid="audit-page">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Audit log</h1>
-      <p className="text-sm text-muted-foreground">
-        An immutable record of every agent action, approval, and API write — who, what, when, and a
-        hash of the payload.
-      </p>
+    <PageShell className="space-y-4" data-testid="audit-page">
+      <PageHeader
+        eyebrow="Security & Governance"
+        title="Audit log"
+        description="An immutable record of every agent action, approval, and API write — who, what, when, and payload hash."
+      />
       <Table>
         <TableHeader>
           <TableRow>
@@ -74,6 +75,6 @@ export default function AuditPage() {
           </Button>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

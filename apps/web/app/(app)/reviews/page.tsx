@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 function Stars({ rating }: { rating: number | null }) {
   return (
@@ -42,21 +43,25 @@ export default function ReviewsPage() {
 
   const s = stats.data;
   return (
-    <div className="page-shell animate-page-in space-y-6" data-testid="reviews-page">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Reviews</h1>
-        <div className="flex items-center gap-2">
-          <Select value={sentiment} onChange={(e) => setSentiment(e.target.value)} className="w-36">
-            <option value="">All sentiment</option>
-            <option value="positive">Positive</option>
-            <option value="neutral">Neutral</option>
-            <option value="negative">Negative</option>
-          </Select>
-          <Button variant="outline" size="sm" disabled={sync.isPending} onClick={() => sync.mutate()} data-testid="reviews-sync">
-            <RefreshCw className={sync.isPending ? 'animate-spin' : ''} /> Sync reviews
-          </Button>
-        </div>
-      </div>
+    <PageShell className="space-y-6" data-testid="reviews-page">
+      <PageHeader
+        eyebrow="Reputation"
+        title="Reviews"
+        description="Monitor customer feedback and AI-drafted replies. Responses are only posted when you approve them."
+        actions={
+          <div className="flex items-center gap-2">
+            <Select value={sentiment} onChange={(e) => setSentiment(e.target.value)} className="w-36">
+              <option value="">All sentiment</option>
+              <option value="positive">Positive</option>
+              <option value="neutral">Neutral</option>
+              <option value="negative">Negative</option>
+            </Select>
+            <Button variant="outline" size="sm" disabled={sync.isPending} onClick={() => sync.mutate()} data-testid="reviews-sync">
+              <RefreshCw className={sync.isPending ? 'animate-spin' : ''} /> Sync reviews
+            </Button>
+          </div>
+        }
+      />
 
       {s && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -177,6 +182,6 @@ export default function ReviewsPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

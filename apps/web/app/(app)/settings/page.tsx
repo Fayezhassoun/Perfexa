@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const PLATFORM_LABELS: Record<string, string> = {
   google_ads: 'Google Ads',
@@ -26,8 +27,12 @@ type Platform = 'google_ads' | 'meta' | 'tiktok' | 'ga4' | 'gsc';
 
 export default function SettingsPage() {
   return (
-    <div className="page-shell animate-page-in space-y-4">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
+    <PageShell className="space-y-4">
+      <PageHeader
+        eyebrow="Configuration"
+        title="Settings"
+        description="Manage ad platform integrations, hard budget caps, team members, and notification preferences."
+      />
       <Tabs defaultValue="integrations">
         <TabsList>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
@@ -60,7 +65,7 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }
 

@@ -4,14 +4,19 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 export default function AdminPage() {
   const users = trpc.admin.users.useQuery();
   const health = trpc.admin.health.useQuery();
 
   return (
-    <div className="page-shell animate-page-in space-y-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Admin</h1>
+    <PageShell className="space-y-6">
+      <PageHeader
+        eyebrow="System"
+        title="Admin"
+        description="Monitor system health, database, model services, and user access across organizations."
+      />
 
       <Card>
         <CardHeader>
@@ -72,6 +77,6 @@ export default function AdminPage() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   );
 }

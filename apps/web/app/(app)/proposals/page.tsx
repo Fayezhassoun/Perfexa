@@ -5,17 +5,18 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { dollars, type PlanShape } from '@/components/console/proposal-card';
-import { PageShell } from '@/components/page-shell';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 export default function ProposalsPage() {
   const proposals = trpc.proposals.list.useQuery();
 
   return (
     <PageShell className="space-y-4">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Proposals</h1>
-      <p className="text-sm text-muted-foreground">
-        Every plan your team suggests lands here. Nothing runs until you approve it.
-      </p>
+      <PageHeader
+        eyebrow="Approvals"
+        title="Proposals"
+        description="Every plan your team suggests lands here. Nothing runs until you approve it."
+      />
       <div className="space-y-3">
         {(proposals.data ?? []).map((p) => {
           const plan = p.plan as unknown as PlanShape;

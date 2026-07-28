@@ -36,7 +36,7 @@ export default function LoginPage() {
       <Card className="glass-panel animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
         <CardHeader className="text-center">
           <div className="voice-orb mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl text-[color:hsl(var(--voice))]">
-            <Mic className="h-5 w-5 text-white" />
+            <Mic className="h-5 w-5" />
           </div>
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>Sign in to talk to your marketing team</CardDescription>

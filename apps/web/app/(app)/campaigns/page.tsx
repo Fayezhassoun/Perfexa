@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select } from '@/components/ui/select';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const PLATFORM_LABELS: Record<string, string> = {
   google_ads: 'Google Ads',
@@ -37,16 +38,20 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="page-shell animate-page-in space-y-4" data-testid="campaigns-page">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Campaigns</h1>
-        <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">
-          <option value="">All platforms</option>
-          <option value="google_ads">Google Ads</option>
-          <option value="meta">Meta</option>
-          <option value="tiktok">TikTok</option>
-        </Select>
-      </div>
+    <PageShell className="space-y-4" data-testid="campaigns-page">
+      <PageHeader
+        eyebrow="Growth"
+        title="Campaigns"
+        description="Monitor active campaigns across platforms. Actions operate safely within your budget limits."
+        actions={
+          <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">
+            <option value="">All platforms</option>
+            <option value="google_ads">Google Ads</option>
+            <option value="meta">Meta</option>
+            <option value="tiktok">TikTok</option>
+          </Select>
+        }
+      />
       {resume.data && (
         <p
           className={
@@ -118,6 +123,6 @@ export default function CampaignsPage() {
           sandbox mode).
         </p>
       )}
-    </div>
+    </PageShell>
   );
 }

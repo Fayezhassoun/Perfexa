@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const STATUSES = ['new', 'contacted', 'won', 'lost'] as const;
 
@@ -39,20 +40,24 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="page-shell animate-page-in space-y-4" data-testid="leads-page">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Leads</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/leads/forms">
-              <FileText /> Forms
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" onClick={downloadCsv}>
-            <Download /> Export CSV
-          </Button>
-        </div>
-      </div>
+    <PageShell className="space-y-4" data-testid="leads-page">
+      <PageHeader
+        eyebrow="Pipeline"
+        title="Leads"
+        description="Filterable contacts, score qualification, and notes. Export anytime to CSV."
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/leads/forms">
+                <FileText /> Forms
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={downloadCsv}>
+              <Download /> Export CSV
+            </Button>
+          </div>
+        }
+      />
 
       <div className="flex flex-wrap gap-2">
         <Input
@@ -132,6 +137,6 @@ export default function LeadsPage() {
           one to your site plan.
         </p>
       )}
-    </div>
+    </PageShell>
   );
 }

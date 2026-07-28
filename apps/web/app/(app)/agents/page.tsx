@@ -5,7 +5,7 @@ import { Bot } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { PageShell } from '@/components/page-shell';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const TYPE_LABELS: Record<string, string> = {
   orchestrator: 'Orchestrator',
@@ -23,10 +23,11 @@ export default function AgentsPage() {
 
   return (
     <PageShell className="space-y-4">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Your agents</h1>
-      <p className="text-sm text-muted-foreground">
-        Specialists created from plans you approved. Each one only has the tools its job needs.
-      </p>
+      <PageHeader
+        eyebrow="Specialists"
+        title="Your agents"
+        description="Specialists created from plans you approved. Each one only has the tools its job needs."
+      />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="agents-grid">
         {(agents.data ?? []).map((agent) => (
           <Link key={agent.id} href={`/agents/${agent.id}`}>

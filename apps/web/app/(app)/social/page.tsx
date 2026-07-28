@@ -15,6 +15,7 @@ import { Select } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 const PLATFORMS = [
   { key: 'instagram', label: 'Instagram' },
@@ -89,13 +90,17 @@ export default function SocialPage() {
 
   const s = summary.data;
   return (
-    <div className="page-shell animate-page-in space-y-6" data-testid="social-page">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Social media</h1>
-        <Button variant="outline" size="sm" disabled={refresh.isPending} onClick={() => refresh.mutate()}>
-          <RefreshCw className={refresh.isPending ? 'animate-spin' : ''} /> Refresh engagement
-        </Button>
-      </div>
+    <PageShell className="space-y-6" data-testid="social-page">
+      <PageHeader
+        eyebrow="Channel"
+        title="Social media"
+        description="Draft, schedule, and track engagement. Publishing is always gated behind your explicit approval."
+        actions={
+          <Button variant="outline" size="sm" disabled={refresh.isPending} onClick={() => refresh.mutate()}>
+            <RefreshCw className={refresh.isPending ? 'animate-spin' : ''} /> Refresh engagement
+          </Button>
+        }
+      />
 
       {s && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
@@ -291,6 +296,6 @@ export default function SocialPage() {
           {grouped.length === 0 && <p className="text-sm text-muted-foreground">Nothing planned yet.</p>}
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

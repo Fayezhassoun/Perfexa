@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PageShell, PageHeader } from '@/components/page-shell';
 
 interface Snapshot {
   analyzedAt?: string;
@@ -32,18 +33,23 @@ export default function CompetitorsPage() {
   const myScore = seo.data?.score ?? null;
 
   return (
-    <div className="page-shell animate-page-in space-y-6" data-testid="competitors-page">
-      <h1 className="font-display text-2xl font-semibold tracking-tight">Competitors</h1>
-      <p className="text-sm text-muted-foreground">
-        Track who you&apos;re up against. Each analysis compares their SEO health to yours
-        {myScore != null && (
+    <PageShell className="space-y-6" data-testid="competitors-page">
+      <PageHeader
+        eyebrow="Market"
+        title="Competitors"
+        description={
           <>
-            {' '}
-            (you: <span className="font-medium text-foreground">{myScore}/100</span>)
+            Track who you&apos;re up against. Each analysis compares their SEO health to yours
+            {myScore != null && (
+              <>
+                {' '}
+                (you: <span className="font-medium text-foreground">{myScore}/100</span>)
+              </>
+            )}
+            .
           </>
-        )}
-        .
-      </p>
+        }
+      />
 
       <Card className="glass rounded-2xl">
         <CardContent className="flex flex-wrap items-center gap-3 p-4">
@@ -153,6 +159,6 @@ export default function CompetitorsPage() {
           competitor rivalplumbing.com”.
         </p>
       )}
-    </div>
+    </PageShell>
   );
 }
