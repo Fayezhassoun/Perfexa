@@ -97,7 +97,7 @@ apps/web build: ✓ Compiled successfully
 ## 5. Commit Details
 
 - **Commit Command**: `git add apps/web SAYSO_LIQUID_GLASS_SECOND_PASS_REPORT.md && git commit -m "design: refine Sayso liquid glass experience"`
-- **Commit Hash**: `f8c13a5d8eeae1d0ee6e3e57f339cf0ca662bb1e` (`f8c13a5`)
+- **Commit Hash**: `a9b99e4 design: refine Sayso liquid glass experience`
 
 ---
 
