@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { trpc } from '@/lib/trpc';
 import { ProposalCard, type PlanShape } from '@/components/console/proposal-card';
+import { PageShell } from '@/components/page-shell';
 
 export default function ProposalDetailPage() {
   const params = useParams<{ id: string }>();
@@ -23,7 +24,7 @@ export default function ProposalDetailPage() {
 
   const p = proposal.data;
   return (
-    <div className="animate-page-in mx-auto max-w-2xl space-y-4 p-6">
+    <PageShell className="mx-auto max-w-3xl space-y-4">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Proposal review</h1>
       <ProposalCard
         plan={p.plan as unknown as PlanShape}
@@ -38,6 +39,6 @@ export default function ProposalDetailPage() {
           {(approve.error ?? reject.error ?? requestChanges.error)?.message}
         </p>
       )}
-    </div>
+    </PageShell>
   );
 }

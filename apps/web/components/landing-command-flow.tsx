@@ -30,11 +30,11 @@ const SPECIALISTS = [
 
 function Waveform() {
   return (
-    <div className="flex h-7 items-center gap-[3px]" aria-hidden="true">
+    <div className="voice-wave flex h-7 items-center gap-[3px]" aria-hidden="true">
       {EQ_BARS.map((height, index) => (
         <span
           key={index}
-          className="animate-eq w-[3px] rounded-full vox-gradient"
+          className="animate-eq w-[3px] rounded-full bg-current"
           style={{ height: `${height * 24}px`, animationDelay: `${index * 100}ms` }}
         />
       ))}
@@ -46,7 +46,7 @@ export function LandingCommandFlow() {
   return (
     <section
       aria-labelledby="landing-command-flow-title"
-      className="glass animate-fade-up animation-delay-300 mt-16 w-full max-w-5xl overflow-hidden rounded-3xl p-5 text-left shadow-2xl sm:p-7"
+      className="glass-panel w-full max-w-5xl overflow-hidden rounded-3xl p-5 text-left sm:p-7"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -57,7 +57,7 @@ export function LandingCommandFlow() {
             One clear brief. A plan you can review.
           </h2>
         </div>
-        <span className="badge-glass inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs text-muted-foreground">
+          <span className="glass-chip inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs text-muted-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
           Preview only
         </span>
@@ -66,7 +66,7 @@ export function LandingCommandFlow() {
       <ol className="mt-6 grid gap-3 md:grid-cols-3 md:gap-4" aria-label="Sayso command flow">
         <li aria-label="Voice brief: Brief captured" className="glass-tile rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl vox-gradient shadow-lg shadow-primary/20">
+            <span className="voice-orb flex h-10 w-10 items-center justify-center rounded-xl text-[color:hsl(var(--voice))]">
               <Mic className="h-5 w-5 text-white" aria-hidden="true" />
             </span>
             <Waveform />

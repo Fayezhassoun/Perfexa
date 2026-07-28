@@ -34,7 +34,7 @@ export default function ContentPage() {
   const [editBody, setEditBody] = useState('');
 
   return (
-    <div className="animate-page-in space-y-6 p-6" data-testid="content-page">
+    <div className="page-shell animate-page-in space-y-6" data-testid="content-page">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Content studio</h1>
       <p className="text-sm text-muted-foreground">
         Drafts are grounded on your site audit and the best-practice knowledge base. Nothing is used

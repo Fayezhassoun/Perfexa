@@ -37,7 +37,7 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="animate-page-in space-y-4 p-6" data-testid="campaigns-page">
+    <div className="page-shell animate-page-in space-y-4" data-testid="campaigns-page">
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Campaigns</h1>
         <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">

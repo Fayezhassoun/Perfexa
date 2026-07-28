@@ -31,7 +31,7 @@ export default function KnowledgePage() {
     : (list.data ?? []);
 
   return (
-    <div className="animate-page-in space-y-4 p-6">
+    <div className="page-shell animate-page-in space-y-4">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Knowledge base</h1>
       <p className="text-sm text-muted-foreground">
         The best-practice library your agents ground their advice on.

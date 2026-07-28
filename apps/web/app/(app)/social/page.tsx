@@ -89,7 +89,7 @@ export default function SocialPage() {
 
   const s = summary.data;
   return (
-    <div className="animate-page-in space-y-6 p-6" data-testid="social-page">
+    <div className="page-shell animate-page-in space-y-6" data-testid="social-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Social media</h1>
         <Button variant="outline" size="sm" disabled={refresh.isPending} onClick={() => refresh.mutate()}>

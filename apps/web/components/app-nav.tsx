@@ -53,10 +53,10 @@ export function AppNav() {
             aria-current={active ? 'page' : undefined}
             style={{ animationDelay: `${i * 50}ms` }}
             className={cn(
-              'animate-nav-in group relative flex items-center gap-3 rounded-xl border px-3 py-2 text-sm transition-all duration-300',
+              'animate-nav-in group relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[0.82rem] transition-all duration-200',
               active
-                ? 'border-[color:var(--glass-border-strong)] bg-primary/15 font-medium text-foreground shadow-[var(--glass-shadow)] backdrop-blur-md'
-                : 'border-transparent text-muted-foreground hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)] hover:text-foreground hover:backdrop-blur-md',
+                ? 'border-primary/20 bg-primary/12 font-medium text-foreground shadow-sm backdrop-blur-md'
+                : 'border-transparent text-muted-foreground hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)] hover:text-foreground',
             )}
           >
             <Icon
@@ -66,12 +66,6 @@ export function AppNav() {
               )}
             />
             {label}
-            {active && (
-              <span
-                className="absolute right-3 h-1.5 w-1.5 rounded-full vox-gradient"
-                aria-hidden
-              />
-            )}
           </Link>
         );
       })}

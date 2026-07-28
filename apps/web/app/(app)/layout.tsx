@@ -1,6 +1,5 @@
-// Authenticated app shell: glass sidebar + blur top bar over the animated
-// mesh backdrop. Redirects to /login without a session and to /onboarding
-// until the wizard is done.
+// Authenticated app shell. Keep the session, org resolution, and onboarding
+// guards server-side; this file only owns the shared visual frame.
 
 import { redirect } from 'next/navigation';
 import { eq, inArray } from 'drizzle-orm';
@@ -27,18 +26,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (org && org.onboardingStep !== 'done') redirect('/onboarding');
 
   return (
-    <div className="vox-backdrop flex min-h-screen">
-      {/* Glass sidebar — stronger blur than cards */}
-      <aside className="glass-strong fixed inset-y-0 left-0 z-40 hidden w-60 flex-col rounded-none border-y-0 border-l-0 md:flex">
+    <div className="liquid-shell flex min-h-screen">
+      <aside className="liquid-sidebar fixed inset-y-0 left-0 z-40 hidden w-56 flex-col rounded-none border-y-0 border-l-0 md:flex">
         <div className="glass-divider-b flex h-16 items-center gap-2.5 px-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg shadow-primary/30 vox-gradient">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
             <Mic className="h-4 w-4 text-white" />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
         </div>
         <AppNav />
         <div className="glass-divider-t p-4">
-          <div className="glass-subtle mb-3 space-y-2 rounded-xl px-3 py-2.5">
+          <div className="glass-tile mb-3 space-y-2 rounded-xl px-3 py-2.5">
             <OrgSwitcher
               orgs={orgRows.map((o) => ({ id: o.id, name: o.name }))}
               activeOrgId={orgId}
@@ -63,10 +61,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Content column with blur top bar */}
-      <div className="flex min-w-0 flex-1 flex-col md:pl-60">
-        <header className="glass-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-6">
+      <div className="flex min-w-0 flex-1 flex-col md:pl-56">
+        <header className="liquid-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-6">
           <span className="flex items-center gap-2 md:hidden">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg vox-gradient">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <Mic className="h-3.5 w-3.5 text-white" />
             </span>
             <span className="font-display text-sm font-semibold tracking-tight">Sayso</span>

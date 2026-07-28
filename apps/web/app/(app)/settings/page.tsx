@@ -26,7 +26,7 @@ type Platform = 'google_ads' | 'meta' | 'tiktok' | 'ga4' | 'gsc';
 
 export default function SettingsPage() {
   return (
-    <div className="animate-page-in space-y-4 p-6">
+    <div className="page-shell animate-page-in space-y-4">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
       <Tabs defaultValue="integrations">
         <TabsList>

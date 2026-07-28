@@ -38,10 +38,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="vox-backdrop flex min-h-screen items-center justify-center p-4">
-      <Card className="glass animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
+    <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
+      <Card className="glass-panel animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
         <CardHeader className="text-center">
-          <div className="animate-pulse-glow mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl vox-gradient">
+          <div className="voice-orb mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl text-[color:hsl(var(--voice))]">
             <Mic className="h-5 w-5 text-white" />
           </div>
           <CardTitle>Create your account</CardTitle>

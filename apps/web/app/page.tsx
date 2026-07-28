@@ -1,12 +1,10 @@
-// Landing page — the product's first impression. Minimalist-luxury dark,
-// the mic as hero object, jargon-free reassurance throughout.
-
 import Link from 'next/link';
 import {
   ArrowRight,
   Bot,
-  Mic,
+  Check,
   LineChart,
+  Mic,
   Search,
   ShieldCheck,
   Sparkles,
@@ -15,74 +13,29 @@ import {
 import { Button } from '@/components/ui/button';
 import { LandingCommandFlow } from '@/components/landing-command-flow';
 
-const EQ_BARS = [0.5, 0.9, 0.6, 1, 0.7, 0.45, 0.85, 0.55];
-
-function EqMark({ className = '' }: { className?: string }) {
-  return (
-    <div className={`flex items-end gap-[3px] ${className}`} aria-hidden>
-      {EQ_BARS.map((h, i) => (
-        <span
-          key={i}
-          className="animate-eq w-[3px] rounded-full vox-gradient"
-          style={{ height: `${h * 22}px`, animationDelay: `${i * 110}ms` }}
-        />
-      ))}
-    </div>
-  );
-}
-
 const SPECIALISTS = [
-  {
-    icon: Search,
-    name: 'SEO Specialist',
-    blurb: 'Audits your site, fixes what search engines dislike, tracks your rankings.',
-  },
-  {
-    icon: Sparkles,
-    name: 'Ads Specialists',
-    blurb: 'Google, Meta, and TikTok campaigns — drafted for you, launched only when you approve.',
-  },
-  {
-    icon: Users,
-    name: 'Lead Gen Specialist',
-    blurb: 'Adds contact forms, captures every enquiry, and scores them so you call the right ones first.',
-  },
-  {
-    icon: LineChart,
-    name: 'Analytics Specialist',
-    blurb: 'Answers “how did we do this week?” in plain language, not spreadsheets.',
-  },
+  { icon: Search, name: 'SEO', detail: 'Visibility, technical health, and search opportunities.' },
+  { icon: Sparkles, name: 'Paid growth', detail: 'Campaign plans with budgets that wait for approval.' },
+  { icon: Users, name: 'Lead capture', detail: 'Forms, qualification, and a cleaner follow-up path.' },
+  { icon: LineChart, name: 'Analytics', detail: 'A plain-language weekly read on what changed.' },
 ];
 
-const STEPS = [
-  {
-    n: '01',
-    title: 'Say what you need',
-    body: '“I need my website to be top visible. I need to get leads.” That’s the whole brief.',
-  },
-  {
-    n: '02',
-    title: 'Review one clear plan',
-    body: 'Your team checks your site, then proposes agents, budgets, and a timeline — as simple cards.',
-  },
-  {
-    n: '03',
-    title: 'Say “approve”',
-    body: 'Nothing spends a cent until you do. A Budget Guardian watches every dollar after that.',
-  },
+const SAFETY_POINTS = [
+  'Approval before spend or public action',
+  'Every decision recorded in an audit log',
+  'Sandbox mode on by default',
 ];
 
 export default function Home() {
   return (
-    <main className="vox-backdrop min-h-screen overflow-x-hidden">
-      {/* Nav — floating glass pill */}
-      <header className="glass-strong sticky top-4 z-50 mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-full py-3 pl-6 pr-3">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg shadow-primary/30 vox-gradient">
-            <Mic className="h-5 w-5 text-white" />
+    <main className="liquid-shell min-h-screen overflow-x-hidden">
+      <header className="liquid-topbar sticky top-0 z-50 mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
+        <Link href="/" className="flex items-center gap-2.5" aria-label="Sayso home">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
+            <Mic className="h-4 w-4 text-white" />
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
-        </div>
+        </Link>
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
@@ -95,112 +48,103 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto flex max-w-4xl flex-col items-center px-6 pb-24 pt-16 text-center sm:pt-24">
-        <div className="glass animate-fade-up flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-muted-foreground">
-          <EqMark />
-          <span>Marketing that listens</span>
-        </div>
-
-        <h1 className="animate-fade-up animation-delay-100 mt-8 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
-          Your marketing team,
-          <br />
-          <span className="vox-gradient-text">one sentence away.</span>
-        </h1>
-
-        <p className="animate-fade-up animation-delay-200 mt-6 max-w-xl text-balance text-lg text-muted-foreground">
-          Say what you need. Specialists shape a clear plan, and nothing proceeds until you
-          approve it.
-        </p>
-
-        <div className="animate-fade-up animation-delay-300 mt-10 flex flex-col items-center gap-4 sm:flex-row">
-          <Button size="lg" className="h-12 px-7 text-base" asChild>
-            <Link href="/register">
-              Start talking — it&apos;s free <ArrowRight />
-            </Link>
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            No card. No jargon. Sandbox by default.
-          </span>
-        </div>
-
-        <LandingCommandFlow />
-      </section>
-
-      {/* Specialists */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
-        <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-          A full team, <span className="vox-gradient-text">no hiring</span>
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-center text-muted-foreground">
-          Each specialist has one job, its own tools, and a strict permission scope.
-        </p>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {SPECIALISTS.map(({ icon: Icon, name, blurb }) => (
-            <div key={name} className="glass lift rounded-2xl p-6">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
-                <Icon className="h-5 w-5 text-primary" />
+      <section className="mx-auto grid max-w-[1440px] items-center gap-12 px-5 pb-24 pt-16 sm:px-8 lg:grid-cols-[0.9fr,1.1fr] lg:gap-20 lg:px-12 lg:pb-32 lg:pt-24">
+        <div className="max-w-xl">
+          <div className="glass-chip animate-fade-up inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Voice-first marketing operations
+          </div>
+          <h1 className="animate-fade-up animation-delay-100 mt-7 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.5rem]">
+            Your AI marketing team,
+            <span className="mt-2 block text-primary">one sentence away.</span>
+          </h1>
+          <p className="animate-fade-up animation-delay-200 mt-7 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
+            Speak naturally about the business problem in front of you. Sayso turns it into a plan,
+            a team, and a measured next step — with your approval in the loop.
+          </p>
+          <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <Button size="lg" className="h-12 px-7 text-base" asChild>
+              <Link href="/register">
+                Start talking — it&apos;s free <ArrowRight />
+              </Link>
+            </Button>
+            <span className="text-sm text-muted-foreground">No card · no jargon · sandbox by default</span>
+          </div>
+          <div className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            {['Speak', 'Review', 'Approve', 'Execute safely'].map((item, index) => (
+              <span key={item} className="flex items-center gap-1.5">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                  {index + 1}
+                </span>
+                {item}
               </span>
-              <h3 className="mt-4 font-medium">{name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{blurb}</p>
+            ))}
+          </div>
+        </div>
+
+        <div className="animate-fade-up animation-delay-200 lg:pl-2">
+          <LandingCommandFlow />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1440px] px-5 pb-24 sm:px-8 lg:px-12">
+        <div className="page-header mb-8">
+          <div>
+            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">The team bench</p>
+            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Specialists with clear jobs.</h2>
+            <p className="mt-3 max-w-xl text-muted-foreground">One operating system for the work you already know needs doing.</p>
+          </div>
+          <span className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex"><Bot className="h-4 w-4 text-primary" /> Built for small teams</span>
+        </div>
+        <div className="glass-panel overflow-hidden rounded-2xl">
+          {SPECIALISTS.map(({ icon: Icon, name, detail }, index) => (
+            <div key={name} className="glass-row flex items-center gap-4 px-5 py-4 sm:px-6">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{name}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{detail}</p>
+              </div>
+              <span className="hidden text-xs font-medium text-muted-foreground sm:block">0{index + 1}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="grid gap-10 lg:grid-cols-3">
-          {STEPS.map((step) => (
-            <div key={step.n} className="relative">
-              <span className="font-display text-6xl font-semibold text-foreground/10">{step.n}</span>
-              <h3 className="mt-2 text-xl font-medium">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Safety band */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="glass relative overflow-hidden rounded-3xl p-8 sm:p-12">
-          <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl" aria-hidden />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[auto,1fr]">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl vox-gradient">
-              <ShieldCheck className="h-8 w-8 text-white" />
+      <section className="mx-auto max-w-[1440px] px-5 pb-24 sm:px-8 lg:px-12">
+        <div className="glass-panel grid gap-8 rounded-3xl p-7 sm:p-10 lg:grid-cols-[0.75fr,1.25fr] lg:items-center lg:p-12">
+          <div>
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="h-6 w-6" />
             </span>
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Your money is guarded, not just budgeted.
-              </h2>
-              <p className="mt-3 max-w-2xl text-muted-foreground">
-                Every spend needs your explicit “approve” — by voice or click. A Budget Guardian
-                enforces hard caps, pauses runaway campaigns automatically, and writes every single
-                action to an audit log you can read. New accounts run entirely in a safe sandbox.
-              </p>
-            </div>
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Clear actions. Deliberate control.</h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+              Sayso helps your team move faster without hiding the consequential moments.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {SAFETY_POINTS.map((point) => (
+              <div key={point} className="glass-tile rounded-2xl p-4">
+                <Check className="h-4 w-4 text-emerald-500" />
+                <p className="mt-4 text-sm font-medium leading-relaxed">{point}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="mx-auto max-w-3xl px-6 pb-28 text-center">
-        <Bot className="mx-auto h-8 w-8 text-primary" />
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-          From one clear brief to <span className="vox-gradient-text">a plan you control</span>.
-        </h2>
+      <section className="mx-auto max-w-3xl px-5 pb-28 text-center sm:px-8">
+        <p className="text-sm font-medium text-primary">Start with the problem, not the platform.</p>
+        <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">From one clear brief to a plan you control.</h2>
         <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
-          <Link href="/register">
-            Create your team <ArrowRight />
-          </Link>
+          <Link href="/register">Create your team <ArrowRight /></Link>
         </Button>
       </section>
 
       <footer className="glass-divider-t">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-          <span className="flex items-center gap-2">
-            <Mic className="h-4 w-4 text-primary" /> Sayso
-          </span>
+        <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8 lg:px-12">
+          <span className="flex items-center gap-2"><Mic className="h-4 w-4 text-primary" /> Sayso</span>
           <span>Built for people who&apos;d rather run their business than learn ad platforms.</span>
         </div>
       </footer>

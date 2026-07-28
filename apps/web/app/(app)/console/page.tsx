@@ -75,11 +75,14 @@ export default function ConsolePage() {
   }, [messages.length, conversationProposals.length, sendMessage.isPending]);
 
   return (
-    <div className="animate-page-in flex h-[calc(100dvh-3.5rem)]">
+    <div className="animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
       {/* Conversation sidebar — floating glass panel */}
-      <aside className="glass-strong m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
+      <aside className="glass-elevated m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
         <div className="glass-divider-b flex items-center justify-between p-3">
-          <span className="text-sm font-medium">Conversations</span>
+          <div>
+            <p className="text-sm font-medium">Conversations</p>
+            <p className="mt-0.5 text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">Your workbench</p>
+          </div>
           <Button
             variant="ghost"
             size="icon"
@@ -113,9 +116,17 @@ export default function ConsolePage() {
 
       {/* Main console */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="glass-topbar flex h-14 items-center justify-between px-4">
-          <h1 className="font-display font-semibold tracking-tight">Voice Console</h1>
+        <header className="liquid-topbar flex h-14 items-center justify-between px-4">
+          <div>
+            <h1 className="font-display font-semibold tracking-tight">Voice Console</h1>
+            <p className="hidden text-[0.68rem] text-muted-foreground sm:block">Speak clearly. Approve deliberately.</p>
+          </div>
           <div className="flex items-center gap-2">
+            {conversationProposals.length > 0 && (
+              <span className="glass-chip hidden rounded-full px-2.5 py-1 text-xs text-amber-600 dark:text-amber-400 sm:inline-flex">
+                {conversationProposals.length} awaiting approval
+              </span>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -147,17 +158,20 @@ export default function ConsolePage() {
         <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4" data-testid="chat-panel">
           {messages.length === 0 && !sendMessage.isPending && (
             <div className="animate-fade-up flex h-full flex-col items-center justify-center text-center">
-              <div className="mb-6 flex items-end gap-1" aria-hidden>
+              <div className="voice-wave mb-6 flex items-end gap-1" aria-hidden>
                 {[0.4, 0.75, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
                   <span
                     key={i}
-                    className="animate-eq w-1 rounded-full vox-gradient"
+                    className="animate-eq w-1 rounded-full bg-current"
                     style={{ height: `${h * 32}px`, animationDelay: `${i * 120}ms` }}
                   />
                 ))}
               </div>
+              <div className="voice-orb mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-[color:hsl(var(--voice))]">
+                <Mic className="h-7 w-7" />
+              </div>
               <p className="font-display max-w-md text-2xl font-semibold tracking-tight">
-                Tell me what you need — <span className="vox-gradient-text">like you would a colleague.</span>
+                Tell me what you need — <span className="text-primary">like you would a colleague.</span>
               </p>
               <p className="mt-3 max-w-md text-sm text-muted-foreground">
                 Try: “I need an SEO specialist. I need my website to be top visible. I need to get
@@ -228,8 +242,8 @@ export default function ConsolePage() {
               onTouchEnd={() => !voice.handsFree && voice.stopRecording()}
               onClick={() => voice.handsFree && (voice.recording ? voice.stopRecording() : voice.startRecording())}
               className={cn(
-                'relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-white transition-all duration-300 active:scale-95',
-                voice.recording ? 'bg-destructive' : 'vox-gradient animate-pulse-glow hover:scale-105',
+                'voice-orb relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[color:hsl(var(--voice))] transition-all duration-200 active:scale-95',
+                voice.recording ? 'border-destructive/60 bg-destructive/10 text-destructive' : 'animate-pulse-glow hover:scale-[1.02]',
               )}
               style={
                 voice.recording

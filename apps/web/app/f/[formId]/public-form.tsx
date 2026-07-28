@@ -44,7 +44,7 @@ export function PublicLeadForm({
 
   if (state === 'done') {
     return (
-      <Card className="animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)] text-center">
+      <Card className="glass-panel animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)] text-center">
         <CardContent className="p-8">
           <p className="text-lg font-medium">Thanks — we got it!</p>
           <p className="mt-1 text-sm text-muted-foreground">Someone will be in touch shortly.</p>
@@ -54,7 +54,7 @@ export function PublicLeadForm({
   }
 
   return (
-    <Card className="animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)]">
+    <Card className="glass-panel animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)]">
       <CardHeader>
         <CardTitle>{name}</CardTitle>
       </CardHeader>

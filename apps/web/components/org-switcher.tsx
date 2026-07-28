@@ -75,7 +75,7 @@ export function OrgSwitcher({ orgs, activeOrgId }: { orgs: OrgOption[]; activeOr
       {open && (
         <div
           role="listbox"
-          className="glass-strong absolute bottom-full left-0 z-50 mb-1 w-full min-w-40 rounded-xl p-1 shadow-lg"
+          className="glass-elevated absolute bottom-full left-0 z-50 mb-1 w-full min-w-40 rounded-xl p-1 shadow-lg"
         >
           {orgs.map((o) => (
             <button

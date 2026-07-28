@@ -102,11 +102,11 @@ export default function OnboardingPage() {
   const busy = update.isPending || complete.isPending;
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return <div className="liquid-shell flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   }
 
   return (
-    <div className="vox-backdrop flex min-h-screen items-center justify-center p-4">
+    <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
       <div className="animate-fade-up w-full max-w-lg">
         <div className="mb-6 flex items-center justify-center gap-2">
           {STEPS.map((s, i) => (
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
             />
           ))}
         </div>
-        <Card className="glass rounded-[var(--glass-radius-lg)]">
+        <Card className="glass-panel rounded-[var(--glass-radius-lg)]">
           {step === 'business' && (
             <>
               <CardHeader>

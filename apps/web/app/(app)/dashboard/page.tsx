@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PageShell } from '@/components/page-shell';
 
 function dollars(cents: number): string {
   return `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
@@ -66,9 +67,13 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="animate-page-in space-y-6 p-6" data-testid="dashboard">
+    <PageShell className="space-y-6" data-testid="dashboard">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <div>
+          <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">Overview</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="mt-2 text-sm text-muted-foreground">A decision-ready view of growth, spend, and operator activity.</p>
+        </div>
         <div className="flex items-center gap-2">
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-36" />
           <span className="text-sm text-muted-foreground">to</span>
@@ -328,6 +333,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageShell>
   );
 }

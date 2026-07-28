@@ -45,7 +45,7 @@ export default function LeadFormsPage() {
   }
 
   return (
-    <div className="animate-page-in space-y-6 p-6">
+    <div className="page-shell animate-page-in space-y-6">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Lead capture forms</h1>
 
       <Card>

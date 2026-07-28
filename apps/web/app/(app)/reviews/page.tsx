@@ -42,7 +42,7 @@ export default function ReviewsPage() {
 
   const s = stats.data;
   return (
-    <div className="animate-page-in space-y-6 p-6" data-testid="reviews-page">
+    <div className="page-shell animate-page-in space-y-6" data-testid="reviews-page">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Reviews</h1>
         <div className="flex items-center gap-2">

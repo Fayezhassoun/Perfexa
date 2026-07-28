@@ -9,7 +9,7 @@ import { trpc } from '@/lib/trpc';
 type Theme = 'light' | 'dark';
 
 const ThemeContext = createContext<{ theme: Theme; toggleTheme: () => void }>({
-  theme: 'dark',
+  theme: 'light',
   toggleTheme: () => {},
 });
 
@@ -25,8 +25,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }),
   );
 
-  // Liquid Glass theme — dark by default, persisted per device.
-  const [theme, setTheme] = useState<Theme>('dark');
+  // Liquid Voice Pro is light-first, with the user's choice persisted per device.
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     const stored = window.localStorage.getItem('vox-theme');

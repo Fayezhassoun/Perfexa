@@ -5,6 +5,7 @@ import { Bot } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { PageShell } from '@/components/page-shell';
 
 const TYPE_LABELS: Record<string, string> = {
   orchestrator: 'Orchestrator',
@@ -21,7 +22,7 @@ export default function AgentsPage() {
   const agents = trpc.agents.list.useQuery();
 
   return (
-    <div className="animate-page-in space-y-4 p-6">
+    <PageShell className="space-y-4">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Your agents</h1>
       <p className="text-sm text-muted-foreground">
         Specialists created from plans you approved. Each one only has the tools its job needs.
@@ -55,6 +56,6 @@ export default function AgentsPage() {
           </p>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

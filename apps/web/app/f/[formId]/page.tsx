@@ -10,13 +10,13 @@ export default async function HostedFormPage({ params }: { params: { formId: str
   const form = await services.leads.getPublicForm(db, params.formId);
   if (!form) {
     return (
-      <div className="vox-backdrop flex min-h-screen items-center justify-center p-4 text-muted-foreground">
+      <div className="liquid-shell flex min-h-screen items-center justify-center p-4 text-muted-foreground">
         This form doesn&apos;t exist (or was removed).
       </div>
     );
   }
   return (
-    <div className="vox-backdrop flex min-h-screen items-center justify-center p-4">
+    <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
       <PublicLeadForm
         formId={form.id}
         name={form.name ?? 'Get in touch'}
