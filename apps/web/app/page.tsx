@@ -5,14 +5,15 @@ import Link from 'next/link';
 import {
   ArrowRight,
   Bot,
-  LineChart,
   Mic,
+  LineChart,
   Search,
   ShieldCheck,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LandingCommandFlow } from '@/components/landing-command-flow';
 
 const EQ_BARS = [0.5, 0.9, 0.6, 1, 0.7, 0.45, 0.85, 0.55];
 
@@ -108,8 +109,8 @@ export default function Home() {
         </h1>
 
         <p className="animate-fade-up animation-delay-200 mt-6 max-w-xl text-balance text-lg text-muted-foreground">
-          Press the mic and say what you need. AI specialists audit your site, plan your
-          campaigns, and capture your leads — and never spend a cent without your approval.
+          Say what you need. Specialists shape a clear plan, and nothing proceeds until you
+          approve it.
         </p>
 
         <div className="animate-fade-up animation-delay-300 mt-10 flex flex-col items-center gap-4 sm:flex-row">
@@ -123,22 +124,7 @@ export default function Home() {
           </span>
         </div>
 
-        {/* Mock console snippet */}
-        <div className="glass animate-fade-up animation-delay-300 mt-16 w-full max-w-2xl rounded-2xl p-6 text-left shadow-2xl">
-          <div className="flex items-center gap-3">
-            <span className="animate-pulse-glow flex h-11 w-11 shrink-0 items-center justify-center rounded-full vox-gradient">
-              <Mic className="h-5 w-5 text-white" />
-            </span>
-            <p className="text-sm sm:text-base">
-              “I need an SEO specialist. I need my website to be top visible. I need to get leads.”
-            </p>
-          </div>
-          <div className="glass-tile mt-5 p-4 text-sm text-muted-foreground">
-            <span className="text-foreground">Your team:</span> I checked your site — mobile speed
-            58/100, no lead form. I&apos;ll set up an SEO agent, a Google Ads agent, and a contact
-            form. Suggested budget $500/mo. <span className="vox-gradient-text font-medium">Say “approve” to launch.</span>
-          </div>
-        </div>
+        <LandingCommandFlow />
       </section>
 
       {/* Specialists */}
@@ -201,7 +187,7 @@ export default function Home() {
       <section className="mx-auto max-w-3xl px-6 pb-28 text-center">
         <Bot className="mx-auto h-8 w-8 text-primary" />
         <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Five minutes from hello to <span className="vox-gradient-text">campaigns live</span>.
+          From one clear brief to <span className="vox-gradient-text">a plan you control</span>.
         </h2>
         <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
           <Link href="/register">
