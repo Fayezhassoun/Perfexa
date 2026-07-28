@@ -3,13 +3,13 @@
 
 import { redirect } from 'next/navigation';
 import { eq, inArray } from 'drizzle-orm';
-import { Mic } from 'lucide-react';
 import { db, organizations } from '@sayso/db';
 import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { Button } from '@/components/ui/button';
 import { AppNav, ThemeToggle } from '@/components/app-nav';
 import { OrgSwitcher } from '@/components/org-switcher';
+import { BrandMark } from '@/components/brand-mark';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -28,11 +28,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="liquid-shell flex min-h-screen">
       <aside className="liquid-sidebar fixed inset-y-0 left-0 z-40 hidden w-56 flex-col rounded-none border-y-0 border-l-0 md:flex">
-        <div className="glass-divider-b flex h-16 items-center gap-2.5 px-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
-            <Mic className="h-4 w-4 text-white" />
-          </span>
-          <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
+        <div className="glass-divider-b flex h-16 items-center px-5">
+          <BrandMark href="/console" size="md" />
         </div>
         <AppNav />
         <div className="glass-divider-t p-4">
@@ -63,12 +60,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* Content column with blur top bar */}
       <div className="flex min-w-0 flex-1 flex-col md:pl-56">
         <header className="liquid-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-6">
-          <span className="flex items-center gap-2 md:hidden">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <Mic className="h-3.5 w-3.5 text-white" />
-            </span>
-            <span className="font-display text-sm font-semibold tracking-tight">Sayso</span>
-          </span>
+          <div className="md:hidden">
+            <BrandMark href="/console" size="sm" />
+          </div>
           <span className="hidden truncate text-sm text-muted-foreground md:block">
             {org?.name}
           </span>

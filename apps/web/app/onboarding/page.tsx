@@ -5,13 +5,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Globe, Mic, Target, Wallet } from 'lucide-react';
+import { Check, Globe, Target, Wallet } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { BrandMark, BrandMarkIcon } from '@/components/brand-mark';
 
 const GOALS = [
   { key: 'visibility' as const, label: 'Be more visible', hint: 'Show up when people search' },
@@ -108,6 +109,9 @@ export default function OnboardingPage() {
   return (
     <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
       <div className="animate-fade-up w-full max-w-lg">
+        <div className="mb-6 flex justify-center">
+          <BrandMark size="md" href="/" ariaLabel="Sayso home" />
+        </div>
         <div className="mb-6 flex items-center justify-center gap-2">
           {STEPS.map((s, i) => (
             <div
@@ -209,7 +213,7 @@ export default function OnboardingPage() {
           {step === 'connect' && (
             <>
               <CardHeader>
-                <Mic className="mb-1 h-5 w-5 text-primary" />
+                <BrandMarkIcon size={20} className="mb-1" />
                 <CardTitle>Connect ad accounts</CardTitle>
                 <CardDescription>
                   Optional — everything starts in a safe sandbox either way. You can connect real

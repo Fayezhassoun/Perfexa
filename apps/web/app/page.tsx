@@ -4,13 +4,13 @@ import {
   Bot,
   Check,
   LineChart,
-  Mic,
   Search,
   ShieldCheck,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { BrandMark } from '@/components/brand-mark';
 import { LandingCommandFlow } from '@/components/landing-command-flow';
 
 const SPECIALISTS = [
@@ -30,12 +30,7 @@ export default function Home() {
   return (
     <main className="liquid-shell min-h-screen overflow-x-hidden">
       <header className="liquid-topbar sticky top-0 z-50 mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="Sayso home">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
-            <Mic className="h-4 w-4 text-white" />
-          </span>
-          <span className="font-display text-lg font-semibold tracking-tight">Sayso</span>
-        </Link>
+        <BrandMark href="/" size="md" ariaLabel="Sayso home" />
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
@@ -144,7 +139,7 @@ export default function Home() {
 
       <footer className="glass-divider-t">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8 lg:px-12">
-          <span className="flex items-center gap-2"><Mic className="h-4 w-4 text-primary" /> Sayso</span>
+          <BrandMark size="sm" />
           <span>Built for people who&apos;d rather run their business than learn ad platforms.</span>
         </div>
       </footer>
