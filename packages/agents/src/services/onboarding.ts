@@ -18,9 +18,45 @@ export interface OnboardingPatch {
   goals?: ('visibility' | 'leads' | 'sales')[];
   monthlyBudgetCeilingCents?: number;
   onboardingStep?: 'welcome' | 'business' | 'goals' | 'budget' | 'connect' | 'done';
+  businessBrain?: BusinessBrainPatch;
+}
+
+export type BusinessBrainTone = 'friendly' | 'expert' | 'premium' | 'direct';
+export type BusinessBrainChannel = 'seo' | 'google_ads' | 'meta' | 'email' | 'social' | 'reviews';
+
+export interface BusinessBrainPatch {
+  offer?: string;
+  idealCustomer?: string;
+  location?: string;
+  tone?: BusinessBrainTone;
+  channels?: BusinessBrainChannel[];
+  constraints?: string;
+  proofPoints?: string;
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function mergeBusinessBrain(
+  settings: Record<string, unknown> | null | undefined,
+  patch: BusinessBrainPatch,
+): Record<string, unknown> {
+  const nextSettings = asRecord(settings);
+  const currentBrain = asRecord(nextSettings.businessBrain);
+  const nextBrain = Object.fromEntries(
+    Object.entries({ ...currentBrain, ...patch }).filter(([, value]) => value !== undefined),
+  );
+
+  return { ...nextSettings, businessBrain: nextBrain };
 }
 
 export async function updateOnboarding(ctx: AgentContext, patch: OnboardingPatch): Promise<Organization> {
+  const settings = patch.businessBrain
+    ? mergeBusinessBrain((await getOnboarding(ctx)).settings, patch.businessBrain)
+    : undefined;
   const [updated] = await ctx.db
     .update(organizations)
     .set({
@@ -29,6 +65,7 @@ export async function updateOnboarding(ctx: AgentContext, patch: OnboardingPatch
       ...(patch.goals !== undefined ? { goals: patch.goals } : {}),
       ...(patch.monthlyBudgetCeilingCents !== undefined ? { monthlyBudgetCeilingCents: patch.monthlyBudgetCeilingCents } : {}),
       ...(patch.onboardingStep !== undefined ? { onboardingStep: patch.onboardingStep } : {}),
+      ...(settings ? { settings } : {}),
     })
     .where(eq(organizations.id, ctx.orgId))
     .returning();

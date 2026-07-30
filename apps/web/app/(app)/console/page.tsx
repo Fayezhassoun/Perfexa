@@ -175,10 +175,10 @@ export default function ConsolePage() {
                 Tell me what you need — <span className="text-primary">like you would a colleague.</span>
               </p>
               <p className="mt-3 max-w-md text-sm text-muted-foreground">
-                Try: “Build my first 7-day marketing plan for my website.”
+                Try: “Use my Business Brain to build a 7-day plan.”
               </p>
               <Button asChild variant="outline" className="mt-5">
-                <Link href="/growth-plan">View the First 7-Day Growth Plan</Link>
+                <Link href="/business-brain">Edit Business Brain</Link>
               </Button>
             </div>
           )}

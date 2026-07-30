@@ -11,6 +11,18 @@ test('signup → wizard → growth plan, and login works afterwards', async ({ p
   await expect(page.getByRole('heading', { name: 'First 7-Day Growth Plan' })).toBeVisible();
   await expect(page.getByTestId('business-brain-summary')).toBeVisible();
 
+  await page.getByRole('link', { name: 'Edit Business Brain' }).click();
+  await page.waitForURL('**/business-brain');
+  await page.getByLabel('Main offer').fill('Emergency plumbing with same-day arrival');
+  await page.getByLabel('Ideal customer').fill('Homeowners who need a trusted local plumber');
+  await page.getByRole('button', { name: 'Save Business Brain' }).click();
+  await expect(page.getByText('Business Brain saved. Sayso will use this context in your plan and console.')).toBeVisible();
+
+  await page.goto('/growth-plan');
+  const brainSummary = page.getByTestId('business-brain-summary');
+  await expect(brainSummary.getByText('Emergency plumbing with same-day arrival')).toBeVisible();
+  await expect(brainSummary.getByText('Homeowners who need a trusted local plumber')).toBeVisible();
+
   // Sign out, then back in with the same credentials.
   await page.getByRole('button', { name: 'Sign out' }).click();
   await page.waitForURL('**/login');

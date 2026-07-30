@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader, PageShell } from '@/components/page-shell';
+import { readBusinessBrain } from '@/lib/business-brain';
 
 const GOAL_LABELS: Record<string, string> = {
   visibility: 'Be more visible',
@@ -136,6 +137,15 @@ export default function GrowthPlanPage() {
   }
 
   const goals = (org.goals ?? []).map((goal) => GOAL_LABELS[goal] ?? goal);
+  const businessBrain = readBusinessBrain(org.settings);
+  const planPersonalization = businessBrain.offer
+    ? `This week starts with your offer: ${businessBrain.offer}`
+    : businessBrain.idealCustomer
+      ? `This week is framed for your ideal customer: ${businessBrain.idealCustomer}`
+      : businessBrain.location
+        ? `This week is grounded in your service area: ${businessBrain.location}`
+        : 'Add your offer, audience, and service area to make this timeline more specific.';
+  const brainValue = (value: string | undefined) => value || 'Not set yet';
 
   return (
     <PageShell className="space-y-6" data-testid="growth-plan">
@@ -173,9 +183,14 @@ export default function GrowthPlanPage() {
                 </CardDescription>
               </div>
             </div>
-            <Badge variant="success">
-              <CheckCircle2 className="mr-1 h-3 w-3" /> Context saved
-            </Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="success">
+                <CheckCircle2 className="mr-1 h-3 w-3" /> Context saved
+              </Badge>
+              <Button asChild size="sm" variant="outline">
+                <Link href="/business-brain">Edit Business Brain</Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -212,6 +227,30 @@ export default function GrowthPlanPage() {
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Monthly ceiling</p>
             <p className="mt-1 font-medium">{formatBudget(org.monthlyBudgetCeilingCents)}</p>
           </div>
+          <div className="glass-tile p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Main offer</p>
+            <p className="mt-1 line-clamp-3 font-medium">{brainValue(businessBrain.offer)}</p>
+          </div>
+          <div className="glass-tile p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Ideal customer</p>
+            <p className="mt-1 line-clamp-3 font-medium">{brainValue(businessBrain.idealCustomer)}</p>
+          </div>
+          <div className="glass-tile p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Location</p>
+            <p className="mt-1 line-clamp-3 font-medium">{brainValue(businessBrain.location)}</p>
+          </div>
+          <div className="glass-tile p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Tone</p>
+            <p className="mt-1 capitalize font-medium">{brainValue(businessBrain.tone)}</p>
+          </div>
+          <div className="glass-tile p-3 sm:col-span-2">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Primary channels</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {businessBrain.channels?.length ? businessBrain.channels.map((channel) => (
+                <Badge key={channel} variant="outline">{channel.replace('_', ' ')}</Badge>
+              )) : <span className="font-medium text-muted-foreground">Not set yet</span>}
+            </div>
+          </div>
         </CardContent>
         <div className="glass-divider-t flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center">
           <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-500" />
@@ -230,6 +269,7 @@ export default function GrowthPlanPage() {
           <div>
             <p className="mb-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">The plan</p>
             <h2 id="timeline-heading" className="font-display text-xl font-semibold tracking-tight">Seven days to a clearer next move</h2>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{planPersonalization}.</p>
           </div>
           <Badge variant="secondary">7 steps · reviewable</Badge>
         </div>

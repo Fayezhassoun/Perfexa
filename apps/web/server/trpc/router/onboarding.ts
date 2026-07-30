@@ -13,6 +13,19 @@ export const onboardingRouter = router({
         goals: z.array(z.enum(['visibility', 'leads', 'sales'])).optional(),
         monthlyBudgetCeilingCents: z.number().int().positive().optional(),
         onboardingStep: z.enum(['welcome', 'business', 'goals', 'budget', 'connect', 'done']).optional(),
+        businessBrain: z
+          .object({
+            offer: z.string().max(600).optional(),
+            idealCustomer: z.string().max(600).optional(),
+            location: z.string().max(600).optional(),
+            tone: z.enum(['friendly', 'expert', 'premium', 'direct']).optional(),
+            channels: z
+              .array(z.enum(['seo', 'google_ads', 'meta', 'email', 'social', 'reviews']))
+              .optional(),
+            constraints: z.string().max(600).optional(),
+            proofPoints: z.string().max(600).optional(),
+          })
+          .optional(),
         idempotencyKey: z.string().optional(),
       }),
     )
