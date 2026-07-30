@@ -21,6 +21,7 @@ import {
   Moon,
   Sun,
   Sparkles,
+  WandSparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
@@ -29,6 +30,7 @@ const NAV = [
   { href: '/console', label: 'Voice Console', icon: Mic },
   { href: '/growth-plan', label: 'Growth Plan', icon: CalendarDays },
   { href: '/business-brain', label: 'Business Brain', icon: Sparkles },
+  { href: '/inspiration', label: 'Inspiration Studio', icon: WandSparkles },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/proposals', label: 'Proposals', icon: ClipboardCheck },
   { href: '/agents', label: 'Agents', icon: Bot },

@@ -23,6 +23,13 @@ test('signup → wizard → growth plan, and login works afterwards', async ({ p
   await expect(brainSummary.getByText('Emergency plumbing with same-day arrival')).toBeVisible();
   await expect(brainSummary.getByText('Homeowners who need a trusted local plumber')).toBeVisible();
 
+  // The AdWhispr-inspired, Sayso-safe competitor workflow is reachable and approval-gated.
+  await page.goto('/inspiration');
+  await expect(page.getByRole('heading', { name: 'Competitor Inspiration Studio' })).toBeVisible();
+  await expect(page.getByText('research → adapt → approve')).toBeVisible();
+  await expect(page.getByText('No copy/paste cloning')).toBeVisible();
+  await expect(page.getByText('No live spend')).toBeVisible();
+
   // Sign out, then back in with the same credentials.
   await page.getByRole('button', { name: 'Sign out' }).click();
   await page.waitForURL('**/login');

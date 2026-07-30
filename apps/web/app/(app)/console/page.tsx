@@ -175,7 +175,7 @@ export default function ConsolePage() {
                 Tell me what you need — <span className="text-primary">like you would a colleague.</span>
               </p>
               <p className="mt-3 max-w-md text-sm text-muted-foreground">
-                Try: “Use my Business Brain to build a 7-day plan.”
+                Try: “Research my competitors and draft an original campaign for review.”
               </p>
               <Button asChild variant="outline" className="mt-5">
                 <Link href="/business-brain">Edit Business Brain</Link>

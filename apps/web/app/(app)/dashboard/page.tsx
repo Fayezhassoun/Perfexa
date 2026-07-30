@@ -14,7 +14,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { Activity, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { Activity, ArrowRight, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -120,6 +120,30 @@ export default function DashboardPage() {
           <Button asChild variant="outline" className="shrink-0">
             <Link href="/growth-plan">
               Open Growth Plan <ArrowRight />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="border-primary/20 bg-primary/[0.04]" data-testid="inspiration-bridge">
+        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="glass-chip flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-primary">
+              <WandSparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium">Competitor-inspired campaign draft</p>
+                <Badge variant="outline">Review first</Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Research what competitors are visibly doing, adapt the useful pattern to your Business Brain, and prepare a paused campaign draft.
+              </p>
+            </div>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/inspiration">
+              Open Inspiration Studio <ArrowRight />
             </Link>
           </Button>
         </CardContent>
