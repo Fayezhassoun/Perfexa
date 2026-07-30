@@ -1,7 +1,7 @@
 'use client';
 
 // Onboarding wizard (CONTRACTS §10): business → goals → budget → connect
-// (skippable) → done → /console. Each step persists via onboarding.update.
+// (skippable) → done → /growth-plan. Each step persists via onboarding.update.
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,7 +47,7 @@ export default function OnboardingPage() {
     if (!org || hydrated) return;
     setHydrated(true);
     if (org.onboardingStep === 'done') {
-      router.replace('/console');
+      router.replace('/growth-plan');
       return;
     }
     setName(org.name ?? '');
@@ -61,7 +61,7 @@ export default function OnboardingPage() {
     onError: (e) => setError(e.message),
     onSuccess: async () => {
       await utils.invalidate();
-      router.push('/console');
+      router.push('/growth-plan');
       router.refresh();
     },
   });

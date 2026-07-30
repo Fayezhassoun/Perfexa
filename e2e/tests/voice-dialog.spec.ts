@@ -8,7 +8,7 @@ import { injectVoice, registerAndOnboard, uniqueEmail } from './helpers';
 const BRIEF = 'I need an SEO specialist. I need my website to be top visible. I need to get leads.';
 
 test('voice brief → proposal → approve → launched campaigns on the dashboard', async ({ page }) => {
-  await registerAndOnboard(page, { email: uniqueEmail('voice'), website: 'https://example.com' });
+  await registerAndOnboard(page, { email: uniqueEmail('voice'), website: 'https://example.com', continueTo: 'console' });
 
   // 1. Voice brief via the mock STT hook.
   await injectVoice(page, BRIEF);
@@ -61,7 +61,7 @@ test('mic-denied fallback: everything works by typing', async ({ browser }) => {
   // Deny mic permission outright — the console must stay fully usable.
   const context = await browser.newContext({ permissions: [] });
   const page = await context.newPage();
-  await registerAndOnboard(page, { email: uniqueEmail('text-only'), website: 'https://example.com' });
+  await registerAndOnboard(page, { email: uniqueEmail('text-only'), website: 'https://example.com', continueTo: 'console' });
 
   await page.getByTestId('text-input').fill('I need leads for my business');
   await page.getByTestId('text-input').press('Enter');

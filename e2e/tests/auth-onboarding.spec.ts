@@ -1,15 +1,15 @@
-// Register → onboarding wizard → Voice Console (CONTRACTS §12 spec 1).
+// Register → onboarding wizard → First 7-Day Growth Plan (CONTRACTS §12 spec 1).
 
 import { expect, test } from '@playwright/test';
 import { registerAndOnboard, uniqueEmail } from './helpers';
 
-test('signup → wizard → console, and login works afterwards', async ({ page }) => {
+test('signup → wizard → growth plan, and login works afterwards', async ({ page }) => {
   const email = uniqueEmail('onboard');
   await registerAndOnboard(page, { email });
 
-  // Landed on the Voice Console with the mic ready.
-  await expect(page.getByTestId('mic-button')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Voice Console' })).toBeVisible();
+  // Landed on the First 7-Day Growth Plan with saved Business Brain context.
+  await expect(page.getByRole('heading', { name: 'First 7-Day Growth Plan' })).toBeVisible();
+  await expect(page.getByTestId('business-brain-summary')).toBeVisible();
 
   // Sign out, then back in with the same credentials.
   await page.getByRole('button', { name: 'Sign out' }).click();

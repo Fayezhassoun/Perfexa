@@ -5,6 +5,7 @@
 // barge-in, inline proposal cards with voice approval.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { Mic, MicOff, Plus, Send, Volume2, VolumeX } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -174,9 +175,11 @@ export default function ConsolePage() {
                 Tell me what you need — <span className="text-primary">like you would a colleague.</span>
               </p>
               <p className="mt-3 max-w-md text-sm text-muted-foreground">
-                Try: “I need an SEO specialist. I need my website to be top visible. I need to get
-                leads.”
+                Try: “Build my first 7-day marketing plan for my website.”
               </p>
+              <Button asChild variant="outline" className="mt-5">
+                <Link href="/growth-plan">View the First 7-Day Growth Plan</Link>
+              </Button>
             </div>
           )}
           {messages.map((m) => (

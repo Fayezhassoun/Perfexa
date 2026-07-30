@@ -4,6 +4,7 @@
 // activity feed, SEO tracker, date-range picker, dev simulate button.
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Line,
   LineChart,
@@ -13,7 +14,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { Activity, RefreshCw } from 'lucide-react';
+import { Activity, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,10 @@ export default function DashboardPage() {
     ...p,
     spend: p.spendCents / 100,
   }));
+  const hasActivity = Boolean(
+    totals &&
+      (totals.spendCents > 0 || totals.impressions > 0 || totals.clicks > 0 || totals.conversions > 0),
+  );
 
   return (
     <PageShell className="space-y-6" data-testid="dashboard">
@@ -91,6 +96,34 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      <Card className="border-primary/20 bg-primary/[0.04]" data-testid="growth-plan-bridge">
+        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="glass-chip flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-primary">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium">Next action</p>
+                <Badge variant={hasActivity ? 'success' : 'secondary'}>
+                  {hasActivity ? 'Keep the momentum' : 'Start here'}
+                </Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {hasActivity
+                  ? 'Use your First 7-Day Growth Plan to turn the latest signal into the next approved action.'
+                  : 'Turn your business context into a practical week-one operating plan before you start spending.'}
+              </p>
+            </div>
+          </div>
+          <Button asChild variant="outline" className="shrink-0">
+            <Link href="/growth-plan">
+              Open Growth Plan <ArrowRight />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8" data-testid="kpi-cards">
         {kpis.map((kpi, i) => (

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Mic,
+  CalendarDays,
   LayoutDashboard,
   Bot,
   Megaphone,
@@ -25,6 +26,7 @@ import { useTheme } from '@/app/providers';
 
 const NAV = [
   { href: '/console', label: 'Voice Console', icon: Mic },
+  { href: '/growth-plan', label: 'Growth Plan', icon: CalendarDays },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/proposals', label: 'Proposals', icon: ClipboardCheck },
   { href: '/agents', label: 'Agents', icon: Bot },
