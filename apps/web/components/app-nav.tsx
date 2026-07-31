@@ -22,7 +22,10 @@ import {
   Sun,
   Sparkles,
   WandSparkles,
+  Brain,
+  Clapperboard,
 } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
 
@@ -37,11 +40,14 @@ const NAV = [
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
   { href: '/social', label: 'Social', icon: Share2 },
   { href: '/content', label: 'Content studio', icon: PenLine },
+  { href: '/video', label: 'Video studio', icon: Clapperboard },
   { href: '/competitors', label: 'Competitors', icon: Swords },
   { href: '/reviews', label: 'Reviews', icon: Star },
   { href: '/leads', label: 'Leads', icon: Users },
   { href: '/knowledge', label: 'Knowledge', icon: BookOpen },
+  { href: '/memory', label: 'Business Memory', icon: Brain },
   { href: '/audit', label: 'Audit log', icon: ScrollText },
+
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
 ];

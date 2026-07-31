@@ -37,3 +37,8 @@ export interface LLMProvider {
   name: string;
   chat(messages: ChatMessage[], opts?: ChatOptions): Promise<LLMResponse>;
 }
+
+export interface LLMConfig {
+  provider?: string;
+  model?: string;
+}

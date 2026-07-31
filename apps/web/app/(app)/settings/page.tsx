@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageShell, PageHeader } from '@/components/page-shell';
+import { ModelSelectorCard } from '@/components/model-selector';
 
 const PLATFORM_LABELS: Record<string, string> = {
   google_ads: 'Google Ads',
@@ -36,6 +37,7 @@ export default function SettingsPage() {
       <Tabs defaultValue="integrations">
         <TabsList>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="models">AI Model</TabsTrigger>
           <TabsTrigger value="budgets">Budgets</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -43,6 +45,9 @@ export default function SettingsPage() {
         </TabsList>
         <TabsContent value="integrations">
           <IntegrationsTab />
+        </TabsContent>
+        <TabsContent value="models">
+          <ModelSelectorCard />
         </TabsContent>
         <TabsContent value="budgets">
           <BudgetsTab />

@@ -148,8 +148,8 @@ Everything works with the defaults from `cp .env.example .env` — no keys, no n
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | empty | Google Ads API developer token (required for google_ads live) |
 | `META_APP_ID` / `META_APP_SECRET` | empty | Meta app credentials (required for Meta live) |
 | `ENCRYPTION_KEY` | dev key (64 hex) | AES-256-GCM for OAuth tokens at rest |
-| `LLM_PROVIDER` | `mock` | `mock` \| `openai` \| `anthropic` |
-| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `LLM_MODEL` | empty | live LLM config |
+| `LLM_PROVIDER` | `mock` | `mock` \| `openai` \| `anthropic` \| `deepseek` \| `gemini` \| `groq` \| `mistral` \| `ollama` \| `qwen` |
+| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` / `GROQ_API_KEY` / `MISTRAL_API_KEY` / `QWEN_API_KEY` / `OLLAMA_BASE_URL` / `LLM_MODEL` | empty | live LLM config |
 | `STT_PROVIDER` | `mock` | `mock` \| `browser` \| `whisper` \| `deepgram` |
 | `DEEPGRAM_API_KEY` | empty | Deepgram STT |
 | `TTS_PROVIDER` | `mock` | `mock` \| `browser` \| `openai` \| `elevenlabs` |

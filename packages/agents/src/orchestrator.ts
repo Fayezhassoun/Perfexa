@@ -26,6 +26,8 @@ import {
 import { recallString, remember } from './memory.js';
 import { executeTool, getTool } from './tools.js';
 import { approveProposal, getOrCreateAgent } from './execute-plan.js';
+import { searchMemory } from './services/memory.js';
+
 
 const PLATFORM_LABEL: Record<'google_ads' | 'meta' | 'tiktok', string> = {
   google_ads: 'Google Search',
@@ -438,11 +440,25 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
         .limit(20)
     : [];
 
+  let systemPrompt = SYSTEM_PROMPT;
+  try {
+    const memoryHits = await searchMemory(ctx, message);
+    if (memoryHits.length > 0) {
+      const memoryText = memoryHits
+        .map((h) => `- [${h.kind ?? 'note'}] ${h.title ?? 'Untitled'}: ${h.content}`)
+        .join('\n');
+      systemPrompt += `\n\nBusiness Memory Context:\n${memoryText}`;
+    }
+  } catch {
+    // Ignore memory search errors during prompt building
+  }
+
   const messages: ChatMessage[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: systemPrompt },
     ...history.map((m): ChatMessage => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content ?? '' })),
     { role: 'user', content: message },
   ];
+
 
   const toolCallsMade: string[] = [];
   for (let round = 0; round < 4; round++) {

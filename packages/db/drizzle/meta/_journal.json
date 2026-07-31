@@ -22,6 +22,20 @@
       "when": 1784927504357,
       "tag": "0002_lumpy_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785507832706,
+      "tag": "0003_soft_toxin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785508529533,
+      "tag": "0004_jittery_sphinx",
+      "breakpoints": true
     }
   ]
 }

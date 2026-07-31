@@ -39,6 +39,8 @@ export type SocialPost = InferSelectModel<typeof schema.socialPosts>;
 export type NewSocialPost = InferInsertModel<typeof schema.socialPosts>;
 export type ContentPiece = InferSelectModel<typeof schema.contentPieces>;
 export type Competitor = InferSelectModel<typeof schema.competitors>;
+export type CompetitorAdScan = InferSelectModel<typeof schema.competitorAdScans>;
+export type VideoJob = InferSelectModel<typeof schema.videoJobs>;
 export type Review = InferSelectModel<typeof schema.reviews>;
 
 let client: postgres.Sql | undefined;

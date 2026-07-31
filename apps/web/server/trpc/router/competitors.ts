@@ -22,4 +22,37 @@ export const competitorsRouter = router({
   remove: orgProcedure
     .input(z.object({ id: z.string().uuid(), idempotencyKey: z.string().optional() }))
     .mutation(({ ctx, input }) => services.competitors.removeCompetitor(ctx.agentCtx, input.id)),
+
+  adIntel: router({
+    scan: orgProcedure
+      .input(
+        z.object({
+          competitorId: z.string().uuid().optional(),
+          advertiserId: z.string().min(4).max(120),
+          advertiserName: z.string().max(200).optional(),
+          regions: z.array(z.string().length(2)).optional(),
+          idempotencyKey: z.string().optional(),
+        }),
+      )
+      .mutation(({ ctx, input }) =>
+        services.adIntel.scanCompetitor(ctx.agentCtx, {
+          competitorId: input.competitorId,
+          advertiserId: input.advertiserId,
+          advertiserName: input.advertiserName,
+          regions: input.regions,
+        }),
+      ),
+
+    matrix: orgProcedure
+      .input(z.object({ competitorId: z.string().uuid() }))
+      .query(({ ctx, input }) => services.adIntel.matrix(ctx.agentCtx, input.competitorId)),
+
+    scans: orgProcedure
+      .input(z.object({ competitorId: z.string().uuid().optional() }).optional())
+      .query(({ ctx, input }) => services.adIntel.listScans(ctx.agentCtx, input)),
+
+    creatives: orgProcedure
+      .input(z.object({ scanId: z.string().uuid() }))
+      .query(({ ctx, input }) => services.adIntel.creatives(ctx.agentCtx, input.scanId)),
+  }),
 });

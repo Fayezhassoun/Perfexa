@@ -53,6 +53,26 @@ export { getGa4Traffic, createGa4LiveAdapter, type Ga4TrafficPoint, type Ga4Adap
 export { getGscQueries, createGscLiveAdapter, type GscQueryRow, type GscAdapter } from './gsc.js';
 
 export {
+  getVideoAdapter,
+  createMockVideoAdapter,
+  createFalVideoAdapter,
+  type VideoAdapter,
+  type GenerateVideoInput,
+  type VideoJobResult,
+} from './video.js';
+
+export {
+  getAdIntelAdapter,
+  createMockAdIntelAdapter,
+  createTransparencyAdIntelAdapter,
+  REGIONS,
+  type AdIntelAdapter,
+  type AdCreative,
+  type ScanRegionInput,
+  type ScanRegionResult,
+} from './ad-intel.js';
+
+export {
   hashString,
   hashHex,
   seededRandom,

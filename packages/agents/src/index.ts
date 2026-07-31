@@ -33,7 +33,7 @@ export {
 export { handleUserMessage } from './orchestrator.js';
 export { approveProposal, getOrCreateAgent, type ApproveProposalResult } from './execute-plan.js';
 export { runSpecialistAgent, type SpecialistResult } from './specialists.js';
-export { createAgentContext } from './context.js';
+export { createAgentContext, createAgentContextWithOrgLLM } from './context.js';
 export * as services from './services/index.js';
 export { leadsToCsv } from './services/leads.js';
 export type { LeadField } from './services/leads.js';

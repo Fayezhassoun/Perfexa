@@ -17,6 +17,9 @@ import { socialRouter } from './social';
 import { contentRouter } from './content';
 import { competitorsRouter } from './competitors';
 import { reviewsRouter } from './reviews';
+import { modelsRouter } from './models';
+import { memoryRouter } from './memory';
+import { videoRouter } from './video';
 
 export const appRouter = router({
   auth: authRouter,
@@ -37,6 +40,9 @@ export const appRouter = router({
   content: contentRouter,
   competitors: competitorsRouter,
   reviews: reviewsRouter,
+  models: modelsRouter,
+  memory: memoryRouter,
+  video: videoRouter,
 });
 
 export type AppRouter = typeof appRouter;

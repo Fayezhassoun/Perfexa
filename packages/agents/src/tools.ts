@@ -35,6 +35,8 @@ import { payloadHash } from './audit.js';
 import { getOrgAdapter } from './store.js';
 import { checkSpend } from './guardian.js';
 import { remember, recall, recallAll } from './memory.js';
+import { createJob as createVideoJob } from './services/video.js';
+import { scanCompetitor as scanCompetitorAds } from './services/ad-intel.js';
 
 const platformSchema = z.enum(['google_ads', 'meta', 'tiktok']);
 
@@ -696,6 +698,50 @@ export const TOOLS: ToolDef[] = [
       return args.key ? { [args.key as string]: await recall(ctx, args.key as string) } : recallAll(ctx);
     },
   },
+  {
+    name: 'video.generate',
+    description: 'Generate a short marketing video from a prompt. SPEND action — live renders require approval; mock mode completes instantly.',
+    schema: z
+      .object({
+        prompt: z.string().min(4).max(1000),
+        style: z.enum(['ugc', 'product_demo', 'cinematic', 'slideshow']).optional(),
+        aspectRatio: z.enum(['9:16', '1:1', '16:9']).optional(),
+        durationSec: z.number().int().min(3).max(120).optional(),
+      })
+      .strict(),
+    gated: true,
+    async execute(ctx, args) {
+      return createVideoJob(ctx, {
+        prompt: args.prompt as string,
+        style: args.style as string | undefined,
+        aspectRatio: args.aspectRatio as string | undefined,
+        durationSec: args.durationSec as number | undefined,
+      });
+    },
+  },
+  {
+    name: 'competitor.ad_scan',
+    description: 'Scan a competitor\'s Google Ads presence across regions via the Ads Transparency Center. Read-only research — not gated.',
+    schema: z
+      .object({
+        competitorId: z.string().uuid().optional(),
+        advertiserId: z.string().min(4).max(120),
+        regions: z.array(z.string().length(2)).optional(),
+      })
+      .strict(),
+    gated: false,
+    async execute(ctx, args) {
+      const rows = await scanCompetitorAds(ctx, {
+        competitorId: args.competitorId as string | undefined,
+        advertiserId: args.advertiserId as string,
+        regions: args.regions as string[] | undefined,
+      });
+      return {
+        scanned: rows.length,
+        regions: rows.map((r) => ({ region: r.region, adCount: r.adCount })),
+      };
+    },
+  },
 ];
 
 const BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
@@ -755,8 +801,8 @@ const AGENT_TOOLS: Record<AgentType, string[]> = {
   analytics: ['analytics.get_overview', 'memory.recall'],
   budget_guardian: [],
   social_media: ['social.draft_post', 'social.publish_post', 'social.get_engagement', 'memory.remember', 'memory.recall'],
-  content: ['content.draft', 'seo.crawl', 'memory.recall'],
-  competitor: ['competitor.analyze', 'seo.run_audit', 'memory.recall'],
+  content: ['content.draft', 'seo.crawl', 'memory.recall', 'video.generate'],
+  competitor: ['competitor.analyze', 'competitor.ad_scan', 'seo.run_audit', 'memory.recall'],
   reputation: ['reviews.sync', 'reviews.draft_reply', 'reviews.post_reply', 'memory.recall'],
 };
 

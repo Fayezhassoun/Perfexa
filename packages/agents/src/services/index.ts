@@ -20,3 +20,7 @@ export * as social from './social.js';
 export * as content from './content.js';
 export * as competitors from './competitors.js';
 export * as reviews from './reviews.js';
+export * as memory from './memory.js';
+export * as video from './video.js';
+export * as adIntel from './ad-intel.js';
+

@@ -240,6 +240,31 @@ export const reports = pgTable('reports', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
+// Per-org cloud business memory (client-imported data). Distinct from the
+// GLOBAL knowledge_documents best-practice library: these rows are scoped to an
+// org and hold the client's own business data (uploaded files, pasted notes,
+// URLs) that agents ground their advice on.
+export const orgMemoryDocuments = pgTable('org_memory_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  title: text('title'),
+  content: text('content'),
+  // text|file|url|note — how the memory entered the system
+  kind: text('kind').default('note'),
+  // {filename, mimeType, sizeBytes, url} provenance for imports
+  sourceMeta: jsonb('source_meta').$type<Record<string, unknown>>(),
+  tags: jsonb('tags').$type<string[]>().default([]),
+  // number[] | null — same pattern as knowledge_documents (§4): JSONB + JS cosine
+  embedding: jsonb('embedding').$type<number[] | null>(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
 export const knowledgeDocuments = pgTable('knowledge_documents', {
   id: uuid('id').defaultRandom().primaryKey(),
   source: text('source'),
@@ -322,6 +347,50 @@ export const competitors = pgTable('competitors', {
   // prior snapshots for diffs: [{analyzedAt, score, keywords[]}]
   history: jsonb('history').$type<Record<string, unknown>[]>(),
   suggestions: jsonb('suggestions').$type<string[]>(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+// Competitor ad-intelligence: Google Ads Transparency Center region scans.
+// One row per (competitor, region) scan; latest per region drives the matrix.
+export const competitorAdScans = pgTable('competitor_ad_scans', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  competitorId: uuid('competitor_id').references(() => competitors.id),
+  advertiserId: text('advertiser_id'), // Google Transparency AR id
+  advertiserName: text('advertiser_name'),
+  region: text('region'), // SA|AE|KW|MA|DZ|CA|US|...
+  adCount: integer('ad_count').default(0),
+  // [{headline,cta,lang,operator,pricingNote,angle}] captured creative text
+  creatives: jsonb('creatives').$type<Record<string, unknown>[]>().default([]),
+  scannedAt: timestamp('scanned_at', { mode: 'date' }).defaultNow().notNull(),
+  raw: jsonb('raw').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+// Video generation studio jobs. Mock-first; live renders gated behind approval.
+export const videoJobs = pgTable('video_jobs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  prompt: text('prompt').notNull(),
+  style: text('style').default('ugc'), // ugc|product_demo|cinematic|slideshow
+  aspectRatio: text('aspect_ratio').default('9:16'), // 9:16|1:1|16:9
+  durationSec: integer('duration_sec').default(15),
+  status: text('status').default('queued'), // queued|processing|completed|failed|needs_approval
+  provider: text('provider').default('mock'), // mock|fal|replicate
+  resultUrl: text('result_url'),
+  thumbnailUrl: text('thumbnail_url'),
+  costCents: integer('cost_cents').default(0),
+  error: text('error'),
+  approvalId: uuid('approval_id'),
+  createdByAgentId: uuid('created_by_agent_id'),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { mode: 'date' })
     .defaultNow()
