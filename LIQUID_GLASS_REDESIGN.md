@@ -1,8 +1,8 @@
-# Sayso — Apple Liquid Glass Design Redesign
+# GrowthCrew — Apple Liquid Glass Design Redesign
 
 ## Goal
 
-Redesign the entire Sayso web app with Apple's **Liquid Glass** design language — the frosted-glass, translucent, depth-layered aesthetic introduced in iOS 26 / macOS 26 (Tahoe). Every surface should feel like it's made of layered glass with light refracting through it.
+Redesign the entire GrowthCrew web app with Apple's **Liquid Glass** design language — the frosted-glass, translucent, depth-layered aesthetic introduced in iOS 26 / macOS 26 (Tahoe). Every surface should feel like it's made of layered glass with light refracting through it.
 
 ## What is Liquid Glass
 
@@ -168,7 +168,7 @@ Redesign EVERY page and component in `apps/web/`:
 4. Then all remaining pages in order
 5. Then UI components
 6. Then auth + public pages
-7. Run `pnpm --filter @sayso/web build` to verify
+7. Run `pnpm --filter @growthcrew/web build` to verify
 8. Commit when done
 
 ## Model
@@ -180,5 +180,5 @@ Use **Kimi K3** with **High thinking effort** for the best balance between token
 - Do NOT break existing functionality — all routes must still work
 - Do NOT remove any features — only change the visual layer
 - Preserve all tRPC routes, API routes, auth, integrations logic
-- Run `pnpm --filter @sayso/web build` after all changes to verify
+- Run `pnpm --filter @growthcrew/web build` after all changes to verify
 - Commit with message: "design: Apple Liquid Glass redesign across all pages"

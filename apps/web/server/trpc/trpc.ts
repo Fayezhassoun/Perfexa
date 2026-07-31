@@ -1,9 +1,9 @@
 // tRPC plumbing (CONTRACTS §5): superjson transformer + the three procedure
-// levels. Routers stay thin — auth + zod here, logic in @sayso/agents.
+// levels. Routers stay thin — auth + zod here, logic in @growthcrew/agents.
 
 import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
-import { createAgentContext, type AgentContext } from '@sayso/agents';
+import { createAgentContext, type AgentContext } from '@growthcrew/agents';
 import type { Context } from './context';
 
 const t = initTRPC.context<Context>().create({ transformer: superjson });

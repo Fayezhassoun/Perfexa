@@ -21,4 +21,4 @@ ENV NODE_ENV=production
 COPY --from=deps /app ./
 COPY . .
 EXPOSE 3001
-CMD ["pnpm", "--filter", "@sayso/worker", "start"]
+CMD ["pnpm", "--filter", "@growthcrew/worker", "start"]

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
-import { auditLogs, competitorAdScans, competitors } from '@sayso/db';
+import { auditLogs, competitorAdScans, competitors } from '@growthcrew/db';
 import { scanCompetitor, matrix, listScans, creatives } from '../src/services/ad-intel.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

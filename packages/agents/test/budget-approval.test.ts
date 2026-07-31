@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
-import { approvals, budgets } from '@sayso/db';
+import { approvals, budgets } from '@growthcrew/db';
 import { updateBudgetCap } from '../src/services/settings.js';
 import { decideApproval } from '../src/services/approvals.js';
 import { db, freshOrg, truncateAll } from './helpers.js';

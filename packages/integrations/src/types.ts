@@ -1,4 +1,4 @@
-// Shared types for @sayso/integrations — mirrors CONTRACTS.md §7.
+// Shared types for @growthcrew/integrations — mirrors CONTRACTS.md §7.
 // These definitions are the binding contract; do not change shapes without
 // updating CONTRACTS.md and every consumer.
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { leadsToCsv } from '../src/services/leads.js';
 import { scoreLead } from '../src/tools.js';
-import type { Lead } from '@sayso/db';
+import type { Lead } from '@growthcrew/db';
 
 function lead(partial: Partial<Lead>): Lead {
   return {

@@ -2,8 +2,8 @@
 // Run: DATABASE_URL=... SEO_AUDIT_MODE=mock LLM_PROVIDER=mock pnpm exec tsx smoke.mts
 
 import { eq } from 'drizzle-orm';
-import { getDb, schema } from '@sayso/db';
-import { getLLM } from '@sayso/llm';
+import { getDb, schema } from '@growthcrew/db';
+import { getLLM } from '@growthcrew/llm';
 import { createAuditLogger, executeTool, handleUserMessage, checkSpend } from './src/index.js';
 
 let failures = 0;
@@ -14,7 +14,7 @@ function check(label: string, cond: boolean, extra?: unknown) {
 
 const db = getDb();
 const [org] = await db.select().from(schema.organizations).where(eq(schema.organizations.name, 'Demo Business'));
-const [user] = await db.select().from(schema.users).where(eq(schema.users.email, 'demo@sayso.dev'));
+const [user] = await db.select().from(schema.users).where(eq(schema.users.email, 'demo@growthcrew.dev'));
 if (!org || !user) throw new Error('Seed data missing — run pnpm db:seed first');
 
 // Clean slate so the smoke is re-runnable.

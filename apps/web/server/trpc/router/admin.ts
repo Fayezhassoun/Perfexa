@@ -1,4 +1,4 @@
-import { services } from '@sayso/agents';
+import { services } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
 export const adminRouter = router({

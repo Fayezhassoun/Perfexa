@@ -1,11 +1,11 @@
 # TASK: Competitor Ad-Intelligence Upgrade
 
-You are extending **Sayso**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
+You are extending **GrowthCrew**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
 Goal: upgrade the existing competitor surface (currently SEO-snapshot only) into a full
 **ad-intelligence** module: track a competitor's Google Ads presence across multiple
 countries, build an ad-count matrix by region, and capture ad creative text/angles. This
 productizes a proven manual research workflow (Google Ads Transparency Center scanning).
-Follow Sayso's rule: **mock-first offline, live behind a real fetch, org-scoped, audited.**
+Follow GrowthCrew's rule: **mock-first offline, live behind a real fetch, org-scoped, audited.**
 
 ## Foundation (the coordinator creates this table BEFORE you start — do NOT add migrations)
 
@@ -26,7 +26,7 @@ export const competitorAdScans = pgTable('competitor_ad_scans', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 ```
-Exported from `@sayso/db`. **If the table is missing when you start, STOP and report it —
+Exported from `@growthcrew/db`. **If the table is missing when you start, STOP and report it —
 do not create the migration yourself (another task owns schema).**
 
 ## Repo facts (verified — build on these exactly)
@@ -43,8 +43,8 @@ do not create the migration yourself (another task owns schema).**
 - tRPC: `apps/web/server/trpc/router/competitors.ts` already exists (list/add/analyze/remove).
 - UI: `apps/web/app/(app)/competitors/page.tsx` already exists. Match its Liquid Glass style.
 - Tests: `packages/agents/test/global-setup.ts` boots throwaway Postgres + all migrations.
-- Run: `pnpm typecheck`, `pnpm --filter @sayso/integrations test`,
-  `pnpm --filter @sayso/agents test`. Node 22, pnpm 11.
+- Run: `pnpm typecheck`, `pnpm --filter @growthcrew/integrations test`,
+  `pnpm --filter @growthcrew/agents test`. Node 22, pnpm 11.
 
 ## What to build
 
@@ -121,6 +121,6 @@ pre-provided), the video router/page/service, or anything the business-memory / 
 tasks own.
 
 ## Definition of done (verify yourself, report real output)
-1. `pnpm typecheck` passes. 2. `pnpm --filter @sayso/integrations test` passes.
-3. `pnpm --filter @sayso/agents test` passes incl. `ad-intel.test.ts`.
+1. `pnpm typecheck` passes. 2. `pnpm --filter @growthcrew/integrations test` passes.
+3. `pnpm --filter @growthcrew/agents test` passes incl. `ad-intel.test.ts`.
 4. Report files changed, test counts, and confirm mock mode produces a region matrix offline.

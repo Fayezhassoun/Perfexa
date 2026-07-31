@@ -1,7 +1,7 @@
 // Content studio services: AI-drafted pieces with an approval workflow.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { contentPieces, type ContentPiece } from '@sayso/db';
+import { contentPieces, type ContentPiece } from '@growthcrew/db';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 import { getOrCreateAgent } from '../execute-plan.js';

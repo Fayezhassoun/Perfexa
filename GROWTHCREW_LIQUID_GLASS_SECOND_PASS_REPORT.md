@@ -1,15 +1,15 @@
-# Sayso Liquid Glass Second-Pass Report
+# GrowthCrew Liquid Glass Second-Pass Report
 
 **Agent Role**: Second Independent Coding/Design Agent  
-**Repo**: `/Users/fox/sayso`  
-**Base Commit**: `b542b6d design: apply professional liquid glass to Sayso`  
+**Repo**: `/Users/fox/growthcrew`  
+**Base Commit**: `b542b6d design: apply professional liquid glass to GrowthCrew`  
 **Status**: Verification passed — changes committed cleanly.
 
 ---
 
 ## 1. Summary of Improvements
 
-The second pass conducted a thorough audit across all product surfaces to elevate Sayso to an executive-grade **Liquid Voice Pro** aesthetic, ensuring visual coherence, strong operational hierarchy, zero color palette violations, and complete parity with backend/voice contracts.
+The second pass conducted a thorough audit across all product surfaces to elevate GrowthCrew to an executive-grade **Liquid Voice Pro** aesthetic, ensuring visual coherence, strong operational hierarchy, zero color palette violations, and complete parity with backend/voice contracts.
 
 Key targeted refinements made:
 
@@ -51,11 +51,11 @@ Key targeted refinements made:
 ## 3. Verification Command Outputs
 
 ```bash
-$ pnpm --filter @sayso/web typecheck
+$ pnpm --filter @growthcrew/web typecheck
 $ tsc -p .
 # Result: Exit code 0 (0 errors)
 
-$ pnpm --filter @sayso/web build
+$ pnpm --filter @growthcrew/web build
   ▲ Next.js 14.2.32
   ✓ Compiled successfully
   Skipping linting
@@ -96,8 +96,8 @@ apps/web build: ✓ Compiled successfully
 
 ## 5. Commit Details
 
-- **Commit Command**: `git add apps/web SAYSO_LIQUID_GLASS_SECOND_PASS_REPORT.md && git commit -m "design: refine Sayso liquid glass experience"`
-- **Commit Hash**: `a9b99e4 design: refine Sayso liquid glass experience`
+- **Commit Command**: `git add apps/web GROWTHCREW_LIQUID_GLASS_SECOND_PASS_REPORT.md && git commit -m "design: refine GrowthCrew liquid glass experience"`
+- **Commit Hash**: `a9b99e4 design: refine GrowthCrew liquid glass experience`
 
 ---
 

@@ -44,24 +44,24 @@ importers:
       '@fontsource-variable/space-grotesk':
         specifier: ^5.2.10
         version: 5.2.10
+      '@growthcrew/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
+      '@growthcrew/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@growthcrew/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
+      '@growthcrew/llm':
+        specifier: workspace:*
+        version: link:../../packages/llm
       '@radix-ui/react-label':
         specifier: 2.1.8
         version: 2.1.8(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot':
         specifier: 1.2.4
         version: 1.2.4(@types/react@18.3.31)(react@18.3.1)
-      '@sayso/agents':
-        specifier: workspace:*
-        version: link:../../packages/agents
-      '@sayso/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@sayso/integrations':
-        specifier: workspace:*
-        version: link:../../packages/integrations
-      '@sayso/llm':
-        specifier: workspace:*
-        version: link:../../packages/llm
       '@tanstack/react-query':
         specifier: 5.59.20
         version: 5.59.20(react@18.3.1)
@@ -144,15 +144,15 @@ importers:
 
   apps/worker:
     dependencies:
+      '@growthcrew/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
+      '@growthcrew/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@hono/node-server':
         specifier: 2.0.10
         version: 2.0.10(hono@4.6.20)
-      '@sayso/agents':
-        specifier: workspace:*
-        version: link:../../packages/agents
-      '@sayso/db':
-        specifier: workspace:*
-        version: link:../../packages/db
       bullmq:
         specifier: 5.34.10
         version: 5.34.10
@@ -193,13 +193,13 @@ importers:
 
   packages/agents:
     dependencies:
-      '@sayso/db':
+      '@growthcrew/db':
         specifier: workspace:*
         version: link:../db
-      '@sayso/integrations':
+      '@growthcrew/integrations':
         specifier: workspace:*
         version: link:../integrations
-      '@sayso/llm':
+      '@growthcrew/llm':
         specifier: workspace:*
         version: link:../llm
       drizzle-orm:
@@ -221,7 +221,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@sayso/integrations':
+      '@growthcrew/integrations':
         specifier: workspace:*
         version: link:../integrations
       bcryptjs:

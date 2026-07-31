@@ -5,7 +5,7 @@ import * as cheerio from 'cheerio';
 import type { CrawlResult } from './types.js';
 import { hashString, hostnameOf, pickDeterministic, seededRange } from './util/hash.js';
 
-const UA = 'SaysoBot/1.0 (+https://sayso.dev)';
+const UA = 'GrowthCrewBot/1.0 (+https://growthcrew.dev)';
 const MAX_PAGES = 10;
 
 export function normalizeUrl(raw: string): string {

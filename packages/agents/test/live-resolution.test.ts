@@ -4,8 +4,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
-import { connectedAccounts } from '@sayso/db';
-import { LiveAdapterNotConnected, decrypt, encrypt, getGscQueries, type FetchLike } from '@sayso/integrations';
+import { connectedAccounts } from '@growthcrew/db';
+import { LiveAdapterNotConnected, decrypt, encrypt, getGscQueries, type FetchLike } from '@growthcrew/integrations';
 import { getOrgAdapter, getOrgGscQueries } from '../src/index.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

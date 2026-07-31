@@ -5,7 +5,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Sayso',
+  title: 'GrowthCrew',
   description: 'Your voice-first AI marketing team',
 };
 

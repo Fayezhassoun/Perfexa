@@ -1,6 +1,6 @@
 import { and, desc, eq, sql, type InferSelectModel } from 'drizzle-orm';
-import { orgMemoryDocuments } from '@sayso/db';
-import { cosineSimilarity, embedText } from '@sayso/integrations';
+import { orgMemoryDocuments } from '@growthcrew/db';
+import { cosineSimilarity, embedText } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 
 export type OrgMemoryDocument = InferSelectModel<typeof orgMemoryDocuments>;
@@ -84,7 +84,7 @@ export async function importUrl(
   try {
     response = await fetch(input.url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; SaysoBot/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; GrowthCrewBot/1.0)',
       },
     });
   } catch (err) {

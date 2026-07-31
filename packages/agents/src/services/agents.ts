@@ -2,7 +2,7 @@
 // created by the orchestrator only — never by users directly.
 
 import { and, desc, eq, sql } from 'drizzle-orm';
-import { agentRuns, agents, type Agent, type AgentRun } from '@sayso/db';
+import { agentRuns, agents, type Agent, type AgentRun } from '@growthcrew/db';
 import type { AgentContext, AgentType } from '../types.js';
 import { getToolsForAgent } from '../tools.js';
 import { recallAll } from '../memory.js';

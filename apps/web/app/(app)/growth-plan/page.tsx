@@ -152,7 +152,7 @@ export default function GrowthPlanPage() {
       <PageHeader
         eyebrow="Your week-one operating system"
         title="First 7-Day Growth Plan"
-        description="Sayso turns business context into a week-one operating plan. Every step stays reviewable, practical, and grounded in what you told us."
+        description="GrowthCrew turns business context into a week-one operating plan. Every step stays reviewable, practical, and grounded in what you told us."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
@@ -179,7 +179,7 @@ export default function GrowthPlanPage() {
               <div>
                 <CardTitle className="text-base">Business Brain</CardTitle>
                 <CardDescription className="mt-1">
-                  The context Sayso will use to shape this plan.
+                  The context GrowthCrew will use to shape this plan.
                 </CardDescription>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function GrowthPlanPage() {
           <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-500" />
           <span>
             <strong className="font-medium">Sandbox by default.</strong>{' '}
-            Sayso can prepare drafts and proposals immediately; spend and public actions stay behind your approval.
+            GrowthCrew can prepare drafts and proposals immediately; spend and public actions stay behind your approval.
           </span>
           <Badge variant="secondary" className="w-fit shrink-0">
             <LockKeyhole className="mr-1 h-3 w-3" /> Approval safety on
@@ -331,7 +331,7 @@ export default function GrowthPlanPage() {
           <div>
             <p className="font-display font-semibold">Ready to make this useful?</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ask Sayso to turn the plan into a proposal, or review anything already waiting for you.
+              Ask GrowthCrew to turn the plan into a proposal, or review anything already waiting for you.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

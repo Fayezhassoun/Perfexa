@@ -1,8 +1,8 @@
 # TASK: Video Generation Studio
 
-You are extending **Sayso**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
+You are extending **GrowthCrew**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
 Goal: add a **Video Studio** where marketers generate short marketing videos (social ads,
-product demos, UGC-style clips) from a text prompt. Follow Sayso's core rule: **mock-first
+product demos, UGC-style clips) from a text prompt. Follow GrowthCrew's core rule: **mock-first
 offline, live behind an API key, and nothing spends money without a recorded approval.**
 
 ## Foundation (the coordinator creates this table BEFORE you start — do NOT add migrations)
@@ -27,7 +27,7 @@ export const videoJobs = pgTable('video_jobs', {
   createdAt, updatedAt,
 });
 ```
-It is exported from `@sayso/db`. **If the table is missing when you start, STOP and report it
+It is exported from `@growthcrew/db`. **If the table is missing when you start, STOP and report it
 — do not create the migration yourself (another task owns schema).**
 
 ## Repo facts (verified — build on these exactly)
@@ -45,8 +45,8 @@ It is exported from `@sayso/db`. **If the table is missing when you start, STOP 
   `@/components/ui/*`, `PageShell`/`PageHeader`. Match `content/page.tsx` styling.
 - Tests: `packages/agents/test/global-setup.ts` boots throwaway Postgres + runs all
   migrations. See `expansion.test.ts` for a service-test pattern.
-- Run: `pnpm typecheck`, `pnpm --filter @sayso/integrations test`,
-  `pnpm --filter @sayso/agents test`. Node 22, pnpm 11.
+- Run: `pnpm typecheck`, `pnpm --filter @growthcrew/integrations test`,
+  `pnpm --filter @growthcrew/agents test`. Node 22, pnpm 11.
 
 ## What to build
 
@@ -54,7 +54,7 @@ It is exported from `@sayso/db`. **If the table is missing when you start, STOP 
 - `VideoAdapter` interface: `{ generate(input: { prompt; style; aspectRatio; durationSec }):
   Promise<{ jobId; status; resultUrl?; thumbnailUrl?; costCents; provider }> }`.
 - `createMockVideoAdapter()` — deterministic: returns a placeholder `resultUrl`
-  (e.g. `https://cdn.sayso.dev/mock/<hash>.mp4` derived from the prompt), a thumbnail, a small
+  (e.g. `https://cdn.growthcrew.dev/mock/<hash>.mp4` derived from the prompt), a thumbnail, a small
   deterministic `costCents`, `status:'completed'`. No network.
 - `createFalVideoAdapter()` — POSTs to fal.ai (`https://fal.run/fal-ai/...`) using
   `FAL_KEY`/`FAL_API_KEY`, injectable `fetch` for tests. Map the response to the interface.
@@ -117,6 +117,6 @@ DO NOT edit `apps/web/server/trpc/router/_app.ts` (coordinator wires it). DO NOT
 business-memory / multi-model tasks own.
 
 ## Definition of done (verify yourself, report real output)
-1. `pnpm typecheck` passes. 2. `pnpm --filter @sayso/integrations test` passes.
-3. `pnpm --filter @sayso/agents test` passes incl. `video.test.ts`.
+1. `pnpm typecheck` passes. 2. `pnpm --filter @growthcrew/integrations test` passes.
+3. `pnpm --filter @growthcrew/agents test` passes incl. `video.test.ts`.
 4. Report files changed, test counts, and confirm mock mode renders a completed job offline.

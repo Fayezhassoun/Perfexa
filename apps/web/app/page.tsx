@@ -30,7 +30,7 @@ export default function Home() {
   return (
     <main className="liquid-shell min-h-screen overflow-x-hidden">
       <header className="liquid-topbar sticky top-0 z-50 mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-        <BrandMark href="/" size="md" ariaLabel="Sayso home" />
+        <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
@@ -54,7 +54,7 @@ export default function Home() {
             <span className="mt-2 block text-primary">one sentence away.</span>
           </h1>
           <p className="animate-fade-up animation-delay-200 mt-7 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
-            Speak naturally about the business problem in front of you. Sayso turns it into a plan,
+            Speak naturally about the business problem in front of you. GrowthCrew turns it into a plan,
             a team, and a measured next step — with your approval in the loop.
           </p>
           <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -115,7 +115,7 @@ export default function Home() {
             </span>
             <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Clear actions. Deliberate control.</h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Sayso helps your team move faster without hiding the consequential moments.
+              GrowthCrew helps your team move faster without hiding the consequential moments.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

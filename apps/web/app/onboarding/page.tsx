@@ -110,7 +110,7 @@ export default function OnboardingPage() {
     <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
       <div className="animate-fade-up w-full max-w-lg">
         <div className="mb-6 flex justify-center">
-          <BrandMark size="md" href="/" ariaLabel="Sayso home" />
+          <BrandMark size="md" href="/" ariaLabel="GrowthCrew home" />
         </div>
         <div className="mb-6 flex items-center justify-center gap-2">
           {STEPS.map((s, i) => (

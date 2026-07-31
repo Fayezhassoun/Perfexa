@@ -1,8 +1,8 @@
 // AgentContext factory (CONTRACTS §8) — shared by web routers and the worker.
 
 import { eq } from 'drizzle-orm';
-import { organizations, type Db } from '@sayso/db';
-import { getLLM, getLLMForConfig, type LLMConfig, type LLMProvider } from '@sayso/llm';
+import { organizations, type Db } from '@growthcrew/db';
+import { getLLM, getLLMForConfig, type LLMConfig, type LLMProvider } from '@growthcrew/llm';
 import type { AgentContext } from './types.js';
 import { createAuditLogger } from './audit.js';
 

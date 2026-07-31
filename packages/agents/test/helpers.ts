@@ -1,6 +1,6 @@
 // Shared DB test helpers: fresh org per test + a ready AgentContext.
 
-import { db, organizations, orgMembers, users, budgets, closeDb } from '@sayso/db';
+import { db, organizations, orgMembers, users, budgets, closeDb } from '@growthcrew/db';
 import { truncateAll } from '../../db/src/test-utils';
 import { createAgentContext } from '../src/context.js';
 import type { AgentContext } from '../src/types.js';

@@ -6,7 +6,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
-import { connectedAccounts, type ConnectedAccount } from '@sayso/db';
+import { connectedAccounts, type ConnectedAccount } from '@growthcrew/db';
 import {
   AdapterError,
   buildAuthorizationUrl,
@@ -18,7 +18,7 @@ import {
   verifyOAuthState,
   type ConnectablePlatform,
   type FetchLike,
-} from '@sayso/integrations';
+} from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 import { oauthClientConfigFor } from '../live.js';
 

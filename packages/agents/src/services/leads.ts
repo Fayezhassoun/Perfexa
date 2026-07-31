@@ -1,7 +1,7 @@
 // Lead services (CONTRACTS §5/§7): mini-CRM list/update/CSV + form builder.
 
 import { and, desc, eq, or, sql } from 'drizzle-orm';
-import { leadForms, leads, type Lead, type LeadForm } from '@sayso/db';
+import { leadForms, leads, type Lead, type LeadForm } from '@growthcrew/db';
 import type { AgentContext } from '../types.js';
 
 export async function listLeads(ctx: AgentContext, filter?: { status?: string; q?: string }): Promise<Lead[]> {

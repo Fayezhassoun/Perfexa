@@ -1,5 +1,5 @@
 {
-  "name": "@sayso/db",
+  "name": "@growthcrew/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@sayso/integrations": "workspace:*",
+    "@growthcrew/integrations": "workspace:*",
     "bcryptjs": "2.4.3",
     "drizzle-orm": "0.36.4",
     "postgres": "3.4.9",

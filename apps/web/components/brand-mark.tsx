@@ -15,7 +15,7 @@ export function BrandMarkIcon({
   ...props
 }: BrandMarkIconProps) {
   const generatedId = useId();
-  const id = gradientId || `sayso-orb-${generatedId.replace(/:/g, '')}`;
+  const id = gradientId || `growthcrew-orb-${generatedId.replace(/:/g, '')}`;
   const bgGradId = `${id}-bg`;
   const waveGradId = `${id}-wave`;
 
@@ -106,7 +106,7 @@ export interface BrandMarkProps {
 export function BrandMark({
   layout = 'full',
   size = 'md',
-  wordmark = 'Sayso',
+  wordmark = 'GrowthCrew',
   descriptor,
   showDescriptor = false,
   href,
@@ -162,9 +162,9 @@ export function BrandMark({
       <BrandMarkIcon size={iconSize} className={markClassName} />
       {layout !== 'mark' && (
         <span className={cn('flex flex-col justify-center leading-none', textClassName)}>
-          <span className={cn('font-display sayso-wordmark', wordmarkClass)}>{wordmark}</span>
+          <span className={cn('font-display growthcrew-wordmark', wordmarkClass)}>{wordmark}</span>
           {(showDescriptor || descriptor) && (
-            <span className={cn('mt-0.5 sayso-descriptor', descriptorClass)}>
+            <span className={cn('mt-0.5 growthcrew-descriptor', descriptorClass)}>
               {descriptor || 'AI Marketing Team'}
             </span>
           )}

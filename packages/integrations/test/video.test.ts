@@ -12,8 +12,8 @@ describe('video adapter', () => {
       expect(job1.status).toBe('completed');
       expect(job1.provider).toBe('mock');
       expect(job1.resultUrl).toBe(job2.resultUrl);
-      expect(job1.resultUrl).toMatch(/^https:\/\/cdn\.sayso\.dev\/mock\/.*\.mp4$/);
-      expect(job1.thumbnailUrl).toMatch(/^https:\/\/cdn\.sayso\.dev\/mock\/.*_thumb\.jpg$/);
+      expect(job1.resultUrl).toMatch(/^https:\/\/cdn\.growthcrew\.dev\/mock\/.*\.mp4$/);
+      expect(job1.thumbnailUrl).toMatch(/^https:\/\/cdn\.growthcrew\.dev\/mock\/.*_thumb\.jpg$/);
       expect(job1.costCents).toBe(15);
       expect(job1.jobId).toBe(job2.jobId);
     });

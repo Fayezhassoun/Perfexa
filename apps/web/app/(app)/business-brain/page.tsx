@@ -71,7 +71,7 @@ export default function BusinessBrainPage() {
   const update = trpc.onboarding.update.useMutation({
     onSuccess: async () => {
       await utils.onboarding.invalidate();
-      setMessage('Business Brain saved. Sayso will use this context in your plan and console.');
+      setMessage('Business Brain saved. GrowthCrew will use this context in your plan and console.');
     },
     onError: (error) => setMessage(error.message),
   });
@@ -125,7 +125,7 @@ export default function BusinessBrainPage() {
       <PageHeader
         eyebrow="Persistent business context"
         title="Business Brain"
-        description="The context Sayso uses before it drafts plans, proposals, and campaigns."
+        description="The context GrowthCrew uses before it drafts plans, proposals, and campaigns."
         actions={
           <Button asChild variant="outline">
             <Link href="/growth-plan"><ArrowLeft /> Back to Growth Plan</Link>
@@ -140,7 +140,7 @@ export default function BusinessBrainPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-base">What Sayso already knows</CardTitle>
+              <CardTitle className="text-base">What GrowthCrew already knows</CardTitle>
               <CardDescription className="mt-1">This profile comes from your onboarding setup.</CardDescription>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function BusinessBrainPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="business-brain-constraints">Constraints / things Sayso should avoid</Label>
+            <Label htmlFor="business-brain-constraints">Constraints / things GrowthCrew should avoid</Label>
             <Textarea
               id="business-brain-constraints"
               maxLength={600}
@@ -283,7 +283,7 @@ export default function BusinessBrainPage() {
           <div>
             <p className="font-medium">Drafts and sandbox by default</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sayso can prepare plans, proposals, and campaign drafts. Public or spend actions remain approval-gated.
+              GrowthCrew can prepare plans, proposals, and campaign drafts. Public or spend actions remain approval-gated.
             </p>
             <Badge variant="secondary" className="mt-3"><LockKeyhole className="mr-1 h-3 w-3" /> Approval safety on</Badge>
           </div>

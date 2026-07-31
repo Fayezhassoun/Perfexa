@@ -1,7 +1,7 @@
 # TASK: Multi-Model LLM Router + Per-Org Model Selection
 
-You are extending **Sayso**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
-Goal: let Sayso use MANY LLM providers (not just one global env var) and let each
+You are extending **GrowthCrew**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
+Goal: let GrowthCrew use MANY LLM providers (not just one global env var) and let each
 organization pick its own model. Everything must stay offline-testable (mock default).
 
 ## Repo facts (verified — build on these exactly)
@@ -22,7 +22,7 @@ organization pick its own model. Everything must stay offline-testable (mock def
 - tRPC: routers in `apps/web/server/trpc/router/`. Pattern (see `knowledge.ts`):
   ```ts
   import { z } from 'zod';
-  import { services } from '@sayso/agents';
+  import { services } from '@growthcrew/agents';
   import { router, orgProcedure } from '../trpc';
   export const xRouter = router({
     foo: orgProcedure.input(z.object({...})).query(({ ctx, input }) => services.x.foo(ctx.agentCtx, input)),
@@ -31,8 +31,8 @@ organization pick its own model. Everything must stay offline-testable (mock def
   `orgProcedure` injects `ctx.agentCtx` (an `AgentContext`) and `ctx.orgId`.
 - Tests: Vitest. `packages/llm/test/` has provider tests using injectable `fetch`.
   `packages/agents/test/global-setup.ts` boots a throwaway Postgres + runs all migrations.
-- Run: `pnpm typecheck` (all packages), `pnpm --filter @sayso/llm test`,
-  `pnpm --filter @sayso/agents test`. Node 22, pnpm 11.
+- Run: `pnpm typecheck` (all packages), `pnpm --filter @growthcrew/llm test`,
+  `pnpm --filter @growthcrew/agents test`. Node 22, pnpm 11.
 
 ## What to build
 
@@ -112,6 +112,6 @@ or the business-memory page (another agent owns those).
 
 ## Definition of done (verify yourself, report real output)
 1. `pnpm typecheck` passes (all packages).
-2. `pnpm --filter @sayso/llm test` passes including your new registry tests.
-3. `pnpm --filter @sayso/agents test` still passes (you didn't break context).
+2. `pnpm --filter @growthcrew/llm test` passes including your new registry tests.
+3. `pnpm --filter @growthcrew/agents test` still passes (you didn't break context).
 4. Report: files changed, test counts, and the exact provider ids now available.

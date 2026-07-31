@@ -1,8 +1,8 @@
 // Competitor intelligence services: track sites, analyze snapshots, diffs.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { competitors, type Competitor } from '@sayso/db';
-import { hostnameOf } from '@sayso/integrations';
+import { competitors, type Competitor } from '@growthcrew/db';
+import { hostnameOf } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 import { getOrCreateAgent } from '../execute-plan.js';

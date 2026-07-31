@@ -4,7 +4,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { approvals, auditLogs, campaignsMirror, type CampaignMirror } from '@sayso/db';
+import { approvals, auditLogs, campaignsMirror, type CampaignMirror } from '@growthcrew/db';
 import { buildSuggestions, generateOptimizationApprovals } from '../src/services/optimize.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

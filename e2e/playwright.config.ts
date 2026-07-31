@@ -3,7 +3,7 @@ import { defineConfig } from '@playwright/test';
 // Fresh embedded Postgres per run (global-setup) + the Next dev server started
 // here with mock providers — no external network, no docker (CONTRACTS §12).
 
-const DATABASE_URL = 'postgres://postgres:postgres@localhost:5601/sayso_e2e';
+const DATABASE_URL = 'postgres://postgres:postgres@localhost:5601/growthcrew_e2e';
 
 export default defineConfig({
   testDir: './tests',
@@ -18,7 +18,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'pnpm --filter @sayso/web exec next dev -p 3100',
+    command: 'pnpm --filter @growthcrew/web exec next dev -p 3100',
     url: 'http://localhost:3100',
     reuseExistingServer: false,
     timeout: 180_000,

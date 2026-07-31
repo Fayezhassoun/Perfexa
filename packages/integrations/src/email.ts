@@ -76,6 +76,6 @@ export function renderWeeklyReportEmail(orgName: string, content: WeeklyReportCo
   <p style="color:#444">${content.summary}</p>
   ${t ? `<table style="border-collapse:collapse;margin:12px 0">${rows}</table>` : ''}
   ${content.highlights.length ? `<h2 style="font-size:15px;margin-top:20px">Highlights</h2><ul style="padding-left:18px">${highlights}</ul>` : ''}
-  <p style="color:#888;font-size:12px;margin-top:24px">${content.periodLabel ?? ''} · Sayso — nothing spends without your approval.</p>
+  <p style="color:#888;font-size:12px;margin-top:24px">${content.periodLabel ?? ''} · GrowthCrew — nothing spends without your approval.</p>
 </body></html>`;
 }

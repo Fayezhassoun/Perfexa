@@ -3,8 +3,8 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
-import { db, organizations } from '@sayso/db';
-import { createAgentContext, services } from '@sayso/agents';
+import { db, organizations } from '@growthcrew/db';
+import { createAgentContext, services } from '@growthcrew/agents';
 
 // zero-config local dev: pick up repo-root .env when present
 try {

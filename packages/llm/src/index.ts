@@ -1,4 +1,4 @@
-// @sayso/llm — provider-agnostic LLM wrapper with function calling.
+// @growthcrew/llm — provider-agnostic LLM wrapper with function calling.
 
 export * from './types.js';
 export { zodToJsonSchema } from './zod-to-json-schema.js';

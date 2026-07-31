@@ -3,7 +3,7 @@
 
 import { redirect } from 'next/navigation';
 import { eq, inArray } from 'drizzle-orm';
-import { db, organizations } from '@sayso/db';
+import { db, organizations } from '@growthcrew/db';
 import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { Button } from '@/components/ui/button';

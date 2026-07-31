@@ -2,10 +2,10 @@
 const nextConfig = {
   output: 'standalone',
   transpilePackages: [
-    '@sayso/db',
-    '@sayso/llm',
-    '@sayso/agents',
-    '@sayso/integrations',
+    '@growthcrew/db',
+    '@growthcrew/llm',
+    '@growthcrew/agents',
+    '@growthcrew/integrations',
   ],
   eslint: {
     // no eslint config in wave 1 — don't let builds fail on it

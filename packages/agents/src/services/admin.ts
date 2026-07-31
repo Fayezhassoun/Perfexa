@@ -2,7 +2,7 @@
 
 import net from 'node:net';
 import { eq } from 'drizzle-orm';
-import { connectedAccounts, orgMembers, organizations, users } from '@sayso/db';
+import { connectedAccounts, orgMembers, organizations, users } from '@growthcrew/db';
 import type { AgentContext } from '../types.js';
 
 export interface AdminUserRow {

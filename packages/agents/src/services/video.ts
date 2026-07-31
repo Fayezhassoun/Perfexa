@@ -2,8 +2,8 @@
 // Handles job creation, mock vs live gating behind approvals, and dispatching approved jobs.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, videoJobs, type VideoJob } from '@sayso/db';
-import { getVideoAdapter } from '@sayso/integrations';
+import { approvals, videoJobs, type VideoJob } from '@growthcrew/db';
+import { getVideoAdapter } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 
 export interface CreateJobInput {

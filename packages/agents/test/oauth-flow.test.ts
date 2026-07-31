@@ -5,8 +5,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, connectedAccounts } from '@sayso/db';
-import { decrypt, signOAuthState, type ConnectablePlatform, type FetchLike } from '@sayso/integrations';
+import { auditLogs, connectedAccounts } from '@growthcrew/db';
+import { decrypt, signOAuthState, type ConnectablePlatform, type FetchLike } from '@growthcrew/integrations';
 import { completeOAuthFlow, redirectUriFor, startOAuthFlow } from '../src/services/oauth.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

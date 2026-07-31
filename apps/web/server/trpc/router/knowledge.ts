@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { services } from '@sayso/agents';
+import { services } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
 export const knowledgeRouter = router({

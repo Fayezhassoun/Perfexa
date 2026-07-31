@@ -16,14 +16,14 @@ test('signup → wizard → growth plan, and login works afterwards', async ({ p
   await page.getByLabel('Main offer').fill('Emergency plumbing with same-day arrival');
   await page.getByLabel('Ideal customer').fill('Homeowners who need a trusted local plumber');
   await page.getByRole('button', { name: 'Save Business Brain' }).click();
-  await expect(page.getByText('Business Brain saved. Sayso will use this context in your plan and console.')).toBeVisible();
+  await expect(page.getByText('Business Brain saved. GrowthCrew will use this context in your plan and console.')).toBeVisible();
 
   await page.goto('/growth-plan');
   const brainSummary = page.getByTestId('business-brain-summary');
   await expect(brainSummary.getByText('Emergency plumbing with same-day arrival')).toBeVisible();
   await expect(brainSummary.getByText('Homeowners who need a trusted local plumber')).toBeVisible();
 
-  // The AdWhispr-inspired, Sayso-safe competitor workflow is reachable and approval-gated.
+  // The AdWhispr-inspired, GrowthCrew-safe competitor workflow is reachable and approval-gated.
   await page.goto('/inspiration');
   await expect(page.getByRole('heading', { name: 'Competitor Inspiration Studio' })).toBeVisible();
   await expect(page.getByText('research → adapt → approve')).toBeVisible();

@@ -1,4 +1,4 @@
-# Sayso — CONTRACTS (integration source of truth)
+# GrowthCrew — CONTRACTS (integration source of truth)
 
 Every package and app MUST conform to this file. If something is ambiguous, follow this
 file over any other assumption. Do not rename anything defined here.
@@ -6,7 +6,7 @@ file over any other assumption. Do not rename anything defined here.
 ## 0. Repo layout & package names
 
 ```
-sayso/
+growthcrew/
   package.json               # private root, pnpm workspaces: apps/*, packages/*
   pnpm-workspace.yaml
   turbo.json                 # OPTIONAL; plain pnpm -r scripts are fine
@@ -17,13 +17,13 @@ sayso/
   .env                       # gitignored; `cp .env.example .env` works with zero edits
   scripts/dev-services.mjs   # embedded postgres + redis for dockerless dev
   scripts/wait-and-migrate.mjs
-  e2e/                       # playwright (own package, @sayso/e2e)
-  apps/web/                  # @sayso/web  — Next.js 14 App Router
-  apps/worker/               # @sayso/worker — Hono + BullMQ
-  packages/db/               # @sayso/db
-  packages/llm/              # @sayso/llm
-  packages/agents/           # @sayso/agents
-  packages/integrations/     # @sayso/integrations
+  e2e/                       # playwright (own package, @growthcrew/e2e)
+  apps/web/                  # @growthcrew/web  — Next.js 14 App Router
+  apps/worker/               # @growthcrew/worker — Hono + BullMQ
+  packages/db/               # @growthcrew/db
+  packages/llm/              # @growthcrew/llm
+  packages/agents/           # @growthcrew/agents
+  packages/integrations/     # @growthcrew/integrations
 ```
 
 TypeScript everywhere, ESM (`"type": "module"`) in packages, strict mode.
@@ -54,14 +54,14 @@ Packages are consumed as TS source (no build step): each package.json has
   Budget Guardian, tool registry, approval-gate enforcement, audit helper.
   NO http/next imports. All functions take `ctx: AgentContext`.
 - `apps/web` — imports everything. tRPC routers are thin: auth + zod validate → call
-  `@sayso/agents` services → return. Business logic NEVER lives in routers.
-- `apps/worker` — BullMQ consumers calling `@sayso/agents` services.
+  `@growthcrew/agents` services → return. Business logic NEVER lives in routers.
+- `apps/worker` — BullMQ consumers calling `@growthcrew/agents` services.
 
 ## 3. Environment variables (`.env.example` documents ALL of these)
 
 | Var | Default (zero-config `.env`) | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5433/sayso` | pg (dev-services uses port 5433; compose db 5432 internal) |
+| `DATABASE_URL` | `postgres://postgres:postgres@localhost:5433/growthcrew` | pg (dev-services uses port 5433; compose db 5432 internal) |
 | `REDIS_URL` | `redis://localhost:6380` | bullmq (dev-services 6380; compose 6379 internal) |
 | `AUTH_SECRET` | `dev-secret-change-me-32-bytes-minimum!!` | Auth.js |
 | `AUTH_URL` | `http://localhost:3000` | Auth.js |
@@ -80,7 +80,7 @@ Packages are consumed as TS source (no build step): each package.json has
 | `ELEVENLABS_API_KEY` / `ELEVENLABS_VOICE_ID` | empty / `21m00Tcm4TlvDq8ikWAM` | elevenlabs |
 | `SEO_AUDIT_MODE` | `live` | `live` falls back to mock on failure; `mock` never hits network |
 | `PAGESPEED_API_KEY` | empty | optional PSI key |
-| `RESEND_API_KEY` / `EMAIL_FROM` | empty / `Sayso <reports@sayso.dev>` | weekly email (phase 3 stub) |
+| `RESEND_API_KEY` / `EMAIL_FROM` | empty / `GrowthCrew <reports@growthcrew.dev>` | weekly email (phase 3 stub) |
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | absolute links, hosted lead forms |
 | `NEXT_PUBLIC_STT_PROVIDER` | `mock` | client picks browser vs mock capture |
 | `NEXT_PUBLIC_TTS_PROVIDER` | `mock` | client picks speechSynthesis vs server audio |
@@ -167,7 +167,7 @@ optional `idempotencyKey: string`; duplicate keys return the original result.
 - `conversations.list()` → conversations w/ last message. `conversations.get({id})` → with messages.
   `conversations.create({title?})` → row.
   `conversations.sendMessage({conversationId?, content, modality: 'voice'|'text'})` →
-  **core entry**: persists user message, runs orchestrator (`@sayso/agents`
+  **core entry**: persists user message, runs orchestrator (`@growthcrew/agents`
   `handleUserMessage`), persists assistant reply, returns `{conversationId, userMessage, assistantMessage, proposal?}`.
   Voice "approve"/"cancel" flows through THIS procedure (content is the transcript).
 - `proposals.list({status?})`, `proposals.get({id})`,
@@ -200,7 +200,7 @@ optional `idempotencyKey: string`; duplicate keys return the original result.
   `settings.budgets.list/update` — update >20% of current cap → creates `approvals` row
   (pending) instead of applying; approved via approvals.decide.
   `settings.members.list/invite(stub)/remove`. `settings.notifications.update` (jsonb on org config — keep in orgs.goals? NO: add `orgs.settings jsonb default '{}'`).
-- `admin.users()` (role owner of FIRST seeded org only if `user.email` endsWith `@sayso.dev`
+- `admin.users()` (role owner of FIRST seeded org only if `user.email` endsWith `@growthcrew.dev`
   OR org role owner — keep simple: any user can view admin page for own org list; platform-admin
   = `ADMIN_EMAILS` env csv match), `admin.health()` → `{db: ok, redis: ok, llm: provider, adapters: [...]}`.
 

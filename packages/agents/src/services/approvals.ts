@@ -3,7 +3,7 @@
 // applied only after an explicit human decision.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, budgets, type Approval } from '@sayso/db';
+import { approvals, budgets, type Approval } from '@growthcrew/db';
 import type { AgentContext } from '../types.js';
 import { executeTool } from '../tools.js';
 

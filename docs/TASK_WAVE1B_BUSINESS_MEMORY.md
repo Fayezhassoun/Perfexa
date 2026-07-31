@@ -1,6 +1,6 @@
 # TASK: Per-Org Cloud Business Memory + Document Import
 
-You are extending **Sayso**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
+You are extending **GrowthCrew**, a pnpm monorepo (Next.js 14 + tRPC + Drizzle/Postgres).
 Goal: give each organization a **cloud memory** where clients import their own business
 data (files, pasted notes, URLs). Agents ground their advice on this memory via semantic
 search. Distinct from the existing GLOBAL `knowledge_documents` best-practice library.
@@ -23,23 +23,23 @@ export const orgMemoryDocuments = pgTable('org_memory_documents', {
 });
 ```
 Migration `packages/db/drizzle/0003_soft_toxin.sql` is committed-ready. It is exported from
-`@sayso/db` via `export * from './schema/index'`. **Do not add new tables or migrations.**
+`@growthcrew/db` via `export * from './schema/index'`. **Do not add new tables or migrations.**
 
 ## Repo facts (verified — build on these exactly)
 
 - Semantic search pattern to copy: `packages/agents/src/services/knowledge.ts` —
-  `searchKnowledge(ctx, q)` embeds the query with `embedText` (from `@sayso/integrations`),
+  `searchKnowledge(ctx, q)` embeds the query with `embedText` (from `@growthcrew/integrations`),
   loads docs, lazily embeds+persists missing embeddings, ranks by `cosineSimilarity`, returns
-  top 5. `embedText`/`cosineSimilarity`/`EMBEDDING_DIM` are exported from `@sayso/integrations`
+  top 5. `embedText`/`cosineSimilarity`/`EMBEDDING_DIM` are exported from `@growthcrew/integrations`
   (`packages/integrations/src/embeddings.ts`).
 - Service pattern: services live in `packages/agents/src/services/*.ts`, take an
   `AgentContext` (`{ db, orgId, userId?, llm, audit, now? }`) as first arg, and are
   re-exported via `packages/agents/src/services/index.ts` (then reachable as
-  `services.<name>` from `@sayso/agents`).
+  `services.<name>` from `@growthcrew/agents`).
 - tRPC router pattern (see `apps/web/server/trpc/router/knowledge.ts`):
   ```ts
   import { z } from 'zod';
-  import { services } from '@sayso/agents';
+  import { services } from '@growthcrew/agents';
   import { router, orgProcedure } from '../trpc';
   export const memoryRouter = router({
     list: orgProcedure.query(({ ctx }) => services.memory.list(ctx.agentCtx)),
@@ -52,7 +52,7 @@ Migration `packages/db/drizzle/0003_soft_toxin.sql` is committed-ready. It is ex
 - Tests: `packages/agents/test/global-setup.ts` boots throwaway Postgres + runs ALL
   migrations (so `org_memory_documents` is available in tests). See
   `packages/agents/test/knowledge.test.ts` for the service-test pattern.
-- Run: `pnpm typecheck`, `pnpm --filter @sayso/agents test`. Node 22, pnpm 11.
+- Run: `pnpm typecheck`, `pnpm --filter @growthcrew/agents test`. Node 22, pnpm 11.
 
 ## What to build
 
@@ -128,5 +128,5 @@ DO NOT touch `packages/db/**` (table+migration already done), `packages/llm/**`,
 
 ## Definition of done (verify yourself, report real output)
 1. `pnpm typecheck` passes (all packages).
-2. `pnpm --filter @sayso/agents test` passes including your new `memory.test.ts`.
+2. `pnpm --filter @growthcrew/agents test` passes including your new `memory.test.ts`.
 3. Report: files changed, test counts, and confirmation that memory is org-scoped.

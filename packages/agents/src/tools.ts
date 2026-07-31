@@ -16,7 +16,7 @@ import {
   reviews,
   socialPosts,
   websites,
-} from '@sayso/db';
+} from '@growthcrew/db';
 import {
   ApprovalRequired,
   BudgetCapExceeded,
@@ -29,7 +29,7 @@ import {
   type MockAdAdapter,
   type SeoAudit,
   type SocialPlatform,
-} from '@sayso/integrations';
+} from '@growthcrew/integrations';
 import type { AgentContext, AgentType, ToolCallRecord, ToolDef } from './types.js';
 import { payloadHash } from './audit.js';
 import { getOrgAdapter } from './store.js';
@@ -342,7 +342,7 @@ export const TOOLS: ToolDef[] = [
       .strict(),
     gated: true,
     async execute(ctx, args) {
-      const { budgets } = await import('@sayso/db');
+      const { budgets } = await import('@growthcrew/db');
       const [existing] = await ctx.db
         .select()
         .from(budgets)

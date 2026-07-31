@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { knowledgeDocuments } from '@sayso/db';
-import { KNOWLEDGE_SEED_DOCS, embedText } from '@sayso/integrations';
+import { knowledgeDocuments } from '@growthcrew/db';
+import { KNOWLEDGE_SEED_DOCS, embedText } from '@growthcrew/integrations';
 import { searchKnowledge } from '../src/services/knowledge.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

@@ -42,7 +42,7 @@ export default function RegisterPage() {
       <Card className="glass-panel animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
         <CardHeader className="text-center">
           <div className="mb-2 flex justify-center">
-            <BrandMark layout="mark" size="lg" ariaLabel="Sayso logo" />
+            <BrandMark layout="mark" size="lg" ariaLabel="GrowthCrew logo" />
           </div>
           <CardTitle>Create your account</CardTitle>
           <CardDescription>Your AI marketing team is a minute away</CardDescription>

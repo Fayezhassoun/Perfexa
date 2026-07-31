@@ -2,16 +2,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-import { KNOWLEDGE_SEED_DOCS, embedText } from '@sayso/integrations';
+import { KNOWLEDGE_SEED_DOCS, embedText } from '@growthcrew/integrations';
 import { getDb, closeDb, schema, type Db } from './index';
 import { loadRootEnv } from './env';
 
-export const DEMO_USER_EMAIL = 'demo@sayso.dev';
+export const DEMO_USER_EMAIL = 'demo@growthcrew.dev';
 export const DEMO_USER_PASSWORD = 'demo1234';
 
 /**
  * Seed the knowledge base from the distilled best-practice docs
- * (@sayso/integrations). Idempotent: docs are upserted by title and
+ * (@growthcrew/integrations). Idempotent: docs are upserted by title and
  * each gets its deterministic embedding.
  */
 export async function seedKnowledge(db: Db): Promise<number> {

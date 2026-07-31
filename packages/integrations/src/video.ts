@@ -31,8 +31,8 @@ export function createMockVideoAdapter(): VideoAdapter {
     async generate(input: GenerateVideoInput): Promise<VideoJobResult> {
       const hash = hashHex(input.prompt);
       const jobId = `mock_${hash.slice(0, 12)}`;
-      const resultUrl = `https://cdn.sayso.dev/mock/${hash}.mp4`;
-      const thumbnailUrl = `https://cdn.sayso.dev/mock/${hash}_thumb.jpg`;
+      const resultUrl = `https://cdn.growthcrew.dev/mock/${hash}.mp4`;
+      const thumbnailUrl = `https://cdn.growthcrew.dev/mock/${hash}_thumb.jpg`;
       const costCents = 15;
 
       return {

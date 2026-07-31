@@ -3,7 +3,7 @@
 // executes without a recorded approval, and execution stops loudly on failure.
 
 import { and, eq } from 'drizzle-orm';
-import { agents, agentRuns, approvals, proposals, type Agent, type Proposal } from '@sayso/db';
+import { agents, agentRuns, approvals, proposals, type Agent, type Proposal } from '@growthcrew/db';
 import type { AgentContext, AgentType, Plan, ToolCallRecord } from './types.js';
 import { executeTool } from './tools.js';
 import { remember } from './memory.js';

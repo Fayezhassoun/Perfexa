@@ -3,7 +3,7 @@
 // as transcript text — the orchestrator handles the deterministic short-circuit.
 
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
-import { conversations, messages, type Conversation, type Message } from '@sayso/db';
+import { conversations, messages, type Conversation, type Message } from '@growthcrew/db';
 import type { AgentContext, OrchestratorResult, Plan, Question } from '../types.js';
 import { handleUserMessage } from '../orchestrator.js';
 

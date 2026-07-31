@@ -1,4 +1,4 @@
-// @sayso/agents — public surface.
+// @growthcrew/agents — public surface.
 
 export * from './types.js';
 export * from './errors.js';

@@ -36,7 +36,7 @@ export default function LoginPage() {
       <Card className="glass-panel animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
         <CardHeader className="text-center">
           <div className="mb-2 flex justify-center">
-            <BrandMark layout="mark" size="lg" ariaLabel="Sayso logo" />
+            <BrandMark layout="mark" size="lg" ariaLabel="GrowthCrew logo" />
           </div>
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>Sign in to talk to your marketing team</CardDescription>

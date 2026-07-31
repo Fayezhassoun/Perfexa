@@ -15,7 +15,7 @@ export default async function setup(): Promise<() => Promise<void>> {
   process.env.ENCRYPTION_KEY ??=
     '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';
 
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sayso-test-pg-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'growthcrew-test-pg-'));
   const { default: EmbeddedPostgres } = await import('embedded-postgres');
   const pg = new EmbeddedPostgres({
     databaseDir: dataDir,
@@ -28,9 +28,9 @@ export default async function setup(): Promise<() => Promise<void>> {
   });
   await pg.initialise();
   await pg.start();
-  await pg.createDatabase('sayso_test');
+  await pg.createDatabase('growthcrew_test');
 
-  process.env.DATABASE_URL = `postgres://postgres:postgres@localhost:${PORT}/sayso_test`;
+  process.env.DATABASE_URL = `postgres://postgres:postgres@localhost:${PORT}/growthcrew_test`;
 
   const { runMigrations } = await import('../../db/src/migrate');
   const { closeDb } = await import('../../db/src/index');

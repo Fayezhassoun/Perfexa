@@ -1,4 +1,4 @@
-// @sayso/integrations — public surface (CONTRACTS.md §7).
+// @growthcrew/integrations — public surface (CONTRACTS.md §7).
 
 export * from './types.js';
 export * from './errors.js';

@@ -63,7 +63,7 @@ export function LandingCommandFlow() {
         </span>
       </div>
 
-      <ol className="mt-6 grid gap-3 md:grid-cols-3 md:gap-4" aria-label="Sayso command flow">
+      <ol className="mt-6 grid gap-3 md:grid-cols-3 md:gap-4" aria-label="GrowthCrew command flow">
         <li aria-label="Voice brief: Brief captured" className="glass-tile rounded-2xl p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <span className="voice-orb flex h-10 w-10 items-center justify-center rounded-xl text-[color:hsl(var(--voice))]">

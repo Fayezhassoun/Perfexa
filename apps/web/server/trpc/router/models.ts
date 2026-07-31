@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { organizations } from '@sayso/db';
-import { LLM_PROVIDERS } from '@sayso/llm';
+import { organizations } from '@growthcrew/db';
+import { LLM_PROVIDERS } from '@growthcrew/llm';
 import { router, orgProcedure } from '../trpc';
 
 function readSelectedLLM(settings: unknown): { provider: string; model?: string } | null {

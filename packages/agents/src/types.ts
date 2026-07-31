@@ -1,7 +1,7 @@
 // Shared agent-runtime types (CONTRACTS §8).
 
-import type { Db } from '@sayso/db';
-import type { LLMProvider } from '@sayso/llm';
+import type { Db } from '@growthcrew/db';
+import type { LLMProvider } from '@growthcrew/llm';
 import type { z } from 'zod';
 import type { AuditLogger } from './audit.js';
 

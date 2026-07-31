@@ -3,8 +3,8 @@
 // adapter, stores org-scoped scan rows, and builds an ad-count matrix.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { competitorAdScans, type CompetitorAdScan } from '@sayso/db';
-import { getAdIntelAdapter, REGIONS, type AdCreative } from '@sayso/integrations';
+import { competitorAdScans, type CompetitorAdScan } from '@growthcrew/db';
+import { getAdIntelAdapter, REGIONS, type AdCreative } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 
 export interface ScanCompetitorInput {

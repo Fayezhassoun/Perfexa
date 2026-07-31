@@ -4,7 +4,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, connectedAccounts } from '@sayso/db';
+import { auditLogs, connectedAccounts } from '@growthcrew/db';
 import { connectSandboxAccount, listIntegrations, setIntegrationMode } from '../src/services/settings.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

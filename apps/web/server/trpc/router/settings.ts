@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { services } from '@sayso/agents';
+import { services } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
 const platform = z.enum(['google_ads', 'meta', 'tiktok', 'ga4', 'gsc']);

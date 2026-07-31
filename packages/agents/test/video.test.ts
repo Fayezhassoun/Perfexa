@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { and, eq } from 'drizzle-orm';
-import { approvals, auditLogs, videoJobs } from '@sayso/db';
+import { approvals, auditLogs, videoJobs } from '@growthcrew/db';
 import { createJob, dispatchApproved, listJobs } from '../src/services/video.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 

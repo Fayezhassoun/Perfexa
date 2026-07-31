@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { services, leadsToCsv } from '@sayso/agents';
+import { services, leadsToCsv } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
 const leadField = z.object({

@@ -4,8 +4,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { and, eq } from 'drizzle-orm';
-import { campaignsMirror, db } from '@sayso/db';
-import { services } from '@sayso/agents';
+import { campaignsMirror, db } from '@growthcrew/db';
+import { services } from '@growthcrew/agents';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 
 const PLATFORMS = ['google_ads', 'meta', 'tiktok'] as const;
