@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
+import { organizations } from '@growthcrew/db';
 import { services } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
@@ -77,4 +79,49 @@ export const settingsRouter = router({
   budgets: budgetsRouter,
   members: membersRouter,
   notifications: notificationsRouter,
+
+  // Brand DNA — structured brand profile for AI grounding
+  brand: router({
+    get: orgProcedure.query(async ({ ctx }) => {
+      const [org] = await ctx.agentCtx.db
+        .select({ brandProfile: organizations.brandProfile })
+        .from(organizations)
+        .where(eq(organizations.id, ctx.agentCtx.orgId))
+        .limit(1);
+      return org?.brandProfile ?? {};
+    }),
+
+    update: orgProcedure
+      .input(
+        z.object({
+          companyName: z.string().max(200).optional(),
+          tagline: z.string().max(300).optional(),
+          industry: z.string().max(200).optional(),
+          targetAudience: z.string().max(1000).optional(),
+          voiceTone: z.string().max(1000).optional(),
+          brandColors: z.array(z.string().max(20)).max(10).optional(),
+          doList: z.array(z.string().max(300)).max(20).optional(),
+          dontList: z.array(z.string().max(300)).max(20).optional(),
+          competitors: z.array(z.string().max(200)).max(20).optional(),
+          usp: z.string().max(1000).optional(),
+          website: z.string().max(500).optional(),
+          products: z.array(z.string().max(300)).max(20).optional(),
+          pastWins: z.array(z.string().max(500)).max(20).optional(),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        // Merge with existing profile (partial update)
+        const [org] = await ctx.agentCtx.db
+          .select({ brandProfile: organizations.brandProfile })
+          .from(organizations)
+          .where(eq(organizations.id, ctx.agentCtx.orgId))
+          .limit(1);
+        const merged = { ...(org?.brandProfile ?? {}), ...input };
+        await ctx.agentCtx.db
+          .update(organizations)
+          .set({ brandProfile: merged })
+          .where(eq(organizations.id, ctx.agentCtx.orgId));
+        return merged;
+      }),
+  }),
 });

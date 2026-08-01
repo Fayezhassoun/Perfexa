@@ -441,6 +441,32 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
     : [];
 
   let systemPrompt = SYSTEM_PROMPT;
+
+  // Brand DNA — ground all output in the org's brand profile
+  try {
+    const org = await loadOrg(ctx);
+    const bp = org.brandProfile;
+    if (bp && Object.keys(bp).length > 0) {
+      const parts: string[] = [];
+      if (bp.companyName) parts.push(`Company: ${bp.companyName}`);
+      if (bp.tagline) parts.push(`Tagline: ${bp.tagline}`);
+      if (bp.industry) parts.push(`Industry: ${bp.industry}`);
+      if (bp.targetAudience) parts.push(`Target audience: ${bp.targetAudience}`);
+      if (bp.voiceTone) parts.push(`Voice & tone: ${bp.voiceTone}`);
+      if (bp.usp) parts.push(`USP: ${bp.usp}`);
+      if (Array.isArray(bp.doList) && bp.doList.length) parts.push(`Always: ${bp.doList.join('; ')}`);
+      if (Array.isArray(bp.dontList) && bp.dontList.length) parts.push(`Never: ${bp.dontList.join('; ')}`);
+      if (Array.isArray(bp.products) && bp.products.length) parts.push(`Products/services: ${bp.products.join(', ')}`);
+      if (Array.isArray(bp.pastWins) && bp.pastWins.length) parts.push(`Past wins: ${bp.pastWins.join('; ')}`);
+      if (Array.isArray(bp.competitors) && bp.competitors.length) parts.push(`Known competitors: ${bp.competitors.join(', ')}`);
+      if (parts.length > 0) {
+        systemPrompt += `\n\n## Brand Context\nYou are the AI marketing team for this business. Ground ALL responses, copy, and campaign proposals in this brand:\n${parts.join('\n')}`;
+      }
+    }
+  } catch {
+    // Brand profile is best-effort — never block the conversation
+  }
+
   try {
     const memoryHits = await searchMemory(ctx, message);
     if (memoryHits.length > 0) {

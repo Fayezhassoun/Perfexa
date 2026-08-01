@@ -5,6 +5,23 @@ import type { Goal } from './enums';
 // App tables per CONTRACTS §4. Table names snake_case plural; TS props camelCase.
 // Money is integer cents (*Cents). "Enums" are text columns (zod unions in enums.ts).
 
+/** Structured brand context the AI uses to ground all output. */
+export interface BrandProfile {
+  companyName?: string;
+  tagline?: string;
+  industry?: string;
+  targetAudience?: string;
+  voiceTone?: string;
+  brandColors?: string[];
+  doList?: string[];
+  dontList?: string[];
+  competitors?: string[];
+  usp?: string;
+  website?: string;
+  products?: string[];
+  pastWins?: string[];
+}
+
 export const organizations = pgTable('organizations', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
@@ -14,6 +31,8 @@ export const organizations = pgTable('organizations', {
   onboardingStep: text('onboarding_step').default('welcome'),
   // notifications + agent memory live here (CONTRACTS §5/§8)
   settings: jsonb('settings').$type<Record<string, unknown>>().default({}),
+  // Brand DNA — structured brand context for AI grounding
+  brandProfile: jsonb('brand_profile').$type<BrandProfile>().default({}),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
