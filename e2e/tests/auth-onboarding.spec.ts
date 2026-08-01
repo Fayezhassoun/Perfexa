@@ -7,7 +7,8 @@ test('signup → wizard → growth plan, and login works afterwards', async ({ p
   const email = uniqueEmail('onboard');
   await registerAndOnboard(page, { email });
 
-  // Landed on the First 7-Day Growth Plan with saved Business Brain context.
+  // Onboarding now lands on the dashboard; the growth plan is one hop away.
+  await page.goto('/growth-plan');
   await expect(page.getByRole('heading', { name: 'First 7-Day Growth Plan' })).toBeVisible();
   await expect(page.getByTestId('business-brain-summary')).toBeVisible();
 

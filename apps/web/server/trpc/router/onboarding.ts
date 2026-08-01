@@ -12,13 +12,17 @@ export const onboardingRouter = router({
         websiteUrl: z.string().url().optional(),
         goals: z.array(z.enum(['visibility', 'leads', 'sales'])).optional(),
         monthlyBudgetCeilingCents: z.number().int().positive().optional(),
-        onboardingStep: z.enum(['welcome', 'business', 'goals', 'budget', 'connect', 'done']).optional(),
+        onboardingStep: z
+          .enum(['welcome', 'business', 'goals', 'budget', 'connect', 'voice', 'insight', 'done'])
+          .optional(),
         businessBrain: z
           .object({
             offer: z.string().max(600).optional(),
             idealCustomer: z.string().max(600).optional(),
             location: z.string().max(600).optional(),
             tone: z.enum(['friendly', 'expert', 'premium', 'direct']).optional(),
+            formality: z.enum(['casual', 'balanced', 'formal']).optional(),
+            personality: z.enum(['approachable', 'authoritative', 'playful', 'bold']).optional(),
             channels: z
               .array(z.enum(['seo', 'google_ads', 'meta', 'email', 'social', 'reviews']))
               .optional(),

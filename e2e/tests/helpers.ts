@@ -4,15 +4,15 @@ export function uniqueEmail(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@e2e.test`;
 }
 
-/** Register a fresh account and complete the onboarding wizard.
+/** Register a fresh account and complete the 5-step onboarding wizard.
  *
- * Product onboarding now lands first on /growth-plan so new users see a concrete
- * week-one plan before entering the console. Existing voice tests can still ask
- * to continue to /console after the landing assertion.
+ * The wizard runs business → goals → connect → brand voice → first insight and
+ * lands on /dashboard. Voice tests can pass continueTo: 'console' to proceed to
+ * the voice console afterwards.
  */
 export async function registerAndOnboard(
   page: Page,
-  opts: { email: string; website?: string; budget?: number; continueTo?: 'growth-plan' | 'console' },
+  opts: { email: string; website?: string; continueTo?: 'console' },
 ): Promise<void> {
   await page.goto('/register');
   await page.getByLabel('Your name').fill('E2E Owner');
@@ -28,20 +28,23 @@ export async function registerAndOnboard(
   await page.getByTestId('onboarding-next').click();
 
   // Step 2 — goals
-  await page.getByRole('button', { name: /Be more visible/ }).click();
-  await page.getByRole('button', { name: /Get leads/ }).click();
+  await page.getByRole('button', { name: /More leads/ }).click();
+  await page.getByRole('button', { name: /Brand awareness/ }).click();
   await page.getByTestId('onboarding-next').click();
 
-  // Step 3 — budget
-  await page.getByLabel(/Maximum per month/).fill(String(opts.budget ?? 500));
+  // Step 3 — connect (skippable)
+  await expect(page.getByText('Connect your first ad platform')).toBeVisible();
   await page.getByTestId('onboarding-next').click();
 
-  // Step 4 — connect (skippable) → finish
-  await expect(page.getByText('Connect ad accounts')).toBeVisible();
+  // Step 4 — brand voice (defaults are fine)
+  await expect(page.getByLabel('Tone')).toBeVisible();
   await page.getByTestId('onboarding-next').click();
 
-  await page.waitForURL('**/growth-plan');
-  await expect(page.getByRole('heading', { name: 'First 7-Day Growth Plan' })).toBeVisible();
+  // Step 5 — first insight → finish (button enables once the scan settles)
+  await expect(page.getByRole('heading', { name: 'Your first insight' })).toBeVisible();
+  await page.getByRole('button', { name: 'Go to dashboard' }).click();
+
+  await page.waitForURL('**/dashboard');
 
   if (opts.continueTo === 'console') {
     await page.goto('/console');
