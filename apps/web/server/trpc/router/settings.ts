@@ -54,6 +54,49 @@ const notificationsRouter = router({
     .mutation(({ ctx, input }) => services.settings.updateNotifications(ctx.agentCtx, input.prefs)),
 });
 
+// Client-facing UI preference flags stored in organizations.settings. Only
+// allowlisted keys are readable/writable here so the client can never touch
+// arbitrary org settings (notifications, memory, …) through this surface.
+const ALLOWED_SETTINGS_KEYS = ['proofDismissed'] as const;
+type SettingsKey = (typeof ALLOWED_SETTINGS_KEYS)[number];
+
+function pickAllowed(settings: Record<string, unknown>): Record<SettingsKey, boolean> {
+  const prefs = {} as Record<SettingsKey, boolean>;
+  for (const key of ALLOWED_SETTINGS_KEYS) prefs[key] = settings[key] === true;
+  return prefs;
+}
+
+const preferencesRouter = router({
+  get: orgProcedure.query(async ({ ctx }) => {
+    const [org] = await ctx.agentCtx.db
+      .select({ settings: organizations.settings })
+      .from(organizations)
+      .where(eq(organizations.id, ctx.agentCtx.orgId))
+      .limit(1);
+    return pickAllowed((org?.settings ?? {}) as Record<string, unknown>);
+  }),
+
+  update: orgProcedure
+    .input(z.object({ proofDismissed: z.boolean().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const [org] = await ctx.agentCtx.db
+        .select({ settings: organizations.settings })
+        .from(organizations)
+        .where(eq(organizations.id, ctx.agentCtx.orgId))
+        .limit(1);
+      const settings = { ...((org?.settings ?? {}) as Record<string, unknown>) };
+      for (const key of ALLOWED_SETTINGS_KEYS) {
+        const value = input[key];
+        if (value !== undefined) settings[key] = value;
+      }
+      await ctx.agentCtx.db
+        .update(organizations)
+        .set({ settings })
+        .where(eq(organizations.id, ctx.agentCtx.orgId));
+      return pickAllowed(settings);
+    }),
+});
+
 export const settingsRouter = router({
   integrations: orgProcedure.query(({ ctx }) => services.settings.listIntegrations(ctx.agentCtx)),
 
@@ -79,6 +122,7 @@ export const settingsRouter = router({
   budgets: budgetsRouter,
   members: membersRouter,
   notifications: notificationsRouter,
+  preferences: preferencesRouter,
 
   // AI usage metering + cost guardrails (Fox Biz decision #4)
   aiUsage: router({
