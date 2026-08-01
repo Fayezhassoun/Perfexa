@@ -123,7 +123,11 @@ export default function PortalPage() {
   return (
     <PageShell className="space-y-6" data-testid="portal">
       <PageHeader
-        eyebrow="White-label"
+        eyebrow={
+          <span className="live-status">
+            <span className={cn('live-dot', !enabled && 'bg-muted-foreground shadow-none')} aria-hidden /> White-label workspace
+          </span>
+        }
         title="Client Portal"
         description="Give every client a branded, read-only view of their growth — your name, your colors, your logo. Share with a link; revoke anytime."
         actions={
@@ -238,13 +242,19 @@ export default function PortalPage() {
             </div>
 
             {links.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No share links yet. Create one to give a client access.</p>
+              <div className="empty-state flex items-start gap-3 px-4 py-5">
+                <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                <div>
+                  <p className="text-sm font-medium">No share links yet</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Name a link above to give a client read-only access. You can revoke it anytime.</p>
+                </div>
+              </div>
             ) : (
               <div className="space-y-2">
                 {links.map((link) => (
                   <div
                     key={link.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-[color:var(--glass-border)] bg-[color:var(--glass-bg-subtle)] px-3 py-2.5"
+                    className="interactive flex items-center justify-between gap-3 rounded-lg border border-[color:var(--glass-border)] bg-[color:var(--glass-bg-subtle)] px-3 py-2.5"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{link.label ?? 'Untitled'}</p>
@@ -319,8 +329,8 @@ export default function PortalPage() {
                     { label: 'Active', value: '3' },
                   ].map((kpi) => (
                     <div key={kpi.label} className="rounded-xl border border-[color:var(--glass-border)] bg-[color:var(--glass-bg-subtle)] p-3">
-                      <p className="text-[0.62rem] font-semibold uppercase tracking-wider text-muted-foreground">{kpi.label}</p>
-                      <p className="mt-1 font-display text-xl font-semibold tabular-nums" style={{ color: primaryColor }}>
+                      <p className="stat-label text-muted-foreground">{kpi.label}</p>
+                      <p className="stat-value mt-1 text-xl" style={{ color: primaryColor }}>
                         {kpi.value}
                       </p>
                     </div>
