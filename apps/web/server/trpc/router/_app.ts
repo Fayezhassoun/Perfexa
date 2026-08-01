@@ -20,6 +20,7 @@ import { alertsRouter } from './alerts';
 import { portalRouter } from './portal';
 import { creativesRouter } from './creatives';
 import { reviewsRouter } from './reviews';
+import { reportsRouter } from './reports';
 import { modelsRouter } from './models';
 import { memoryRouter } from './memory';
 import { videoRouter } from './video';
@@ -46,6 +47,7 @@ export const appRouter = router({
   portal: portalRouter,
   creatives: creativesRouter,
   reviews: reviewsRouter,
+  reports: reportsRouter,
   models: modelsRouter,
   memory: memoryRouter,
   video: videoRouter,
