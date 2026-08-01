@@ -12,6 +12,7 @@ import {
   RefreshCw,
   ShieldAlert,
   TrendingDown,
+  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
@@ -69,7 +70,7 @@ function formatMetric(key: string, value: unknown): string | null {
   }
 }
 
-const METRIC_KEYS = ['spendCents', 'ctr', 'ctrChangePct', 'frequency', 'impressions', 'conversions', 'roas', 'cpcCents'];
+const METRIC_KEYS = ['spendCents', 'ctr', 'frequency', 'impressions', 'conversions', 'roas', 'cpcCents'];
 
 type AlertRow = {
   id: string;
@@ -122,7 +123,11 @@ export default function AlertsPage() {
   return (
     <PageShell className="space-y-6" data-testid="alerts">
       <PageHeader
-        eyebrow="Guardian"
+        eyebrow={
+          <span className="live-status">
+            <span className="live-dot" aria-hidden /> Guardian monitoring
+          </span>
+        }
         title="Alerts Center"
         description="Real-time anomaly and creative-fatigue detection across your campaigns. The Guardian watches spend, CTR, frequency, and conversions — and tells you what to do."
         actions={
@@ -142,10 +147,10 @@ export default function AlertsPage() {
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+              <p className="stat-label text-muted-foreground">{label}</p>
               <Icon className={cn('h-4 w-4', tone)} />
             </div>
-            <p className={cn('mt-2 font-display text-3xl font-semibold tabular-nums tracking-tight', tone)}>{value}</p>
+            <p className={cn('stat-value', tone)}>{value}</p>
           </div>
         ))}
       </div>
@@ -180,7 +185,7 @@ export default function AlertsPage() {
           <RefreshCw className="h-4 w-4 animate-spin" /> Scanning campaigns…
         </div>
       ) : visible.length === 0 ? (
-        <div className="glass-panel flex flex-col items-center gap-3 p-16 text-center">
+        <div className="empty-state glass-panel flex flex-col items-center gap-3 p-16 text-center">
           <ShieldAlert className="h-10 w-10 text-emerald-500" />
           <p className="font-display text-lg font-semibold">All clear</p>
           <p className="max-w-sm text-sm text-muted-foreground">
@@ -199,7 +204,8 @@ export default function AlertsPage() {
               <div
                 key={a.id}
                 className={cn(
-                  'glass-panel group relative overflow-hidden p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  'glass-panel group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  isCritical ? 'border-l-red-500 bg-red-500/[0.035]' : a.severity === 'warning' ? 'border-l-amber-500 bg-amber-500/[0.035]' : 'border-l-sky-500 bg-sky-500/[0.025]',
                   a.acknowledged && 'opacity-60',
                 )}
                 style={{ animationDelay: `${i * 40}ms` }}
@@ -236,6 +242,19 @@ export default function AlertsPage() {
                             {m}
                           </span>
                         ))}
+                        {metrics.ctrChangePct !== null && metrics.ctrChangePct !== undefined && Number.isFinite(Number(metrics.ctrChangePct)) && (
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-[0.7rem] tabular-nums',
+                              Number(metrics.ctrChangePct) < 0
+                                ? 'border-red-500/30 bg-red-500/10 text-red-500'
+                                : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+                            )}
+                          >
+                            {Number(metrics.ctrChangePct) < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                            CTR {Number(metrics.ctrChangePct) > 0 ? '+' : ''}{Number(metrics.ctrChangePct)}%
+                          </span>
+                        )}
                       </div>
                     )}
                     {a.suggestedAction && (
