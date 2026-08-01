@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PageShell, PageHeader } from '@/components/page-shell';
+import { ProofFlow } from '@/components/proof-flow';
 import { cn } from '@/lib/utils';
 
 function dollars(cents: number): string {
@@ -106,6 +107,9 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* Guided proof moment — real anomaly walkthrough, dismissible per org */}
+      <ProofFlow />
 
       {/* Ops Pulse — live operational signals across the five engines */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="ops-pulse">
