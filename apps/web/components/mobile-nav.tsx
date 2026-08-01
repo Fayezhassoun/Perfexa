@@ -29,7 +29,7 @@ const PRIMARY = [
 const GROUPS: { title: string; hrefs: string[] }[] = [
   {
     title: 'Operate',
-    hrefs: ['/dashboard', '/console', '/alerts', '/creatives', '/campaigns', '/growth-plan'],
+    hrefs: ['/dashboard', '/console', '/alerts', '/creatives', '/reports', '/campaigns', '/growth-plan'],
   },
   {
     title: 'Create',

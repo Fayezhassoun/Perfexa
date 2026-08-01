@@ -27,6 +27,7 @@ import {
   Bell,
   Gauge,
   Globe,
+  FileText,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -40,6 +41,7 @@ export const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/alerts', label: 'Alerts', icon: Bell },
   { href: '/creatives', label: 'Creative Health', icon: Gauge },
+  { href: '/reports', label: 'Reports', icon: FileText },
   { href: '/proposals', label: 'Proposals', icon: ClipboardCheck },
   { href: '/agents', label: 'Agents', icon: Bot },
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
