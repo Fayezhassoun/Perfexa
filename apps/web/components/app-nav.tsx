@@ -24,6 +24,9 @@ import {
   WandSparkles,
   Brain,
   Clapperboard,
+  Bell,
+  Gauge,
+  Globe,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -35,6 +38,8 @@ const NAV = [
   { href: '/business-brain', label: 'Business Brain', icon: Sparkles },
   { href: '/inspiration', label: 'Inspiration Studio', icon: WandSparkles },
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/alerts', label: 'Alerts', icon: Bell },
+  { href: '/creatives', label: 'Creative Health', icon: Gauge },
   { href: '/proposals', label: 'Proposals', icon: ClipboardCheck },
   { href: '/agents', label: 'Agents', icon: Bot },
   { href: '/campaigns', label: 'Campaigns', icon: Megaphone },
@@ -46,6 +51,7 @@ const NAV = [
   { href: '/leads', label: 'Leads', icon: Users },
   { href: '/knowledge', label: 'Knowledge', icon: BookOpen },
   { href: '/memory', label: 'Business Memory', icon: Brain },
+  { href: '/portal', label: 'Client Portal', icon: Globe },
   { href: '/audit', label: 'Audit log', icon: ScrollText },
 
   { href: '/settings', label: 'Settings', icon: Settings },

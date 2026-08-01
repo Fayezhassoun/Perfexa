@@ -34,8 +34,9 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage ad platform integrations, hard budget caps, team members, and notification preferences."
       />
-      <Tabs defaultValue="integrations">
+      <Tabs defaultValue="brand">
         <TabsList>
+          <TabsTrigger value="brand">Brand DNA</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="models">AI Model</TabsTrigger>
           <TabsTrigger value="budgets">Budgets</TabsTrigger>
@@ -43,6 +44,9 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
+        <TabsContent value="brand">
+          <BrandDNATab />
+        </TabsContent>
         <TabsContent value="integrations">
           <IntegrationsTab />
         </TabsContent>
@@ -75,6 +79,93 @@ export default function SettingsPage() {
 }
 
 /** Result banner after the OAuth round-trip (?connected= / ?error=). */
+function BrandDNATab() {
+  const utils = trpc.useUtils();
+  const brand = trpc.settings.brand.get.useQuery();
+  const update = trpc.settings.brand.update.useMutation({
+    onSuccess: () => {
+      utils.settings.brand.invalidate();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    },
+  });
+
+  const profile = (brand.data ?? {}) as Record<string, unknown>;
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState(false);
+
+  // Sync server → local on load
+  const str = (v: unknown) => (typeof v === 'string' ? v : Array.isArray(v) ? v.join('\n') : '');
+  const fields: Array<{ key: string; label: string; hint: string; multiline?: boolean }> = [
+    { key: 'companyName', label: 'Company name', hint: 'What the AI should call you.' },
+    { key: 'tagline', label: 'Tagline', hint: 'One line that captures the brand.' },
+    { key: 'industry', label: 'Industry', hint: 'Sector and niche.' },
+    { key: 'targetAudience', label: 'Target audience', hint: 'Who you sell to — regions, demographics, psychographics.', multiline: true },
+    { key: 'voiceTone', label: 'Voice & tone', hint: 'How the brand sounds. e.g. "confident, plain-spoken, never salesy".', multiline: true },
+    { key: 'usp', label: 'Unique selling point', hint: 'The one thing you do better than anyone.', multiline: true },
+    { key: 'doList', label: 'Always do', hint: 'One per line. Things the AI must lean into.', multiline: true },
+    { key: 'dontList', label: 'Never do', hint: 'One per line. Hard guardrails for the AI.', multiline: true },
+    { key: 'competitors', label: 'Competitors', hint: 'One per line. Who you watch.', multiline: true },
+  ];
+
+  const val = (key: string) => (form[key] !== undefined ? form[key] : str(profile[key]));
+
+  const handleSave = () => {
+    const payload: Record<string, unknown> = {};
+    for (const f of fields) {
+      const raw = val(f.key).trim();
+      if (!raw) continue;
+      payload[f.key] = f.multiline && ['doList', 'dontList', 'competitors'].includes(f.key)
+        ? raw.split('\n').map((s) => s.trim()).filter(Boolean)
+        : raw;
+    }
+    update.mutate(payload as never);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between text-base">
+          Brand DNA
+          <Button size="sm" onClick={handleSave} disabled={update.isPending}>
+            {saved ? 'Saved ✓' : update.isPending ? 'Saving…' : 'Save Brand DNA'}
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          This is the ground truth your AI team writes from. The more specific you are, the more on-brand every
+          campaign, alert, and report becomes.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-5 sm:grid-cols-2">
+        {fields.map((f) => (
+          <div key={f.key} className={f.multiline ? 'sm:col-span-2' : ''}>
+            <Label htmlFor={`brand-${f.key}`}>{f.label}</Label>
+            {f.multiline ? (
+              <textarea
+                id={`brand-${f.key}`}
+                value={val(f.key)}
+                onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                placeholder={f.hint}
+                rows={3}
+                className="glass-input mt-1.5 w-full rounded-xl px-3 py-2 text-sm placeholder:text-muted-foreground"
+              />
+            ) : (
+              <Input
+                id={`brand-${f.key}`}
+                value={val(f.key)}
+                onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                placeholder={f.hint}
+                className="mt-1.5"
+              />
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">{f.hint}</p>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 function OAuthNotice() {
   const params = useSearchParams();
   const connected = params.get('connected');

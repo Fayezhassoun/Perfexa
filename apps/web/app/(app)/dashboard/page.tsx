@@ -14,13 +14,14 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { Activity, ArrowRight, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
+import { Activity, ArrowRight, Bell, Flame, Gauge, Globe, RefreshCw, Sparkles, WandSparkles } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PageShell, PageHeader } from '@/components/page-shell';
+import { cn } from '@/lib/utils';
 
 function dollars(cents: number): string {
   return `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
@@ -44,6 +45,9 @@ export default function DashboardPage() {
   const seo = trpc.dashboard.seoTracker.useQuery();
   const social = trpc.social.summary.useQuery();
   const reviewStats = trpc.reviews.stats.useQuery();
+  const activeAlerts = trpc.alerts.list.useQuery({ unacknowledgedOnly: true, limit: 100 });
+  const fatigue = trpc.creatives.fatigueSignals.useQuery();
+  const portal = trpc.portal.get.useQuery();
   const simulate = trpc.dashboard.simulateTick.useMutation({
     onSuccess: () => utils.dashboard.invalidate(),
   });
@@ -71,6 +75,12 @@ export default function DashboardPage() {
       (totals.spendCents > 0 || totals.impressions > 0 || totals.clicks > 0 || totals.conversions > 0),
   );
 
+  const alertRows = (activeAlerts.data ?? []) as Array<{ id: string; severity: string; title: string }>;
+  const criticalAlerts = alertRows.filter((a) => a.severity === 'critical').length;
+  const fatigueRows = (fatigue.data ?? []) as Array<{ creativeId: string; severity: string }>;
+  const criticalFatigue = fatigueRows.filter((f) => f.severity === 'critical').length;
+  const portalEnabled = portal.data?.enabled ?? false;
+
   return (
     <PageShell className="space-y-6" data-testid="dashboard">
       <PageHeader
@@ -96,6 +106,67 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* Ops Pulse — live operational signals across the five engines */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="ops-pulse">
+        <Link
+          href="/alerts"
+          className={cn(
+            'glass-panel group flex items-center justify-between p-4 transition-all duration-200 hover:-translate-y-0.5',
+            criticalAlerts && 'border-red-500/30',
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', criticalAlerts ? 'bg-red-500/15 text-red-500' : 'bg-[color:var(--glass-bg-subtle)] text-muted-foreground')}>
+              <Bell className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-display text-xl font-semibold tabular-nums">{alertRows.length}</p>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Active alerts{criticalAlerts ? ` · ${criticalAlerts} critical` : ''}
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
+        </Link>
+
+        <Link
+          href="/creatives"
+          className={cn(
+            'glass-panel group flex items-center justify-between p-4 transition-all duration-200 hover:-translate-y-0.5',
+            criticalFatigue && 'border-red-500/30',
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', fatigueRows.length ? 'bg-amber-500/15 text-amber-500' : 'bg-[color:var(--glass-bg-subtle)] text-muted-foreground')}>
+              <Gauge className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-display text-xl font-semibold tabular-nums">{fatigueRows.length}</p>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Fatigued creatives{criticalFatigue ? ` · ${criticalFatigue} critical` : ''}
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
+        </Link>
+
+        <Link
+          href="/portal"
+          className="glass-panel group flex items-center justify-between p-4 transition-all duration-200 hover:-translate-y-0.5"
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', portalEnabled ? 'bg-emerald-500/15 text-emerald-500' : 'bg-[color:var(--glass-bg-subtle)] text-muted-foreground')}>
+              <Globe className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-display text-xl font-semibold">{portalEnabled ? 'Live' : 'Off'}</p>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Client portal</p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
+        </Link>
+      </div>
 
       <Card className="border-primary/20 bg-primary/[0.04]" data-testid="growth-plan-bridge">
         <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
