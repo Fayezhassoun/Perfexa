@@ -140,22 +140,27 @@ export default function BusinessBrainPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-base">What GrowthCrew already knows</CardTitle>
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-base">What GrowthCrew already knows</CardTitle>
+                <span className="live-status text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <span className="live-dot" aria-hidden /> Context active
+                </span>
+              </div>
               <CardDescription className="mt-1">This profile comes from your onboarding setup.</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="glass-tile p-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Business name</p>
-            <p className="mt-1 truncate font-medium">{org.name}</p>
+            <p className="stat-label text-muted-foreground">Business name</p>
+            <p className="mt-1 truncate font-display text-base font-semibold">{org.name}</p>
           </div>
           <div className="glass-tile p-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Website</p>
-            <p className="mt-1 truncate font-medium">{org.websiteUrl ?? 'Not added yet'}</p>
+            <p className="stat-label text-muted-foreground">Website</p>
+            <p className="mt-1 truncate font-display text-base font-semibold">{org.websiteUrl ?? 'Not added yet'}</p>
           </div>
           <div className="glass-tile p-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Goals</p>
+            <p className="stat-label text-muted-foreground">Goals</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {goals.length ? goals.map((goal) => <Badge key={goal} variant="outline">{goal}</Badge>) : (
                 <span className="font-medium text-muted-foreground">Not set yet</span>
@@ -163,15 +168,15 @@ export default function BusinessBrainPage() {
             </div>
           </div>
           <div className="glass-tile p-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Budget ceiling</p>
-            <p className="mt-1 font-medium">{formatBudget(org.monthlyBudgetCeilingCents)}</p>
+            <p className="stat-label text-muted-foreground">Budget ceiling</p>
+            <p className="mt-1 font-display text-base font-semibold tabular-nums">{formatBudget(org.monthlyBudgetCeilingCents)}</p>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Shape your context</CardTitle>
+          <CardTitle className="text-lg">Shape your context</CardTitle>
           <CardDescription>Keep this specific enough to guide useful drafts, and update it as your business changes.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-5 md:grid-cols-2">
@@ -239,6 +244,12 @@ export default function BusinessBrainPage() {
                 );
               })}
             </div>
+            {channels.length === 0 && (
+              <div className="empty-state flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                Choose the channels GrowthCrew should prioritize in drafts.
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="business-brain-constraints">Constraints / things GrowthCrew should avoid</Label>

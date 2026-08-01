@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Mic, MicOff, Plus, Send, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Mic, MicOff, Plus, Send, Volume2, VolumeX } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +81,7 @@ export default function ConsolePage() {
       <aside className="glass-elevated m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
         <div className="glass-divider-b flex items-center justify-between p-3">
           <div>
-            <p className="text-sm font-medium">Conversations</p>
+            <p className="font-display text-sm font-semibold">Conversations</p>
             <p className="mt-0.5 text-[0.68rem] uppercase tracking-[0.12em] text-muted-foreground">Your workbench</p>
           </div>
           <Button
@@ -94,24 +94,32 @@ export default function ConsolePage() {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
-          {(conversationsQuery.data ?? []).map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setConversationId(c.id)}
-              className={cn(
-                'mb-1 w-full rounded-xl border border-transparent px-3 py-2 text-left text-sm transition-all duration-300 hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)]',
-                conversationId === c.id &&
-                  'border-[color:var(--glass-border-strong)] bg-[color:var(--glass-bg-subtle)] shadow-sm',
-              )}
-            >
-              <span className="block truncate font-medium">{c.title ?? 'Conversation'}</span>
-              {c.lastMessage?.content && (
-                <span className="block truncate text-xs text-muted-foreground">
-                  {c.lastMessage.content}
-                </span>
-              )}
-            </button>
-          ))}
+          {(conversationsQuery.data ?? []).length === 0 && !conversationsQuery.isLoading ? (
+            <div className="empty-state flex min-h-40 flex-col items-center justify-center gap-2 px-4 py-6 text-center">
+              <MessageCircle className="h-5 w-5 text-muted-foreground/60" />
+              <p className="text-xs font-medium">Your conversations live here</p>
+              <p className="text-[0.68rem] leading-relaxed text-muted-foreground">Start with a question below.</p>
+            </div>
+          ) : (
+            (conversationsQuery.data ?? []).map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setConversationId(c.id)}
+                className={cn(
+                  'interactive mb-1 w-full rounded-xl border border-transparent px-3 py-2 text-left text-sm transition-all duration-300 hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)]',
+                  conversationId === c.id &&
+                    'border-[color:var(--glass-border-strong)] bg-[color:var(--glass-bg-subtle)] shadow-sm',
+                )}
+              >
+                <span className="block truncate font-medium">{c.title ?? 'Conversation'}</span>
+                {c.lastMessage?.content && (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {c.lastMessage.content}
+                  </span>
+                )}
+              </button>
+            ))
+          )}
         </div>
       </aside>
 
@@ -119,7 +127,12 @@ export default function ConsolePage() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="liquid-topbar flex h-14 items-center justify-between px-4">
           <div>
-            <h1 className="font-display font-semibold tracking-tight">Voice Console</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-display font-semibold tracking-tight">Voice Console</h1>
+              <span className="live-status text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="live-dot" aria-hidden /> Ready
+              </span>
+            </div>
             <p className="hidden text-[0.68rem] text-muted-foreground sm:block">Speak clearly. Approve deliberately.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -171,7 +184,7 @@ export default function ConsolePage() {
               <div className="voice-orb mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-[color:hsl(var(--voice))]">
                 <Mic className="h-7 w-7" />
               </div>
-              <p className="font-display max-w-md text-2xl font-semibold tracking-tight">
+              <p className="font-display max-w-md text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
                 Tell me what you need — <span className="text-primary">like you would a colleague.</span>
               </p>
               <p className="mt-3 max-w-md text-sm text-muted-foreground">
@@ -228,9 +241,9 @@ export default function ConsolePage() {
         </div>
 
         {/* Input row */}
-        <div className="glass-divider-t bg-[color:var(--glass-bg-subtle)] p-4 backdrop-blur-xl">
-          {voice.partial && (
-            <p className="mb-2 text-sm italic text-muted-foreground" data-testid="partial-transcript">
+          <div className="glass-divider-t bg-[color:var(--glass-bg-subtle)] p-4 backdrop-blur-xl">
+            {voice.partial && (
+            <p className="mb-2 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2 text-sm italic text-muted-foreground" data-testid="partial-transcript">
               {voice.partial}…
             </p>
           )}

@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ScanSearch,
   TrendingDown,
+  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
@@ -109,7 +110,11 @@ export default function CreativesPage() {
   return (
     <PageShell className="space-y-6" data-testid="creatives">
       <PageHeader
-        eyebrow="Creative intelligence"
+        eyebrow={
+          <span className="live-status">
+            <span className="live-dot" aria-hidden /> Creative intelligence
+          </span>
+        }
         title="Creative Health"
         description="Ad fatigue is silent until it's expensive. The detector watches frequency, CTR decay, and conversion drought on every creative — and tells you when to rotate."
         actions={
@@ -140,10 +145,10 @@ export default function CreativesPage() {
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+              <p className="stat-label text-muted-foreground">{label}</p>
               <Icon className={cn('h-4 w-4', tone)} />
             </div>
-            <p className={cn('mt-2 font-display text-3xl font-semibold tabular-nums tracking-tight', tone)}>{value}</p>
+            <p className={cn('stat-value', tone)}>{value}</p>
           </div>
         ))}
       </div>
@@ -154,7 +159,7 @@ export default function CreativesPage() {
           <RefreshCw className="h-4 w-4 animate-spin" /> Analyzing creatives…
         </div>
       ) : rows.length === 0 ? (
-        <div className="glass-panel flex flex-col items-center gap-3 p-16 text-center">
+        <div className="empty-state glass-panel flex flex-col items-center gap-3 p-16 text-center">
           <ImageIcon className="h-10 w-10 text-emerald-500" />
           <p className="font-display text-lg font-semibold">No fatigued creatives</p>
           <p className="max-w-sm text-sm text-muted-foreground">
@@ -168,7 +173,10 @@ export default function CreativesPage() {
             return (
               <div
                 key={s.creativeId}
-                className="glass-panel animate-fade-up group relative overflow-hidden p-5 transition-all duration-200 hover:-translate-y-0.5"
+                className={cn(
+                  'glass-panel animate-fade-up group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  isCritical ? 'border-l-red-500 bg-red-500/[0.035]' : 'border-l-amber-500 bg-amber-500/[0.035]',
+                )}
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 <span className={cn('absolute inset-y-0 left-0 w-1', isCritical ? 'bg-red-500' : 'bg-amber-500')} />
@@ -199,7 +207,7 @@ export default function CreativesPage() {
                             : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
                         )}
                       >
-                        <TrendingDown className="h-3 w-3" />
+                        {s.ctrChangePct < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
                         {s.ctrChangePct > 0 ? '+' : ''}
                         {s.ctrChangePct}% vs avg
                       </span>
