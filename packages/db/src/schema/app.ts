@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, uuid, jsonb, unique, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, uuid, jsonb, unique, boolean, real } from 'drizzle-orm/pg-core';
 import { users } from './auth';
 import type { Goal } from './enums';
 
@@ -503,5 +503,26 @@ export const alerts = pgTable('alerts', {
   suggestedAction: text('suggested_action'),
   acknowledged: boolean('acknowledged').default(false).notNull(),
   acknowledgedAt: timestamp('acknowledged_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+/** Per-creative performance snapshots for fatigue detection. */
+export const creativePerformance = pgTable('creative_performance', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  campaignId: uuid('campaign_id').references(() => campaignsMirror.id),
+  creativeId: text('creative_id').notNull(),
+  platform: text('platform'),
+  headline: text('headline'),
+  imageUrl: text('image_url'),
+  impressions: integer('impressions').default(0),
+  clicks: integer('clicks').default(0),
+  spendCents: integer('spend_cents').default(0),
+  conversions: integer('conversions').default(0),
+  frequency: real('frequency').default(0),
+  ctr: real('ctr').default(0),
+  snapshotAt: timestamp('snapshot_at', { mode: 'date' }).defaultNow().notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });

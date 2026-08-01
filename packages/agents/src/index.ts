@@ -60,3 +60,10 @@ export {
   resolvePortal,
   type PortalSummary,
 } from './services/portal.js';
+export {
+  detectCreativeFatigue,
+  listFatigueSignals,
+  recordCreativeSnapshot,
+  type FatigueSignal,
+  type FatigueReport,
+} from './services/creative-fatigue.js';

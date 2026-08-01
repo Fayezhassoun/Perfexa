@@ -18,6 +18,7 @@ import { contentRouter } from './content';
 import { competitorsRouter } from './competitors';
 import { alertsRouter } from './alerts';
 import { portalRouter } from './portal';
+import { creativesRouter } from './creatives';
 import { reviewsRouter } from './reviews';
 import { modelsRouter } from './models';
 import { memoryRouter } from './memory';
@@ -43,6 +44,7 @@ export const appRouter = router({
   competitors: competitorsRouter,
   alerts: alertsRouter,
   portal: portalRouter,
+  creatives: creativesRouter,
   reviews: reviewsRouter,
   models: modelsRouter,
   memory: memoryRouter,
