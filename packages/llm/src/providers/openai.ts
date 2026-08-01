@@ -23,6 +23,8 @@ export interface OpenAIProviderOptions {
   apiKey?: string;
   /** Defaults to LLM_MODEL, then gpt-4o-mini. */
   model?: string;
+  /** Custom base URL — set to https://openrouter.ai/api/v1 for OpenRouter. Defaults to OPENAI_BASE_URL env. */
+  baseURL?: string;
   /** Injectable fetch — used by tests; production uses the SDK default. */
   fetch?: typeof fetch;
 }
@@ -34,7 +36,8 @@ export function createOpenAIProvider(options?: OpenAIProviderOptions): LLMProvid
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not set. Set it or use LLM_PROVIDER=mock.');
     }
-    client ??= new OpenAI({ apiKey, ...(options?.fetch ? { fetch: options.fetch } : {}) });
+    const baseURL = options?.baseURL ?? process.env.OPENAI_BASE_URL ?? undefined;
+    client ??= new OpenAI({ apiKey, ...(baseURL ? { baseURL } : {}), ...(options?.fetch ? { fetch: options.fetch } : {}) });
     return client;
   };
 
