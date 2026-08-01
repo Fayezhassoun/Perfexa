@@ -15,6 +15,12 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageShell, PageHeader } from '@/components/page-shell';
 import { ModelSelectorCard } from '@/components/model-selector';
+import {
+  GoLiveDialog,
+  IntegrationPlatformCard,
+  type IntegrationPlatform,
+  type IntegrationRecord,
+} from '@/components/integrations-platform-card';
 
 const PLATFORM_LABELS: Record<string, string> = {
   google_ads: 'Google Ads',
@@ -23,8 +29,6 @@ const PLATFORM_LABELS: Record<string, string> = {
   ga4: 'Google Analytics 4',
   gsc: 'Search Console',
 };
-
-type Platform = 'google_ads' | 'meta' | 'tiktok' | 'ga4' | 'gsc';
 
 export default function SettingsPage() {
   return (
@@ -191,7 +195,11 @@ function OAuthNotice() {
 function IntegrationsTab() {
   const utils = trpc.useUtils();
   const integrations = trpc.settings.integrations.useQuery();
-  const connect = trpc.settings.connect.useMutation({ onSuccess: () => utils.settings.invalidate() });
+  const [connecting, setConnecting] = useState<IntegrationPlatform | null>(null);
+  const connect = trpc.settings.connect.useMutation({
+    onSuccess: () => utils.settings.invalidate(),
+    onSettled: () => setConnecting(null),
+  });
   const setMode = trpc.settings.setMode.useMutation({
     onSuccess: () => {
       utils.settings.invalidate();
@@ -199,104 +207,92 @@ function IntegrationsTab() {
       setConfirmText('');
     },
   });
-  const [confirming, setConfirming] = useState<Platform | null>(null);
+  const [confirming, setConfirming] = useState<IntegrationPlatform | null>(null);
   const [confirmText, setConfirmText] = useState('');
 
+  const rows = (integrations.data ?? []) as IntegrationRecord[];
+  const connectedCount = rows.filter((integration) => integration.connected).length;
+
+  if (integrations.isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" aria-label="Loading integrations" aria-busy="true">
+        {Array.from({ length: 5 }, (_, index) => (
+          <Card key={index} className="h-[330px] animate-pulse bg-[color:var(--glass-bg-subtle)]" />
+        ))}
+      </div>
+    );
+  }
+
+  if (integrations.error) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-destructive" role="alert">
+          We couldn&apos;t load your integrations. {integrations.error.message}
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <Suspense fallback={null}>
         <OAuthNotice />
       </Suspense>
-      {(integrations.data ?? []).map((integration) => (
-        <Card key={integration.platform}>
-          <CardContent className="space-y-3 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-medium">{PLATFORM_LABELS[integration.platform]}</p>
-                <p className="text-xs text-muted-foreground">
-                  {integration.connected
-                    ? `Connected (${integration.externalAccountId ?? 'sandbox'}) · ${integration.health}`
-                    : 'Not connected'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={integration.mode === 'live' ? 'destructive' : 'success'}>
-                  {integration.mode === 'live' ? 'LIVE — real money' : 'Sandbox — safe'}
-                </Badge>
-                {!integration.connected && (
-                  <>
-                    {integration.oauthConfigured && integration.connectUrl ? (
-                      <Button variant="default" size="sm" asChild>
-                        <a href={integration.connectUrl}>Connect</a>
-                      </Button>
-                    ) : null}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={connect.isPending}
-                      title={
-                        integration.oauthConfigured
-                          ? 'Dev shortcut: simulate a connected account without OAuth'
-                          : 'OAuth app credentials are not configured — sandbox simulation only'
-                      }
-                      onClick={() => connect.mutate({ platform: integration.platform })}
-                    >
-                      {integration.oauthConfigured ? 'Simulate (dev)' : 'Connect sandbox'}
-                    </Button>
-                  </>
-                )}
-                {integration.connected && integration.mode === 'sandbox' && (
-                  <Button variant="outline" size="sm" onClick={() => setConfirming(integration.platform)}>
-                    Switch to live…
-                  </Button>
-                )}
-                {integration.connected && integration.mode === 'live' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={setMode.isPending}
-                    onClick={() => setMode.mutate({ platform: integration.platform, mode: 'sandbox' })}
-                  >
-                    Back to sandbox
-                  </Button>
-                )}
-              </div>
-            </div>
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.15em] text-primary">Connected ecosystem</p>
+          <h2 className="mt-1 font-display text-xl font-semibold tracking-tight">Bring every growth signal together.</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Start safely in sandbox mode, then move an account live only when you&apos;re ready. Each connection keeps your reporting and decisions grounded in the data that matters.
+          </p>
+        </div>
+        <Badge variant="outline" className="w-fit shrink-0 px-3 py-1.5">
+          {connectedCount} of {rows.length} connected
+        </Badge>
+      </div>
 
-            {confirming === integration.platform && (
-              <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
-                <p className="text-sm">
-                  Going live means campaigns can spend <strong>real money</strong> on this account
-                  (still only after your approval, and always under the Budget Guardian&apos;s caps).
-                  Type <strong>LIVE</strong> to confirm.
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    value={confirmText}
-                    onChange={(e) => setConfirmText(e.target.value)}
-                    placeholder="LIVE"
-                    className="w-32"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    disabled={setMode.isPending}
-                    onClick={() =>
-                      setMode.mutate({ platform: integration.platform, mode: 'live', confirmText })
-                    }
-                  >
-                    Confirm live mode
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setConfirming(null)}>
-                    Cancel
-                  </Button>
-                </div>
-                {setMode.error && <p className="text-sm text-destructive">{setMode.error.message}</p>}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+      {connect.error && (
+        <p className="rounded-xl border border-destructive/35 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+          {connect.error.message}
+        </p>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {rows.map((integration) => (
+          <IntegrationPlatformCard
+            key={integration.platform}
+            integration={integration}
+            connectPending={connecting === integration.platform && connect.isPending}
+            setModePending={setMode.isPending}
+            onConnect={() => {
+              setConnecting(integration.platform);
+              connect.mutate({ platform: integration.platform });
+            }}
+            onGoLive={() => {
+              setMode.reset();
+              setConfirming(integration.platform);
+              setConfirmText('');
+            }}
+            onSwitchToSandbox={() => setMode.mutate({ platform: integration.platform, mode: 'sandbox' })}
+          />
+        ))}
+      </div>
+
+      {confirming && (
+        <GoLiveDialog
+          platform={confirming}
+          confirmText={confirmText}
+          error={setMode.error?.message}
+          pending={setMode.isPending}
+          onConfirmTextChange={setConfirmText}
+          onConfirm={() => setMode.mutate({ platform: confirming, mode: 'live', confirmText })}
+          onCancel={() => {
+            setMode.reset();
+            setConfirming(null);
+            setConfirmText('');
+          }}
+        />
+      )}
     </div>
   );
 }
