@@ -51,3 +51,12 @@ export {
   acknowledgeAlert,
   type AnomalyAlert,
 } from './services/anomaly-detection.js';
+export {
+  getPortalConfig,
+  updatePortalConfig,
+  createShareLink,
+  listShareLinks,
+  revokeShareLink,
+  resolvePortal,
+  type PortalSummary,
+} from './services/portal.js';

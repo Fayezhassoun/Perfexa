@@ -52,6 +52,46 @@ export const orgMembers = pgTable(
   (t) => [unique('org_members_org_user_unique').on(t.orgId, t.userId)],
 );
 
+/** White-label portal configuration per org. */
+export interface PortalConfig {
+  portalName?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  primaryColor?: string;
+  accentColor?: string;
+  customDomain?: string;
+  footerText?: string;
+  showGrowthCrewBranding?: boolean;
+  allowedEmailDomains?: string[];
+}
+
+export const portalConfigs = pgTable('portal_configs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .unique()
+    .references(() => organizations.id),
+  config: jsonb('config').$type<PortalConfig>().default({}),
+  enabled: boolean('enabled').default(false),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const portalShareLinks = pgTable('portal_share_links', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  token: text('token').notNull().unique(),
+  label: text('label'),
+  scopes: jsonb('scopes').$type<string[]>().default(['dashboard']),
+  expiresAt: timestamp('expires_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
 export const orgInvites = pgTable('org_invites', {
   id: uuid('id').defaultRandom().primaryKey(),
   orgId: uuid('org_id')
