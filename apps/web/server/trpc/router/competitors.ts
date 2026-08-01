@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { services } from '@growthcrew/agents';
+import { services, generateCounterCampaign } from '@growthcrew/agents';
 import { router, orgProcedure } from '../trpc';
 
 export const competitorsRouter = router({
@@ -55,4 +55,19 @@ export const competitorsRouter = router({
       .input(z.object({ scanId: z.string().uuid() }))
       .query(({ ctx, input }) => services.adIntel.creatives(ctx.agentCtx, input.scanId)),
   }),
+
+  // Counter-Campaign Agent: analyze scans → propose counter-campaign
+  counterCampaign: orgProcedure
+    .input(
+      z.object({
+        competitorId: z.string().uuid().optional(),
+        monthlyBudgetCents: z.number().int().positive().max(10000000).optional(),
+      }),
+    )
+    .mutation(({ ctx, input }) =>
+      generateCounterCampaign(ctx.agentCtx, {
+        competitorId: input.competitorId,
+        monthlyBudgetCents: input.monthlyBudgetCents,
+      }),
+    ),
 });
