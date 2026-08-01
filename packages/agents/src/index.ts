@@ -44,3 +44,10 @@ export type { UserOrg, AcceptInviteResult } from './services/orgs.js';
 export type { SystemHealth, AdminUserRow } from './services/admin.js';
 export type { AuditPage } from './services/audit-log.js';
 export { generateCounterCampaign, type CounterCampaignInput, type CounterCampaignResult } from './services/counter-campaign.js';
+export {
+  detectAnomalies,
+  runAnomalyDetection,
+  listAlerts,
+  acknowledgeAlert,
+  type AnomalyAlert,
+} from './services/anomaly-detection.js';

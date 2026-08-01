@@ -16,6 +16,7 @@ import { adminRouter } from './admin';
 import { socialRouter } from './social';
 import { contentRouter } from './content';
 import { competitorsRouter } from './competitors';
+import { alertsRouter } from './alerts';
 import { reviewsRouter } from './reviews';
 import { modelsRouter } from './models';
 import { memoryRouter } from './memory';
@@ -39,6 +40,7 @@ export const appRouter = router({
   social: socialRouter,
   content: contentRouter,
   competitors: competitorsRouter,
+  alerts: alertsRouter,
   reviews: reviewsRouter,
   models: modelsRouter,
   memory: memoryRouter,

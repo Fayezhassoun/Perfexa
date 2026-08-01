@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, uuid, jsonb, unique } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, uuid, jsonb, unique, boolean } from 'drizzle-orm/pg-core';
 import { users } from './auth';
 import type { Goal } from './enums';
 
@@ -436,4 +436,32 @@ export const reviews = pgTable('reviews', {
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date()),
+});
+
+export type AlertSeverity = 'info' | 'warning' | 'critical';
+export type AlertType =
+  | 'spend_velocity'
+  | 'zero_conversions'
+  | 'ctr_drop'
+  | 'cpc_spike'
+  | 'budget_cap_near'
+  | 'campaign_paused'
+  | 'competitor_surge';
+
+export const alerts = pgTable('alerts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  type: text('type').notNull(),
+  severity: text('severity').notNull().default('info'),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  campaignId: uuid('campaign_id'),
+  platform: text('platform'),
+  metrics: jsonb('metrics').$type<Record<string, unknown>>(),
+  suggestedAction: text('suggested_action'),
+  acknowledged: boolean('acknowledged').default(false).notNull(),
+  acknowledgedAt: timestamp('acknowledged_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
