@@ -8,6 +8,7 @@ import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { Button } from '@/components/ui/button';
 import { AppNav, ThemeToggle } from '@/components/app-nav';
+import { MobileNav } from '@/components/mobile-nav';
 import { OrgSwitcher } from '@/components/org-switcher';
 import { BrandMark } from '@/components/brand-mark';
 
@@ -70,8 +71,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <ThemeToggle />
           </span>
         </header>
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 pb-20 md:pb-0">{children}</main>
       </div>
+      <MobileNav />
     </div>
   );
 }

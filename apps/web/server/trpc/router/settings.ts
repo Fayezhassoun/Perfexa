@@ -80,6 +80,14 @@ export const settingsRouter = router({
   members: membersRouter,
   notifications: notificationsRouter,
 
+  // AI usage metering + cost guardrails (Fox Biz decision #4)
+  aiUsage: router({
+    stats: orgProcedure.query(({ ctx }) => services.llmUsage.getUsageStats(ctx.agentCtx)),
+    setBudget: orgProcedure
+      .input(z.object({ cents: z.number().int().min(100).max(100000) }))
+      .mutation(({ ctx, input }) => services.llmUsage.setOrgBudgetCents(ctx.agentCtx, input.cents)),
+  }),
+
   // Brand DNA — structured brand profile for AI grounding
   brand: router({
     get: orgProcedure.query(async ({ ctx }) => {

@@ -415,17 +415,34 @@ async function websiteFromDb(ctx: AgentContext): Promise<string | null> {
 // LLM provider path (openai/anthropic) — same flow, model-driven.
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are the GrowthCrew Orchestrator for a small business owner who knows nothing about advertising.
-Style: simple, reassuring, jargon-free. Short sentences. Never invent numbers.
+const SYSTEM_PROMPT = `You are the GrowthCrew Orchestrator — the user's fractional head of growth. You are not a chatbot answering tickets; you are a senior marketing strategist who happens to live in their dashboard. You think like an operator: you weigh trade-offs, you cite specifics, you anticipate the next problem, and you talk to the owner like a trusted colleague, not a customer.
 
-Flow you must follow:
-1. When the user expresses marketing goals (SEO, visibility, leads, ads), FIRST run seo.run_audit on their website, then reply with a plain-language summary of the findings and ask AT MOST 2 clarifying questions (which city/area they serve; whether the suggested budget is OK).
-2. When they answer, propose a concrete plan: which specialist agents you will set up (SEO, Google Ads, Lead Gen as needed), the budget split (default 60% ads / 40% reserve), timeline, and expected outcomes. End with a one-line voice summary like: "Launch a $300/month Google Search campaign targeting Chicago — say approve or cancel."
-3. NEVER execute spend, publish, or delete actions yourself. The system gates them behind human approval — if a tool call fails with an approval error, explain that approval is needed and stop.
-4. Ground marketing advice in the knowledge base when relevant. Keep replies under 120 words unless asked for detail.`;
+How you communicate:
+- Be substantive. A real strategist doesn't answer a growth question in one line. Give the reasoning, the recommendation, and the "here's what I'd watch for." Two to four short paragraphs is normal; use a tight list when you're laying out options or steps.
+- Be specific and grounded. Reference the brand context, the business memory, and any live numbers you pulled from tools. Vague advice ("improve your SEO") is worthless — say what to change and why it matters.
+- Plain language, no jargon walls. The owner is smart but not an ads specialist. Explain a term the first time you use it, then move on. Warm and confident, never salesy or sycophantic.
+- Match the depth to the ask. A quick factual question gets a crisp answer. A strategy question gets real thinking. Don't pad, but don't shortchange.
+- Never invent numbers. If you don't have a metric, say so or pull it with a tool.
+
+Your operating flow (follow it, but keep it conversational — never sound like a script):
+1. When the user expresses a marketing goal (SEO, visibility, leads, ads), FIRST run seo.run_audit on their website. Then walk them through what you found in plain terms, give your read on what it means for their business, and ask AT MOST 2 clarifying questions (which city/area they serve; whether the suggested budget works).
+2. When they answer, propose a concrete plan: which specialist agents you'll set up (SEO, Google Ads, Lead Gen as needed), the budget split (default 60% ads / 40% reserve), the timeline, and the outcomes they should expect. Explain the reasoning behind the split. Close with a one-line decision prompt like: "Launch a $300/month Google Search campaign targeting Chicago — say approve or cancel."
+3. For general questions, brainstorming, or "what do you think" prompts — just be the strategist. Reason it through, give your honest recommendation with the trade-offs, and offer to turn it into action. You don't need to force every message into a campaign.
+4. NEVER execute spend, publish, or delete actions yourself. The system gates them behind human approval — if a tool call fails with an approval error, explain plainly that the step needs their sign-off and stop.
+5. Ground marketing advice in the knowledge base and business memory when relevant.`;
 
 async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voice' | 'text'): Promise<OrchestratorResult> {
   void modality;
+
+  // --- Cost guardrail: block if org is over monthly LLM budget ---
+  const { isWithinBudget, recordUsage, getUsageStats } = await import('./services/llm-usage.js');
+  if (!(await isWithinBudget(ctx))) {
+    const stats = await getUsageStats(ctx);
+    return {
+      assistantMessage: `You've reached your monthly AI budget ($${(stats.estimatedCostCents / 100).toFixed(2)} of $${(stats.budgetCents / 100).toFixed(2)} used). Your deterministic engines (alerts, fatigue detection, competitor intel) still run normally. Upgrade your plan or increase your budget in Settings → AI Usage to resume AI conversations.`,
+    };
+  }
+
   const { getToolsForAgent } = await import('./tools.js');
   const { zodToJsonSchema } = await import('@growthcrew/llm');
   const tools = getToolsForAgent('orchestrator');
@@ -489,6 +506,10 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
   const toolCallsMade: string[] = [];
   for (let round = 0; round < 4; round++) {
     const res = await ctx.llm.chat(messages, { tools: specs });
+    // Record token usage for cost guardrails
+    if (res.usage) {
+      await recordUsage(ctx, res.usage).catch(() => {});
+    }
     if (!res.toolCalls?.length) {
       return { assistantMessage: res.content || 'I am here — tell me what you need.', agentRuns: undefined };
     }

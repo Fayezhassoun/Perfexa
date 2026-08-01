@@ -5,6 +5,12 @@ primary_region = "fra"
 [build]
   dockerfile = "Dockerfile"
 
+# Run schema migrations before routing traffic to the new release.
+# Idempotent (CREATE TABLE IF NOT EXISTS). Prevents silent schema drift —
+# this is what previously let the Business Memory table go missing in prod.
+[deploy]
+  release_command = "node /app/migrate.cjs"
+
 [env]
   PORT = "3000"
   NODE_ENV = "production"

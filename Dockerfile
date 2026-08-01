@@ -58,6 +58,9 @@ RUN touch /app/apps/web/.env
 
 RUN pnpm --filter @growthcrew/web build
 
+# Bundle the standalone production migrator (self-contained CJS)
+RUN node scripts/build-migrate.mjs
+
 # ── Stage 3: runtime ───────────────────────────────────────────────
 FROM node:22-slim AS runtime
 
@@ -75,6 +78,10 @@ RUN mkdir -p ./apps/web/public
 
 # Copy package.json for reference
 COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
+
+# Copy the standalone migrator + SQL migrations (run via release_command)
+COPY --from=builder /app/scripts/dist/migrate.cjs ./migrate.cjs
+COPY --from=builder /app/packages/db/drizzle ./drizzle
 
 EXPOSE 3000
 

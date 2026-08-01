@@ -32,7 +32,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/app/providers';
 
-const NAV = [
+export const NAV = [
   { href: '/console', label: 'Voice Console', icon: Mic },
   { href: '/growth-plan', label: 'Growth Plan', icon: CalendarDays },
   { href: '/business-brain', label: 'Business Brain', icon: Sparkles },

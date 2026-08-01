@@ -39,6 +39,7 @@ export default function SettingsPage() {
           <TabsTrigger value="brand">Brand DNA</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="models">AI Model</TabsTrigger>
+          <TabsTrigger value="aiUsage">AI Usage</TabsTrigger>
           <TabsTrigger value="budgets">Budgets</TabsTrigger>
           <TabsTrigger value="team">Team</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -52,6 +53,9 @@ export default function SettingsPage() {
         </TabsContent>
         <TabsContent value="models">
           <ModelSelectorCard />
+        </TabsContent>
+        <TabsContent value="aiUsage">
+          <AiUsageTab />
         </TabsContent>
         <TabsContent value="budgets">
           <BudgetsTab />
@@ -498,5 +502,104 @@ function NotificationsTab() {
         ))}
       </CardContent>
     </Card>
+  );
+}
+
+function AiUsageTab() {
+  const utils = trpc.useUtils();
+  const { data: stats, isLoading } = trpc.settings.aiUsage.stats.useQuery();
+  const [budgetInput, setBudgetInput] = useState('');
+  const setBudget = trpc.settings.aiUsage.setBudget.useMutation({
+    onSuccess: () => {
+      utils.settings.aiUsage.stats.invalidate();
+      setBudgetInput('');
+    },
+  });
+
+  if (isLoading) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Loading usage data…</CardContent></Card>;
+  if (!stats) return null;
+
+  const usedDollars = (stats.estimatedCostCents / 100).toFixed(2);
+  const budgetDollars = (stats.budgetCents / 100).toFixed(2);
+  const remainingDollars = (stats.remainingCents / 100).toFixed(2);
+  const pctColor = stats.pctUsed >= 90 ? 'bg-red-500' : stats.pctUsed >= 70 ? 'bg-amber-500' : 'bg-emerald-500';
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">AI Usage — {stats.month}</CardTitle>
+          <CardDescription>
+            Token consumption and estimated cost for AI conversations this month. Deterministic engines (alerts, fatigue, competitor intel) run at zero AI cost and are never throttled.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Usage bar */}
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span>${usedDollars} used</span>
+              <span>${budgetDollars} budget</span>
+            </div>
+            <div className="h-3 rounded-full bg-muted overflow-hidden">
+              <div className={`h-full rounded-full ${pctColor} transition-all`} style={{ width: `${Math.min(100, stats.pctUsed)}%` }} />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.pctUsed}% used · ${remainingDollars} remaining · {stats.requestCount} requests · {(stats.totalTokens / 1000).toFixed(1)}K tokens
+            </p>
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: 'Prompt tokens', value: stats.promptTokens.toLocaleString() },
+              { label: 'Completion tokens', value: stats.completionTokens.toLocaleString() },
+              { label: 'Requests', value: String(stats.requestCount) },
+              { label: 'Est. cost', value: `$${usedDollars}` },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border p-3 text-center">
+                <p className="text-lg font-semibold">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Monthly AI Budget</CardTitle>
+          <CardDescription>
+            When usage reaches this cap, AI conversations pause until next month. Deterministic engines keep running. Recommended: $4.60 (Starter), $12 (Growth), $25 (Agency).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-end gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="ai-budget">Budget (USD/month)</Label>
+              <Input
+                id="ai-budget"
+                type="number"
+                min="1"
+                max="1000"
+                step="0.50"
+                placeholder={(stats.budgetCents / 100).toFixed(2)}
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
+                className="w-32"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                const cents = Math.round(parseFloat(budgetInput) * 100);
+                if (cents >= 100) setBudget.mutate({ cents });
+              }}
+              disabled={!budgetInput || setBudget.isPending}
+            >
+              {setBudget.isPending ? 'Saving…' : 'Update budget'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

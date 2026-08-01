@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, uuid, jsonb, unique, boolean, real } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, uuid, jsonb, unique, boolean, real, bigint } from 'drizzle-orm/pg-core';
 import { users } from './auth';
 import type { Goal } from './enums';
 
@@ -526,3 +526,23 @@ export const creativePerformance = pgTable('creative_performance', {
   snapshotAt: timestamp('snapshot_at', { mode: 'date' }).defaultNow().notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
+
+/** Monthly LLM usage rollup per org for cost guardrails. */
+export const llmUsage = pgTable(
+  'llm_usage',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    month: text('month').notNull(), // 'YYYY-MM'
+    promptTokens: bigint('prompt_tokens', { mode: 'number' }).default(0).notNull(),
+    completionTokens: bigint('completion_tokens', { mode: 'number' }).default(0).notNull(),
+    totalTokens: bigint('total_tokens', { mode: 'number' }).default(0).notNull(),
+    estimatedCostCents: integer('estimated_cost_cents').default(0).notNull(),
+    requestCount: integer('request_count').default(0).notNull(),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (t) => [unique('llm_usage_org_month_unique').on(t.orgId, t.month)],
+);

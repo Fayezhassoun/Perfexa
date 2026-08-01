@@ -78,7 +78,17 @@ export function createDeepSeekProvider(options?: DeepSeekProviderOptions): LLMPr
         }
         return { id: tc.id, name: fn?.name ?? '', args };
       });
-      return { content: choice?.content ?? '', toolCalls: toolCalls?.length ? toolCalls : undefined };
+      return {
+        content: choice?.content ?? '',
+        toolCalls: toolCalls?.length ? toolCalls : undefined,
+        usage: res.usage
+          ? {
+              promptTokens: res.usage.prompt_tokens ?? 0,
+              completionTokens: res.usage.completion_tokens ?? 0,
+              totalTokens: res.usage.total_tokens ?? 0,
+            }
+          : undefined,
+      };
     },
   };
 }
