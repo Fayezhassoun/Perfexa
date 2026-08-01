@@ -299,6 +299,37 @@ export const reports = pgTable('reports', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
+/** Structured payload stored in `weekly_reports.content_json`. */
+export interface WeeklyReportPayload {
+  /** Rendered markdown brief (wins / losses / recommendations / priorities). */
+  markdown: string;
+  periodLabel: string;
+  totals: { spendCents: number; impressions: number; clicks: number; conversions: number };
+  byPlatform: Record<string, { spendCents: number; impressions: number; clicks: number; conversions: number }>;
+  wins: string[];
+  losses: string[];
+  recommendations: string[];
+  priorities: string[];
+  alertCount: number;
+  fatiguedCreatives: number;
+  /** Whether the narrative came from the LLM or the deterministic fallback. */
+  source: 'llm' | 'deterministic';
+  generatedAt: string;
+}
+
+// In-app weekly performance report (the #1 retention surface). Distinct from
+// the legacy `reports` table used by the Phase-3 email cron: this one is
+// generated on demand from the /reports page and rendered in-app as markdown.
+export const weeklyReports = pgTable('weekly_reports', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  weekStart: timestamp('week_start', { mode: 'date' }).notNull(),
+  content: jsonb('content_json').$type<WeeklyReportPayload>().notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
 // Per-org cloud business memory (client-imported data). Distinct from the
 // GLOBAL knowledge_documents best-practice library: these rows are scoped to an
 // org and hold the client's own business data (uploaded files, pasted notes,
