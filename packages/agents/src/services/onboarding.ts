@@ -17,11 +17,13 @@ export interface OnboardingPatch {
   websiteUrl?: string;
   goals?: ('visibility' | 'leads' | 'sales')[];
   monthlyBudgetCeilingCents?: number;
-  onboardingStep?: 'welcome' | 'business' | 'goals' | 'budget' | 'connect' | 'done';
+  onboardingStep?: 'welcome' | 'business' | 'goals' | 'budget' | 'connect' | 'voice' | 'insight' | 'done';
   businessBrain?: BusinessBrainPatch;
 }
 
 export type BusinessBrainTone = 'friendly' | 'expert' | 'premium' | 'direct';
+export type BusinessBrainFormality = 'casual' | 'balanced' | 'formal';
+export type BusinessBrainPersonality = 'approachable' | 'authoritative' | 'playful' | 'bold';
 export type BusinessBrainChannel = 'seo' | 'google_ads' | 'meta' | 'email' | 'social' | 'reviews';
 
 export interface BusinessBrainPatch {
@@ -29,6 +31,8 @@ export interface BusinessBrainPatch {
   idealCustomer?: string;
   location?: string;
   tone?: BusinessBrainTone;
+  formality?: BusinessBrainFormality;
+  personality?: BusinessBrainPersonality;
   channels?: BusinessBrainChannel[];
   constraints?: string;
   proofPoints?: string;
