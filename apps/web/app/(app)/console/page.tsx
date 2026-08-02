@@ -162,6 +162,35 @@ export default function ConsolePage() {
           </div>
         </header>
 
+        <div className="grid grid-cols-2 gap-3 border-b border-[color:var(--glass-divider)] px-4 pb-4 pt-4 sm:grid-cols-3">
+          <div className="glass-panel elevated-card stat-card p-3">
+            <p className="stat-label text-muted-foreground">Review queue</p>
+            <p className={cn('stat-value', conversationProposals.length ? 'text-amber-500' : 'text-muted-foreground')}>
+              {conversationProposals.length}
+            </p>
+            <span className={cn('stat-trend', conversationProposals.length ? 'stat-trend-warning' : 'stat-trend-positive')}>
+              <MessageCircle className="h-3 w-3" />
+              {conversationProposals.length ? 'Awaiting approval' : 'All clear'}
+            </span>
+          </div>
+          <div className="glass-panel elevated-card stat-card p-3">
+            <p className="stat-label text-muted-foreground">Conversations</p>
+            <p className="stat-value text-foreground">{conversationsQuery.data?.length ?? 0}</p>
+            <span className="stat-trend stat-trend-positive">
+              <MessageCircle className="h-3 w-3" /> Workbench history
+            </span>
+          </div>
+          <div className="glass-panel elevated-card stat-card col-span-2 p-3 sm:col-span-1">
+            <p className="stat-label text-muted-foreground">Voice mode</p>
+            <p className={cn('stat-value text-base sm:text-lg', voice.handsFree ? 'text-primary' : 'text-foreground')}>
+              {voice.handsFree ? 'Hands-free' : 'Push to talk'}
+            </p>
+            <span className="stat-trend stat-trend-positive">
+              <span className="live-dot" aria-hidden /> Ready when you are
+            </span>
+          </div>
+        </div>
+
         {voice.micDenied && (
           <div className="border-b bg-amber-500/10 px-4 py-2 text-sm text-amber-500" data-testid="mic-denied-hint">
             Microphone access was blocked — no problem, just type below. You can re-enable the mic

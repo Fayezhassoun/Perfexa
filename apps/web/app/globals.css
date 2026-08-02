@@ -390,6 +390,22 @@
   .metric-card { min-height: 112px; }
   .stat-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; line-height: 1.2; text-transform: uppercase; }
   .stat-value { margin-top: 0.55rem; font-family: 'Space Grotesk Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: clamp(1.9rem, 3vw, 2.6rem); font-variant-numeric: tabular-nums; font-weight: 650; letter-spacing: -0.055em; line-height: 0.98; }
+  .stat-card { min-height: 108px; }
+  .stat-card-critical .stat-value {
+    text-shadow: 0 0 18px hsl(var(--danger) / 0.38);
+  }
+  .stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+    font-size: 0.64rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+  }
+  .stat-trend-critical { color: hsl(var(--danger)); }
+  .stat-trend-warning { color: hsl(var(--warning)); }
+  .stat-trend-positive { color: hsl(var(--success)); }
   .live-status { display: inline-flex; align-items: center; gap: 0.45rem; }
   .live-dot { position: relative; display: inline-block; width: 0.42rem; height: 0.42rem; border-radius: 999px; background: hsl(var(--success)); box-shadow: 0 0 0 3px hsl(var(--success) / 0.1); }
   .live-dot::after { position: absolute; inset: -0.22rem; border: 1px solid hsl(var(--success) / 0.52); border-radius: inherit; content: ''; animation: live-ping 2.4s ease-out infinite; }
