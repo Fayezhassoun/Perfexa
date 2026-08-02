@@ -146,6 +146,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!secret || header !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-  const run = await runWeeklyReportCron();
+  // ?force=1 bypasses the per-ISO-week idempotency guard — for deliberate
+  // operator test sends (pilot ops). The Monday cron never passes it.
+  const force = new URL(req.url).searchParams.get('force') === '1';
+  const run = await runWeeklyReportCron({ force });
   return NextResponse.json(run, { status: run.errors.length > 0 ? 207 : 200 });
 }
