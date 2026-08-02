@@ -304,6 +304,35 @@
     box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08), var(--glass-shadow-hover);
   }
 
+  .severity-card {
+    --severity-hue: var(--primary);
+    border-left-color: hsl(var(--severity-hue) / 0.78);
+    background:
+      linear-gradient(108deg, hsl(var(--severity-hue) / 0.08), hsl(var(--severity-hue) / 0.025) 48%, transparent 86%),
+      var(--glass-bg);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.08),
+      var(--glass-shadow),
+      0 0 26px -17px hsl(var(--severity-hue) / 0.9);
+  }
+  .severity-card.severity-critical { --severity-hue: var(--danger); }
+  .severity-card.severity-warning { --severity-hue: var(--warning); }
+  .severity-card.severity-info { --severity-hue: var(--vox-cyan); }
+  .severity-card:hover {
+    border-left-color: hsl(var(--severity-hue));
+    background:
+      linear-gradient(108deg, hsl(var(--severity-hue) / 0.1), hsl(var(--severity-hue) / 0.03) 48%, transparent 86%),
+      var(--glass-bg);
+    box-shadow:
+      inset 0 1px 0 hsl(var(--foreground) / 0.1),
+      var(--glass-shadow-hover),
+      0 0 30px -14px hsl(var(--severity-hue) / 0.95);
+  }
+  .severity-edge {
+    background: hsl(var(--severity-hue));
+    box-shadow: 0 0 14px hsl(var(--severity-hue) / 0.62), 0 0 28px hsl(var(--severity-hue) / 0.22);
+  }
+
   .liquid-topbar,
   .glass-topbar {
     border-bottom: 1px solid var(--glass-divider);

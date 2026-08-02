@@ -204,8 +204,8 @@ export default function AlertsPage() {
               <div
                 key={a.id}
                 className={cn(
-                  'glass-panel group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
-                  isCritical ? 'border-l-red-500 bg-red-500/[0.035]' : a.severity === 'warning' ? 'border-l-amber-500 bg-amber-500/[0.035]' : 'border-l-sky-500 bg-sky-500/[0.025]',
+                  'glass-panel severity-card group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  isCritical ? 'severity-critical' : a.severity === 'warning' ? 'severity-warning' : 'severity-info',
                   a.acknowledged && 'opacity-60',
                 )}
                 style={{ animationDelay: `${i * 40}ms` }}
@@ -213,8 +213,8 @@ export default function AlertsPage() {
                 {/* severity edge */}
                 <span
                   className={cn(
-                    'absolute inset-y-0 left-0 w-1',
-                    isCritical ? 'bg-red-500' : a.severity === 'warning' ? 'bg-amber-500' : 'bg-sky-500',
+                    'severity-edge absolute inset-y-0 left-0 w-1',
+                    isCritical ? 'severity-critical' : a.severity === 'warning' ? 'severity-warning' : 'severity-info',
                   )}
                 />
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
