@@ -351,19 +351,36 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="mx-auto max-w-3xl px-5 pb-28 text-center sm:px-8">
-        <Sparkles className="mx-auto h-6 w-6 text-primary" />
-        <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          Hire a team that never sleeps.
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-          Set up in minutes. Your brand, your competitors, your campaigns — watched from day one.
-        </p>
-        <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
-          <Link href="/register">
-            Start free <ArrowRight />
-          </Link>
-        </Button>
+      <section className="mx-auto max-w-4xl px-5 pb-28 sm:px-8">
+        <div className="glass-panel relative overflow-hidden rounded-3xl px-7 py-12 text-center sm:px-12 sm:py-16">
+          <div className="absolute -left-24 -top-28 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+          <div className="absolute -bottom-32 -right-24 h-64 w-64 rounded-full bg-[color:hsl(var(--voice)/0.12)] blur-3xl" aria-hidden="true" />
+          <div className="relative">
+            <div className="glass-chip inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Design Partner Program · founding pricing
+            </div>
+            <h2 className="mx-auto mt-6 max-w-xl text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              The pilot is small. The upside isn&apos;t.
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-balance leading-relaxed text-muted-foreground">
+              Join the design-partner program: founding rates locked for the life of the pilot, a direct line to the
+              founder, and a weekly client report that proves the value. Connect your accounts today — the crew
+              starts watching tonight.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" className="h-12 px-7 text-base" asChild>
+                <Link href="/register?plan=growth">
+                  Join the design-partner program <ArrowRight />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="h-12 px-7 text-base" asChild>
+                <Link href="/pricing">See pricing</Link>
+              </Button>
+            </div>
+            <p className="mt-5 text-xs text-muted-foreground">No card · month-to-month · cancel anytime</p>
+          </div>
+        </div>
       </section>
 
       <footer className="glass-divider-t">
