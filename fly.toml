@@ -54,6 +54,24 @@ primary_region = "fra"
 # Without CRON_SECRET the endpoint returns 401 (cron disabled). The run is
 # idempotent per ISO week, so an early/late trigger won't double-send.
 
+# ── Live data sync cron ───────────────────────────────────────────
+# Pulls live campaigns from every org's connected ad platforms into
+# campaigns_mirror (the table reports/alerts/anomaly-detection read):
+#
+#   POST https://growthcrew.fly.dev/api/cron/sync
+#   Authorization: Bearer $CRON_SECRET
+#
+# Schedule it every 6 hours (cron "0 */6 * * *"), reusing the same
+# CRON_SECRET as the weekly report:
+#
+#   flyctl machine run --schedule "0 */6 * * *" \
+#     "curl -fsS -X POST -H \"Authorization: Bearer $CRON_SECRET\" \
+#      https://growthcrew.fly.dev/api/cron/sync"
+#
+# Without CRON_SECRET the endpoint returns 401 (cron disabled). The sync is
+# an idempotent upsert, so an early/late trigger is harmless. Per-platform
+# failures are isolated — one bad account won't abort the rest of the run.
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
