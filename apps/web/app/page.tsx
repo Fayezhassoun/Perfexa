@@ -10,11 +10,12 @@ import {
   ShieldCheck,
   Sparkles,
   Swords,
-  TrendingDown,
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandMark } from '@/components/brand-mark';
+import { HowItWorks } from '@/components/how-it-works';
+import { TrustSection } from '@/components/trust-section';
 
 const SAFETY_POINTS = [
   'Approval before any spend or public action',
@@ -267,23 +268,23 @@ export default function Home() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            AI marketing operations · always on
+            Now onboarding design partners
           </div>
           <h1 className="animate-fade-up animation-delay-100 mt-7 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.25rem]">
             Your AI marketing team,
             <span className="mt-2 block text-primary">wide awake at 3 a.m.</span>
           </h1>
           <p className="animate-fade-up animation-delay-200 mt-7 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
-            GrowthCrew learns your brand, watches your competitors, catches anomalies before they cost you,
-            refreshes tired creatives, and reports to clients under your name — with your approval on every dollar.
+            GrowthCrew plugs into your ad accounts read-only, watches performance around the clock, and turns
+            anomalies into approved fixes — then proves the value to clients with a weekly report under your brand.
           </p>
           <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Button size="lg" className="h-12 px-7 text-base" asChild>
-              <Link href="/register">
-                Put your team on the clock <ArrowRight />
+              <Link href="/register?plan=growth">
+                Start your pilot <ArrowRight />
               </Link>
             </Button>
-            <span className="text-sm text-muted-foreground">No card · sandbox by default</span>
+            <span className="text-sm text-muted-foreground">No card · read-only · cancel anytime</span>
           </div>
           <div className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
             {['Learns your brand', 'Watches competitors', 'Flags anomalies', 'Reports as you'].map((item, index) => (
@@ -319,6 +320,12 @@ export default function Home() {
         <EnginesBento />
       </section>
 
+      {/* How it works */}
+      <HowItWorks />
+
+      {/* Trust & design partners */}
+      <TrustSection />
+
       {/* Control & safety */}
       <section className="mx-auto max-w-[1440px] px-5 pb-24 sm:px-8 lg:px-12">
         <div className="glass-panel grid gap-8 rounded-3xl p-7 sm:p-10 lg:grid-cols-[0.75fr,1.25fr] lg:items-center lg:p-12">
@@ -344,19 +351,36 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="mx-auto max-w-3xl px-5 pb-28 text-center sm:px-8">
-        <Sparkles className="mx-auto h-6 w-6 text-primary" />
-        <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-          Hire a team that never sleeps.
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-          Set up in minutes. Your brand, your competitors, your campaigns — watched from day one.
-        </p>
-        <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
-          <Link href="/register">
-            Start free <ArrowRight />
-          </Link>
-        </Button>
+      <section className="mx-auto max-w-4xl px-5 pb-28 sm:px-8">
+        <div className="glass-panel relative overflow-hidden rounded-3xl px-7 py-12 text-center sm:px-12 sm:py-16">
+          <div className="absolute -left-24 -top-28 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+          <div className="absolute -bottom-32 -right-24 h-64 w-64 rounded-full bg-[color:hsl(var(--voice)/0.12)] blur-3xl" aria-hidden="true" />
+          <div className="relative">
+            <div className="glass-chip inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Design Partner Program · founding pricing
+            </div>
+            <h2 className="mx-auto mt-6 max-w-xl text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              The pilot is small. The upside isn&apos;t.
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-balance leading-relaxed text-muted-foreground">
+              Join the design-partner program: founding rates locked for the life of the pilot, a direct line to the
+              founder, and a weekly client report that proves the value. Connect your accounts today — the crew
+              starts watching tonight.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" className="h-12 px-7 text-base" asChild>
+                <Link href="/register?plan=growth">
+                  Join the design-partner program <ArrowRight />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="h-12 px-7 text-base" asChild>
+                <Link href="/pricing">See pricing</Link>
+              </Button>
+            </div>
+            <p className="mt-5 text-xs text-muted-foreground">No card · month-to-month · cancel anytime</p>
+          </div>
+        </div>
       </section>
 
       <footer className="glass-divider-t">
