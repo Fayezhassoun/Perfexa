@@ -330,6 +330,21 @@ export const weeklyReports = pgTable('weekly_reports', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
+export const reportShares = pgTable('report_shares', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  shareId: text('share_id').notNull().unique(),
+  reportId: uuid('report_id')
+    .notNull()
+    .references(() => weeklyReports.id),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  brandName: text('brand_name').notNull(),
+  brandColor: text('brand_color'),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { mode: 'date' }),
+});
+
 // Per-org cloud business memory (client-imported data). Distinct from the
 // GLOBAL knowledge_documents best-practice library: these rows are scoped to an
 // org and hold the client's own business data (uploaded files, pasted notes,
