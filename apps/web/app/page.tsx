@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandMark } from '@/components/brand-mark';
+import { HowItWorks } from '@/components/how-it-works';
 import { TrustSection } from '@/components/trust-section';
 
 const SAFETY_POINTS = [
@@ -318,6 +319,9 @@ export default function Home() {
         </div>
         <EnginesBento />
       </section>
+
+      {/* How it works */}
+      <HowItWorks />
 
       {/* Trust & design partners */}
       <TrustSection />
