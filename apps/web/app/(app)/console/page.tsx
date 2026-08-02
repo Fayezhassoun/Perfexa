@@ -182,11 +182,15 @@ export default function ConsolePage() {
           </div>
           <div className="glass-panel elevated-card stat-card col-span-2 p-3 sm:col-span-1">
             <p className="stat-label text-muted-foreground">Voice mode</p>
-            <p className={cn('stat-value text-base sm:text-lg', voice.handsFree ? 'text-primary' : 'text-foreground')}>
-              {voice.handsFree ? 'Hands-free' : 'Push to talk'}
+            <p className={cn(
+              'stat-value text-base sm:text-lg',
+              voice.micDenied ? 'text-destructive' : voice.handsFree ? 'text-primary' : 'text-foreground',
+            )}>
+              {voice.micDenied ? 'Mic blocked' : voice.handsFree ? 'Hands-free' : 'Push to talk'}
             </p>
-            <span className="stat-trend stat-trend-positive">
-              <span className="live-dot" aria-hidden /> Ready when you are
+            <span className={cn('stat-trend', voice.micDenied ? 'stat-trend-critical' : 'stat-trend-positive')}>
+              {voice.micDenied ? <MicOff className="h-3 w-3" /> : <span className="live-dot" aria-hidden />}
+              {voice.micDenied ? 'Permission needed' : 'Ready when you are'}
             </span>
           </div>
         </div>
