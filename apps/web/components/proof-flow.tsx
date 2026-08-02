@@ -6,7 +6,7 @@
 // (campaigns.list, alerts.list); nothing is hardcoded. Dismissal persists to
 // org settings via settings.preferences.update so it never shows again.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -179,13 +179,19 @@ function ImpactBar({ label, value, pct, tone }: { label: string; value: string; 
   );
 }
 
-export function ProofFlow() {
+export interface ProofFlowHandle {
+  open: () => void;
+}
+
+export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, ref) {
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [visibleCount, setVisibleCount] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const triggeredDetection = useRef(false);
+  const autoOpened = useRef(false);
+  const ahaFired = useRef(false);
   const [reducedMotion] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
@@ -215,6 +221,26 @@ export function ProofFlow() {
     setVisibleCount(0);
     setOpen(true);
   }, []);
+
+  useImperativeHandle(ref, () => ({ open: openFlow }), [openFlow]);
+
+  // Auto-open on first arrival: fresh org (proofDismissed=false) with campaign
+  // data sees the walkthrough within ~1s of landing on the dashboard.
+  useEffect(() => {
+    if (autoOpened.current || !prefs.data || prefs.data.proofDismissed || dismissed) return;
+    if (campaignRows.length === 0) return;
+    autoOpened.current = true;
+    const id = setTimeout(openFlow, 800);
+    return () => clearTimeout(id);
+  }, [prefs.data, dismissed, campaignRows.length, openFlow]);
+
+  // First-win: stamp firstAhaAt when the user reaches the completion screen.
+  useEffect(() => {
+    if (step !== COMPLETE_STEP || ahaFired.current) return;
+    if (prefs.data?.firstAhaAt) return;
+    ahaFired.current = true;
+    updatePrefs.mutate({ firstAhaAt: new Date().toISOString() });
+  }, [step, prefs.data, updatePrefs]);
 
   // Auto-advance every 2.5s until the completion screen.
   useEffect(() => {
@@ -267,38 +293,41 @@ export function ProofFlow() {
     };
   }, [open, dismiss]);
 
-  // Wait for the preference flag before rendering so dismissed orgs never flash.
-  if (!prefs.data || dismissed || prefs.data.proofDismissed) return null;
+  // Banner only shows for orgs that haven't dismissed; the sheet can still be
+  // opened imperatively (e.g. "Show me a demo") regardless of dismissal state.
+  const showBanner = Boolean(prefs.data) && !dismissed && !prefs.data?.proofDismissed;
 
   const next = () => setStep((s) => Math.min(s + 1, COMPLETE_STEP));
 
   return (
     <>
       {/* Proof banner — the entry point on the dashboard */}
-      <Card className="border-primary/25 bg-primary/[0.05]" data-testid="proof-banner">
-        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="glass-chip animate-pulse-glow flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
-              <Sparkles className="h-5 w-5" />
+      {showBanner && (
+        <Card className="border-primary/25 bg-primary/[0.05]" data-testid="proof-banner">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="glass-chip animate-pulse-glow flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium">See what GrowthCrew just found</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A 30-second walkthrough of a real anomaly we detected in your campaigns — and the
+                  action we recommend.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">See what GrowthCrew just found</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                A 30-second walkthrough of a real anomaly we detected in your campaigns — and the
-                action we recommend.
-              </p>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button onClick={openFlow} data-testid="proof-open">
+                See GrowthCrew in action <ArrowRight />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={dismiss} aria-label="Dismiss proof walkthrough">
+                <X />
+              </Button>
             </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button onClick={openFlow} data-testid="proof-open">
-              See GrowthCrew in action <ArrowRight />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={dismiss} aria-label="Dismiss proof walkthrough">
-              <X />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Full-screen proof sheet */}
       {open && (
@@ -462,7 +491,7 @@ export function ProofFlow() {
 
                 {step === COMPLETE_STEP && (
                   <div key="step-complete" className="animate-fade-up flex h-full flex-col items-center justify-center gap-4 py-6 text-center">
-                    <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-500">
+                    <span className="animate-pulse-glow flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-500">
                       <CheckCircle2 className="h-8 w-8" />
                     </span>
                     <div className="space-y-2">
@@ -505,4 +534,4 @@ export function ProofFlow() {
       )}
     </>
   );
-}
+});
