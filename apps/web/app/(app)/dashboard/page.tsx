@@ -3,7 +3,7 @@
 // Dashboard (CONTRACTS §10): KPI cards, trend chart, platform breakdown,
 // activity feed, SEO tracker, date-range picker, dev simulate button.
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Line,
@@ -21,7 +21,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PageShell, PageHeader } from '@/components/page-shell';
-import { ProofFlow } from '@/components/proof-flow';
+import { ProofFlow, type ProofFlowHandle } from '@/components/proof-flow';
+import { ActivationCard } from '@/components/activation-card';
 import { cn } from '@/lib/utils';
 
 function dollars(cents: number): string {
@@ -38,6 +39,7 @@ export default function DashboardPage() {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const utils = trpc.useUtils();
+  const proofFlowRef = useRef<ProofFlowHandle>(null);
 
   const overview = trpc.dashboard.overview.useQuery(
     from || to ? { from: from || undefined, to: to || undefined } : undefined,
@@ -109,7 +111,10 @@ export default function DashboardPage() {
       />
 
       {/* Guided proof moment — real anomaly walkthrough, dismissible per org */}
-      <ProofFlow />
+      <ProofFlow ref={proofFlowRef} />
+
+      {/* Empty-state activation nudge — zero integrations, zero alerts */}
+      <ActivationCard onShowDemo={() => proofFlowRef.current?.open()} />
 
       {/* Ops Pulse — live operational signals across the five engines */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="ops-pulse">
