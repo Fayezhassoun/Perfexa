@@ -99,7 +99,7 @@ export default function BusinessBrainPage() {
 
   if (isLoading) {
     return (
-      <PageShell className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
+      <PageShell className="page-depth flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
         <p className="text-sm text-muted-foreground">Loading your business context…</p>
       </PageShell>
     );
@@ -107,7 +107,7 @@ export default function BusinessBrainPage() {
 
   if (isError || !org) {
     return (
-      <PageShell className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
+      <PageShell className="page-depth flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
         <Card className="elevated-card max-w-md">
           <CardHeader>
             <CardTitle>Business Brain unavailable</CardTitle>
@@ -121,7 +121,7 @@ export default function BusinessBrainPage() {
   const goals = (org.goals ?? []).map((goal) => GOAL_LABELS[goal] ?? goal);
 
   return (
-    <PageShell className="space-y-6" data-testid="business-brain">
+    <PageShell className="page-depth space-y-6" data-testid="business-brain">
       <PageHeader
         eyebrow="Persistent business context"
         title="Business Brain"

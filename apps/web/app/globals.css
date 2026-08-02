@@ -366,6 +366,15 @@
     margin: 0 auto;
     padding: 28px clamp(20px, 3vw, 48px) 48px;
   }
+  .page-depth {
+    background-image:
+      radial-gradient(circle at 12% 0%, hsl(var(--primary) / 0.045), transparent 30rem),
+      radial-gradient(circle at 88% 42%, hsl(var(--voice) / 0.035), transparent 34rem),
+      linear-gradient(hsl(var(--foreground) / 0.022) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.022) 1px, transparent 1px);
+    background-position: center top, center center, center top, center top;
+    background-size: auto, auto, 44px 44px, 44px 44px;
+  }
   .page-header {
     display: flex;
     align-items: flex-end;

@@ -76,7 +76,7 @@ export default function ConsolePage() {
   }, [messages.length, conversationProposals.length, sendMessage.isPending]);
 
   return (
-    <div className="animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
+    <div className="page-depth animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
       {/* Conversation sidebar — floating glass panel */}
       <aside className="glass-elevated elevated-card m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
         <div className="glass-divider-b flex items-center justify-between p-3">

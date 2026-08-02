@@ -121,7 +121,7 @@ export default function AlertsPage() {
   ];
 
   return (
-    <PageShell className="space-y-6" data-testid="alerts">
+    <PageShell className="page-depth space-y-6" data-testid="alerts">
       <PageHeader
         eyebrow={
           <span className="live-status">

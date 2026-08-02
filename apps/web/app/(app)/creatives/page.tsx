@@ -108,7 +108,7 @@ export default function CreativesPage() {
   ];
 
   return (
-    <PageShell className="space-y-6" data-testid="creatives">
+    <PageShell className="page-depth space-y-6" data-testid="creatives">
       <PageHeader
         eyebrow={
           <span className="live-status">
