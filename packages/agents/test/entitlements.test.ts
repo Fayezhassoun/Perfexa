@@ -10,6 +10,7 @@ describe('entitlements', () => {
   it('defaults missing or invalid plan settings to starter', () => {
     expect(getPlan(orgWithPlan())).toBe('starter');
     expect(getPlan(orgWithPlan('not-a-plan'))).toBe('starter');
+    expect(getPlan(orgWithPlan('constructor'))).toBe('starter');
   });
 
   it.each(['starter', 'growth', 'agency'] as const)('returns the %s plan entitlements', (plan) => {

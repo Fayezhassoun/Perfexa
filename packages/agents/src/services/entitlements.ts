@@ -50,7 +50,7 @@ export interface PlanEntitlements {
 }
 
 function isPlan(value: unknown): value is Plan {
-  return typeof value === 'string' && value in PLANS;
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(PLANS, value);
 }
 
 /** Read the organization's plan, defaulting safely for new or invalid settings. */
