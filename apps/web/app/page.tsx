@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandMark } from '@/components/brand-mark';
+import { TrustSection } from '@/components/trust-section';
 
 const SAFETY_POINTS = [
   'Approval before any spend or public action',
@@ -317,6 +318,9 @@ export default function Home() {
         </div>
         <EnginesBento />
       </section>
+
+      {/* Trust & design partners */}
+      <TrustSection />
 
       {/* Control & safety */}
       <section className="mx-auto max-w-[1440px] px-5 pb-24 sm:px-8 lg:px-12">
