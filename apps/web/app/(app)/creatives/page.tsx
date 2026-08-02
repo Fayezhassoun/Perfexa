@@ -108,7 +108,7 @@ export default function CreativesPage() {
   ];
 
   return (
-    <PageShell className="space-y-6" data-testid="creatives">
+    <PageShell className="page-depth space-y-6" data-testid="creatives">
       <PageHeader
         eyebrow={
           <span className="live-status">
@@ -141,7 +141,7 @@ export default function CreativesPage() {
         {stats.map(({ label, value, icon: Icon, tone }, i) => (
           <div
             key={label}
-            className="glass-panel animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5"
+            className="glass-panel elevated-card animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
@@ -174,12 +174,12 @@ export default function CreativesPage() {
               <div
                 key={s.creativeId}
                 className={cn(
-                  'glass-panel animate-fade-up group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
-                  isCritical ? 'border-l-red-500 bg-red-500/[0.035]' : 'border-l-amber-500 bg-amber-500/[0.035]',
+                  'glass-panel severity-card animate-fade-up group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  isCritical ? 'severity-critical' : 'severity-warning',
                 )}
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <span className={cn('absolute inset-y-0 left-0 w-1', isCritical ? 'bg-red-500' : 'bg-amber-500')} />
+                <span className={cn('severity-edge absolute inset-y-0 left-0 w-1', isCritical ? 'severity-critical' : 'severity-warning')} />
                 <div className="flex items-start gap-4 pl-2">
                   <FrequencyGauge value={s.frequency} severity={s.severity} />
                   <div className="min-w-0 flex-1 space-y-2">

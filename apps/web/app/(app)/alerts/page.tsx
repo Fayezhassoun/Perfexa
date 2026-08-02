@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   AlertTriangle,
+  Activity,
   Bell,
   BellOff,
   Check,
@@ -114,14 +115,26 @@ export default function AlertsPage() {
     });
 
   const stats = [
-    { label: 'Active alerts', value: active.length, icon: Bell, tone: active.length ? 'text-foreground' : 'text-muted-foreground' },
-    { label: 'Critical', value: critical.length, icon: Flame, tone: critical.length ? 'text-red-500' : 'text-muted-foreground' },
-    { label: 'Warnings', value: warnings.length, icon: AlertTriangle, tone: warnings.length ? 'text-amber-500' : 'text-muted-foreground' },
-    { label: 'Acknowledged', value: rows.filter((r) => r.acknowledged).length, icon: CheckCheck, tone: 'text-emerald-500' },
+    {
+      label: 'Active alerts', value: active.length, icon: Bell, tone: active.length ? 'text-foreground' : 'text-muted-foreground',
+      trend: active.length ? 'Needs attention' : 'No open items', trendTone: active.length ? 'stat-trend-warning' : 'stat-trend-positive',
+    },
+    {
+      label: 'Critical', value: critical.length, icon: Flame, tone: critical.length ? 'text-red-500' : 'text-muted-foreground',
+      trend: critical.length ? 'Review now' : 'Clear', trendTone: critical.length ? 'stat-trend-critical' : 'stat-trend-positive', critical: critical.length > 0,
+    },
+    {
+      label: 'Warnings', value: warnings.length, icon: AlertTriangle, tone: warnings.length ? 'text-amber-500' : 'text-muted-foreground',
+      trend: warnings.length ? 'Keep watching' : 'Clear', trendTone: warnings.length ? 'stat-trend-warning' : 'stat-trend-positive',
+    },
+    {
+      label: 'Acknowledged', value: rows.filter((r) => r.acknowledged).length, icon: CheckCheck, tone: 'text-emerald-500',
+      trend: 'Resolved state', trendTone: 'stat-trend-positive',
+    },
   ];
 
   return (
-    <PageShell className="space-y-6" data-testid="alerts">
+    <PageShell className="page-depth space-y-6" data-testid="alerts">
       <PageHeader
         eyebrow={
           <span className="live-status">
@@ -140,10 +153,13 @@ export default function AlertsPage() {
 
       {/* Stat strip */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map(({ label, value, icon: Icon, tone }, i) => (
+        {stats.map(({ label, value, icon: Icon, tone, trend, trendTone, critical: isCritical }, i) => (
           <div
             key={label}
-            className="glass-panel animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5"
+            className={cn(
+              'glass-panel elevated-card stat-card animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5',
+              isCritical && 'stat-card-critical',
+            )}
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
@@ -151,6 +167,10 @@ export default function AlertsPage() {
               <Icon className={cn('h-4 w-4', tone)} />
             </div>
             <p className={cn('stat-value', tone)}>{value}</p>
+            <span className={cn('stat-trend', trendTone)}>
+              {isCritical ? <TrendingUp className="h-3 w-3" /> : <Activity className="h-3 w-3" />}
+              {trend}
+            </span>
           </div>
         ))}
       </div>
@@ -204,8 +224,8 @@ export default function AlertsPage() {
               <div
                 key={a.id}
                 className={cn(
-                  'glass-panel group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
-                  isCritical ? 'border-l-red-500 bg-red-500/[0.035]' : a.severity === 'warning' ? 'border-l-amber-500 bg-amber-500/[0.035]' : 'border-l-sky-500 bg-sky-500/[0.025]',
+                  'glass-panel severity-card group relative overflow-hidden border-l-2 p-5 transition-all duration-200 hover:-translate-y-0.5',
+                  isCritical ? 'severity-critical' : a.severity === 'warning' ? 'severity-warning' : 'severity-info',
                   a.acknowledged && 'opacity-60',
                 )}
                 style={{ animationDelay: `${i * 40}ms` }}
@@ -213,8 +233,8 @@ export default function AlertsPage() {
                 {/* severity edge */}
                 <span
                   className={cn(
-                    'absolute inset-y-0 left-0 w-1',
-                    isCritical ? 'bg-red-500' : a.severity === 'warning' ? 'bg-amber-500' : 'bg-sky-500',
+                    'severity-edge absolute inset-y-0 left-0 w-1',
+                    isCritical ? 'severity-critical' : a.severity === 'warning' ? 'severity-warning' : 'severity-info',
                   )}
                 />
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

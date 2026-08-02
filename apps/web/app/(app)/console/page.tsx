@@ -76,9 +76,9 @@ export default function ConsolePage() {
   }, [messages.length, conversationProposals.length, sendMessage.isPending]);
 
   return (
-    <div className="animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
+    <div className="page-depth animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
       {/* Conversation sidebar — floating glass panel */}
-      <aside className="glass-elevated m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
+      <aside className="glass-elevated elevated-card m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
         <div className="glass-divider-b flex items-center justify-between p-3">
           <div>
             <p className="font-display text-sm font-semibold">Conversations</p>
@@ -161,6 +161,39 @@ export default function ConsolePage() {
             </Button>
           </div>
         </header>
+
+        <div className="grid grid-cols-2 gap-3 border-b border-[color:var(--glass-divider)] px-4 pb-4 pt-4 sm:grid-cols-3">
+          <div className="glass-panel elevated-card stat-card p-3">
+            <p className="stat-label text-muted-foreground">Review queue</p>
+            <p className={cn('stat-value', conversationProposals.length ? 'text-amber-500' : 'text-muted-foreground')}>
+              {conversationProposals.length}
+            </p>
+            <span className={cn('stat-trend', conversationProposals.length ? 'stat-trend-warning' : 'stat-trend-positive')}>
+              <MessageCircle className="h-3 w-3" />
+              {conversationProposals.length ? 'Awaiting approval' : 'All clear'}
+            </span>
+          </div>
+          <div className="glass-panel elevated-card stat-card p-3">
+            <p className="stat-label text-muted-foreground">Conversations</p>
+            <p className="stat-value text-foreground">{conversationsQuery.data?.length ?? 0}</p>
+            <span className="stat-trend stat-trend-positive">
+              <MessageCircle className="h-3 w-3" /> Workbench history
+            </span>
+          </div>
+          <div className="glass-panel elevated-card stat-card col-span-2 p-3 sm:col-span-1">
+            <p className="stat-label text-muted-foreground">Voice mode</p>
+            <p className={cn(
+              'stat-value text-base sm:text-lg',
+              voice.micDenied ? 'text-destructive' : voice.handsFree ? 'text-primary' : 'text-foreground',
+            )}>
+              {voice.micDenied ? 'Mic blocked' : voice.handsFree ? 'Hands-free' : 'Push to talk'}
+            </p>
+            <span className={cn('stat-trend', voice.micDenied ? 'stat-trend-critical' : 'stat-trend-positive')}>
+              {voice.micDenied ? <MicOff className="h-3 w-3" /> : <span className="live-dot" aria-hidden />}
+              {voice.micDenied ? 'Permission needed' : 'Ready when you are'}
+            </span>
+          </div>
+        </div>
 
         {voice.micDenied && (
           <div className="border-b bg-amber-500/10 px-4 py-2 text-sm text-amber-500" data-testid="mic-denied-hint">
