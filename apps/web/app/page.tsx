@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Sparkles,
   Swords,
-  TrendingDown,
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -267,23 +266,23 @@ export default function Home() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            AI marketing operations · always on
+            Now onboarding design partners
           </div>
           <h1 className="animate-fade-up animation-delay-100 mt-7 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.25rem]">
             Your AI marketing team,
             <span className="mt-2 block text-primary">wide awake at 3 a.m.</span>
           </h1>
           <p className="animate-fade-up animation-delay-200 mt-7 max-w-lg text-balance text-lg leading-relaxed text-muted-foreground">
-            GrowthCrew learns your brand, watches your competitors, catches anomalies before they cost you,
-            refreshes tired creatives, and reports to clients under your name — with your approval on every dollar.
+            GrowthCrew plugs into your ad accounts read-only, watches performance around the clock, and turns
+            anomalies into approved fixes — then proves the value to clients with a weekly report under your brand.
           </p>
           <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Button size="lg" className="h-12 px-7 text-base" asChild>
-              <Link href="/register">
-                Put your team on the clock <ArrowRight />
+              <Link href="/register?plan=growth">
+                Start your pilot <ArrowRight />
               </Link>
             </Button>
-            <span className="text-sm text-muted-foreground">No card · sandbox by default</span>
+            <span className="text-sm text-muted-foreground">No card · read-only · cancel anytime</span>
           </div>
           <div className="mt-10 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
             {['Learns your brand', 'Watches competitors', 'Flags anomalies', 'Reports as you'].map((item, index) => (
