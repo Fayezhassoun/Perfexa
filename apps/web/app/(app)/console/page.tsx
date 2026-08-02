@@ -78,7 +78,7 @@ export default function ConsolePage() {
   return (
     <div className="animate-page-in flex h-[calc(100dvh-3.5rem)] min-h-[560px] bg-transparent">
       {/* Conversation sidebar — floating glass panel */}
-      <aside className="glass-elevated m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
+      <aside className="glass-elevated elevated-card m-3 mr-0 hidden w-64 shrink-0 flex-col lg:flex">
         <div className="glass-divider-b flex items-center justify-between p-3">
           <div>
             <p className="font-display text-sm font-semibold">Conversations</p>

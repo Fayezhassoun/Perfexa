@@ -108,7 +108,7 @@ export default function BusinessBrainPage() {
   if (isError || !org) {
     return (
       <PageShell className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
-        <Card className="max-w-md">
+        <Card className="elevated-card max-w-md">
           <CardHeader>
             <CardTitle>Business Brain unavailable</CardTitle>
             <CardDescription>We couldn&apos;t load your business context. Try refreshing the page.</CardDescription>
@@ -133,7 +133,7 @@ export default function BusinessBrainPage() {
         }
       />
 
-      <Card className="overflow-hidden border-primary/20">
+      <Card className="elevated-card overflow-hidden border-primary/20">
         <CardHeader className="border-b border-[color:var(--glass-border)] bg-primary/[0.04] pb-4">
           <div className="flex items-start gap-3">
             <div className="glass-chip flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary">
@@ -174,7 +174,7 @@ export default function BusinessBrainPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="elevated-card">
         <CardHeader>
           <CardTitle className="text-lg">Shape your context</CardTitle>
           <CardDescription>Keep this specific enough to guide useful drafts, and update it as your business changes.</CardDescription>
@@ -288,7 +288,7 @@ export default function BusinessBrainPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-emerald-500/20 bg-emerald-500/[0.04]">
+      <Card className="elevated-card border-emerald-500/20 bg-emerald-500/[0.04]">
         <CardContent className="flex items-start gap-3 p-5">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
           <div>

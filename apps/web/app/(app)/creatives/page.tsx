@@ -141,7 +141,7 @@ export default function CreativesPage() {
         {stats.map(({ label, value, icon: Icon, tone }, i) => (
           <div
             key={label}
-            className="glass-panel animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5"
+            className="glass-panel elevated-card animate-fade-up p-4 transition-transform duration-200 hover:-translate-y-0.5"
             style={{ animationDelay: `${i * 60}ms` }}
           >
             <div className="flex items-center justify-between">
