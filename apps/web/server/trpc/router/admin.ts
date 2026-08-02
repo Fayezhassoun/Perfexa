@@ -7,5 +7,9 @@ export const adminRouter = router({
     services.admin.listUsers(ctx.agentCtx, ctx.session?.user?.email),
   ),
 
+  orgsOverview: orgProcedure.query(({ ctx }) =>
+    services.admin.listOrgsOverview(ctx.agentCtx, ctx.session?.user?.email),
+  ),
+
   health: orgProcedure.query(({ ctx }) => services.admin.systemHealth(ctx.agentCtx)),
 });
