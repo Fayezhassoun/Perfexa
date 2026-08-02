@@ -26,6 +26,7 @@ import {
 import { createAuditLogger } from '../audit.js';
 import { createAgentContext } from '../context.js';
 import { isWithinBudget, recordUsage } from './llm-usage.js';
+import { track } from './analytics.js';
 import type { AgentContext } from '../types.js';
 
 interface HistoryPoint {
@@ -235,6 +236,7 @@ export async function runWeeklyReportsForAllOrgs(
         entityId: org.id,
         payload: { to: to.length, emailId: result.id },
       });
+      await track(ctx, 'report_emailed', { to: to.length });
     } catch (err) {
       run.errors.push(`${org.name}: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -722,6 +724,7 @@ export async function generateWeeklyReport(
     entityId: report!.id,
     payload: { weekStart: weekStart.toISOString(), source, alertCount: agg.alerts.total },
   });
+  await track(ctx, 'report_generated', { weekStart: weekStart.toISOString(), source });
 
   return { report: report!, content };
 }
