@@ -47,6 +47,7 @@ export default function AdminPage() {
   const users = trpc.admin.users.useQuery();
   const health = trpc.admin.health.useQuery();
   const orgs = overview.data ?? [];
+  const overviewUnavailable = overview.isLoading || Boolean(overview.error);
   const activeSince = Date.now() - WEEK_MS;
   const connectedOrgs = orgs.filter((org) => org.liveConnections > 0).length;
   const activeThisWeek = orgs.filter(
@@ -71,18 +72,18 @@ export default function AdminPage() {
       <section className="grid gap-3 sm:grid-cols-3" aria-label="Pilot cohort summary">
         <MetricCard
           label="Organizations"
-          value={overview.isLoading ? '—' : orgs.length}
-          detail={orgs.length ? 'Across the current pilot cohort' : 'No organizations onboarded'}
+          value={overviewUnavailable ? '—' : orgs.length}
+          detail={overviewUnavailable ? 'Unavailable right now' : orgs.length ? 'Across the current pilot cohort' : 'No organizations onboarded'}
         />
         <MetricCard
           label="Connected orgs"
-          value={overview.isLoading ? '—' : connectedOrgs}
-          detail={overview.isLoading ? 'Reading account health…' : `${formatCount(totalLiveConnections, 'live connection')}`}
+          value={overviewUnavailable ? '—' : connectedOrgs}
+          detail={overviewUnavailable ? 'Unavailable right now' : `${formatCount(totalLiveConnections, 'live connection')}`}
         />
         <MetricCard
           label="Active this week"
-          value={overview.isLoading ? '—' : activeThisWeek}
-          detail="Recent operator or report activity"
+          value={overviewUnavailable ? '—' : activeThisWeek}
+          detail={overviewUnavailable ? 'Unavailable right now' : 'Recent operator or report activity'}
         />
       </section>
 
@@ -217,7 +218,10 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(users.data ?? []).map((user) => (
+                {users.isLoading && <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">Loading users…</TableCell></TableRow>}
+                {users.error && <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-destructive">Could not load users.</TableCell></TableRow>}
+                {!users.isLoading && !users.error && !users.data?.length && <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">No users in view.</TableCell></TableRow>}
+                {!users.isLoading && !users.error && users.data?.map((user) => (
                   <TableRow key={`${user.userId}-${user.orgId}`}>
                     <TableCell className="pl-6">
                       <p className="font-medium">{user.name ?? user.email ?? 'Unnamed user'}</p>
@@ -228,7 +232,6 @@ export default function AdminPage() {
                     <TableCell className="pr-6 text-xs text-muted-foreground">{formatDate(user.createdAt)}</TableCell>
                   </TableRow>
                 ))}
-                {!users.data?.length && <TableRow><TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">No users in view.</TableCell></TableRow>}
               </TableBody>
             </Table>
           </CardContent>

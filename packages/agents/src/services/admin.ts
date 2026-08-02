@@ -1,7 +1,7 @@
 // Admin services (CONTRACTS §5): org user list + system health.
 
 import net from 'node:net';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import {
   auditLogs,
   connectedAccounts,
@@ -106,43 +106,56 @@ export async function listOrgsOverview(
 
   if (orgRows.length === 0) return [];
 
+  const orgIds = orgRows.map((org) => org.id);
   const [memberRows, connectionRows, reportRows, activityRows] = await Promise.all([
-    ctx.db.select({ orgId: orgMembers.orgId }).from(orgMembers),
     ctx.db
-      .select({ orgId: connectedAccounts.orgId, mode: connectedAccounts.mode, status: connectedAccounts.status })
-      .from(connectedAccounts),
+      .select({ orgId: orgMembers.orgId, memberCount: sql<number>`count(*)::int` })
+      .from(orgMembers)
+      .where(inArray(orgMembers.orgId, orgIds))
+      .groupBy(orgMembers.orgId),
     ctx.db
-      .select({ orgId: weeklyReports.orgId, createdAt: weeklyReports.createdAt })
-      .from(weeklyReports),
+      .select({ orgId: connectedAccounts.orgId, liveConnections: sql<number>`count(*)::int` })
+      .from(connectedAccounts)
+      .where(
+        and(
+          inArray(connectedAccounts.orgId, orgIds),
+          eq(connectedAccounts.mode, 'live'),
+          eq(connectedAccounts.status, 'connected'),
+        ),
+      )
+      .groupBy(connectedAccounts.orgId),
     ctx.db
-      .select({ orgId: auditLogs.orgId, createdAt: auditLogs.createdAt })
-      .from(auditLogs),
+      .select({ orgId: weeklyReports.orgId, lastReportAt: sql<Date>`max(${weeklyReports.createdAt})` })
+      .from(weeklyReports)
+      .where(inArray(weeklyReports.orgId, orgIds))
+      .groupBy(weeklyReports.orgId),
+    ctx.db
+      .select({ orgId: auditLogs.orgId, lastActiveAt: sql<Date>`max(${auditLogs.createdAt})` })
+      .from(auditLogs)
+      .where(inArray(auditLogs.orgId, orgIds))
+      .groupBy(auditLogs.orgId),
   ]);
 
   const memberCounts = new Map<string, number>();
   for (const row of memberRows) {
-    memberCounts.set(row.orgId, (memberCounts.get(row.orgId) ?? 0) + 1);
+    memberCounts.set(row.orgId, row.memberCount);
   }
 
   const liveConnectionCounts = new Map<string, number>();
   for (const row of connectionRows) {
-    if (row.mode !== 'live' || row.status !== 'connected') continue;
-    liveConnectionCounts.set(row.orgId, (liveConnectionCounts.get(row.orgId) ?? 0) + 1);
+    liveConnectionCounts.set(row.orgId, row.liveConnections);
   }
 
   const lastReportByOrg = new Map<string, Date>();
   const lastActiveByOrg = new Map<string, Date>();
   for (const row of reportRows) {
-    const lastReport = lastReportByOrg.get(row.orgId);
-    if (!lastReport || row.createdAt.getTime() > lastReport.getTime()) lastReportByOrg.set(row.orgId, row.createdAt);
-
-    const lastActive = lastActiveByOrg.get(row.orgId);
-    if (!lastActive || row.createdAt.getTime() > lastActive.getTime()) lastActiveByOrg.set(row.orgId, row.createdAt);
+    lastReportByOrg.set(row.orgId, row.lastReportAt);
+    lastActiveByOrg.set(row.orgId, row.lastReportAt);
   }
   for (const row of activityRows) {
     if (!row.orgId) continue;
     const lastActive = lastActiveByOrg.get(row.orgId);
-    if (!lastActive || row.createdAt.getTime() > lastActive.getTime()) lastActiveByOrg.set(row.orgId, row.createdAt);
+    if (!lastActive || row.lastActiveAt.getTime() > lastActive.getTime()) lastActiveByOrg.set(row.orgId, row.lastActiveAt);
   }
 
   const now = ctx.now ?? new Date();
