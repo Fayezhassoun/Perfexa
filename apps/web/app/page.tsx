@@ -246,6 +246,9 @@ export default function Home() {
         <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
         <nav className="flex items-center gap-2">
           <Button variant="ghost" asChild>
+            <Link href="/pricing">Pricing</Link>
+          </Button>
+          <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
           <Button asChild>
