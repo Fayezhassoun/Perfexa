@@ -36,6 +36,8 @@ export interface WeeklyReportCronRun {
   sent: number;
   skipped: number;
   errors: string[];
+  /** Per-org outcome so operators can see WHY an org was skipped (pilot ops). */
+  details: { orgId: string; status: 'sent' | 'skipped'; reason?: string; recipients?: number; provider?: string }[];
 }
 
 /**
@@ -114,14 +116,19 @@ export async function runWeeklyReportCron(
 ): Promise<WeeklyReportCronRun> {
   const database = opts.db ?? db;
   const orgs = await database.select({ id: organizations.id }).from(organizations);
-  const run: WeeklyReportCronRun = { orgs: orgs.length, sent: 0, skipped: 0, errors: [] };
+  const run: WeeklyReportCronRun = { orgs: orgs.length, sent: 0, skipped: 0, errors: [], details: [] };
 
   for (const org of orgs) {
     const ctx = createAgentContext({ db: database, orgId: org.id, now: opts.now });
     try {
       const result = await sendWeeklyReportForOrg(ctx, opts);
-      if (result.status === 'sent') run.sent += 1;
-      else run.skipped += 1;
+      if (result.status === 'sent') {
+        run.sent += 1;
+        run.details.push({ orgId: org.id, status: 'sent', recipients: result.recipients, provider: result.provider });
+      } else {
+        run.skipped += 1;
+        run.details.push({ orgId: org.id, status: 'skipped', reason: result.reason });
+      }
     } catch (err) {
       run.errors.push(`${org.id}: ${err instanceof Error ? err.message : String(err)}`);
     }
