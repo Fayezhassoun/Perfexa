@@ -57,13 +57,19 @@ const notificationsRouter = router({
 // Client-facing UI preference flags stored in organizations.settings. Only
 // allowlisted keys are readable/writable here so the client can never touch
 // arbitrary org settings (notifications, memory, …) through this surface.
-const ALLOWED_SETTINGS_KEYS = ['proofDismissed'] as const;
+const ALLOWED_SETTINGS_KEYS = ['proofDismissed', 'firstAhaAt'] as const;
 type SettingsKey = (typeof ALLOWED_SETTINGS_KEYS)[number];
 
-function pickAllowed(settings: Record<string, unknown>): Record<SettingsKey, boolean> {
-  const prefs = {} as Record<SettingsKey, boolean>;
-  for (const key of ALLOWED_SETTINGS_KEYS) prefs[key] = settings[key] === true;
-  return prefs;
+interface Preferences {
+  proofDismissed: boolean;
+  firstAhaAt: string | null;
+}
+
+function pickAllowed(settings: Record<string, unknown>): Preferences {
+  return {
+    proofDismissed: settings.proofDismissed === true,
+    firstAhaAt: typeof settings.firstAhaAt === 'string' ? settings.firstAhaAt : null,
+  };
 }
 
 const preferencesRouter = router({
@@ -77,7 +83,7 @@ const preferencesRouter = router({
   }),
 
   update: orgProcedure
-    .input(z.object({ proofDismissed: z.boolean().optional() }))
+    .input(z.object({ proofDismissed: z.boolean().optional(), firstAhaAt: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const [org] = await ctx.agentCtx.db
         .select({ settings: organizations.settings })
