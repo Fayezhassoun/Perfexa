@@ -105,6 +105,7 @@ const preferencesRouter = router({
 
 export const settingsRouter = router({
   integrations: orgProcedure.query(({ ctx }) => services.settings.listIntegrations(ctx.agentCtx)),
+  connectionHealth: orgProcedure.query(({ ctx }) => services.connectionHealth.getConnectionHealth(ctx.agentCtx)),
 
   // sandbox→live requires an OAuth-connected account + confirmText 'LIVE' (§5).
   setMode: orgProcedure

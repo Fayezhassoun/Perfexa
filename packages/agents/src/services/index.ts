@@ -9,6 +9,7 @@ export * as agents from './agents.js';
 export * as leads from './leads.js';
 export * as knowledge from './knowledge.js';
 export * as settings from './settings.js';
+export * as connectionHealth from './connection-health.js';
 export * as orgs from './orgs.js';
 export * as oauth from './oauth.js';
 export * as optimize from './optimize.js';
@@ -25,4 +26,3 @@ export * as memory from './memory.js';
 export * as video from './video.js';
 export * as adIntel from './ad-intel.js';
 export * as llmUsage from './llm-usage.js';
-

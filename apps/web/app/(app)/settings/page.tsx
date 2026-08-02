@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageShell, PageHeader } from '@/components/page-shell';
 import { ModelSelectorCard } from '@/components/model-selector';
+import { cn } from '@/lib/utils';
 import {
   GoLiveDialog,
   IntegrationPlatformCard,
@@ -192,9 +193,113 @@ function OAuthNotice() {
   return null;
 }
 
+type ConnectionHealthRecord = {
+  platform: IntegrationPlatform;
+  mode: 'sandbox' | 'live';
+  status: string;
+  tokenExpiresAt: Date | string | null;
+  tokenHealthy: boolean;
+  lastSyncAt: Date | string | null;
+  needsReconnect: boolean;
+  warning?: string;
+};
+
+function asDate(value: Date | string | null): Date | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatSyncAge(value: Date | string | null): string {
+  const date = asDate(value);
+  if (!date) return 'not synced yet';
+
+  const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60_000));
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function IntegrationHealthRow({
+  integration,
+  health,
+  loading,
+  error,
+}: {
+  integration: IntegrationRecord;
+  health?: ConnectionHealthRecord;
+  loading: boolean;
+  error: boolean;
+}) {
+  const tokenExpiresAt = asDate(health?.tokenExpiresAt ?? null);
+  const expiring = Boolean(health?.needsReconnect && tokenExpiresAt && tokenExpiresAt.getTime() > Date.now());
+  const tone =
+    !health || loading || error ? 'neutral' : health.needsReconnect ? (expiring ? 'warning' : 'danger') : 'healthy';
+  const reconnectUrl = integration.connectUrl ?? `/api/integrations/${integration.platform}/connect`;
+  const label = loading
+    ? 'Checking connection health…'
+    : error
+      ? 'Connection health unavailable'
+      : health?.needsReconnect
+        ? expiring
+          ? 'Token expiring — reconnect soon'
+          : 'Connection lost — reconnect'
+        : health
+          ? `Connected · synced ${formatSyncAge(health.lastSyncAt)}`
+          : integration.connected
+            ? 'Connected · sync status pending'
+            : 'Not connected · connect to start syncing';
+
+  return (
+    <div
+      className={cn(
+        'flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-4 py-2.5 text-xs',
+        tone === 'healthy' && 'border-emerald-500/25 bg-emerald-500/8 text-emerald-700 dark:text-emerald-300',
+        tone === 'warning' && 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+        tone === 'danger' && 'border-destructive/30 bg-destructive/8 text-destructive',
+        tone === 'neutral' && 'border-[color:var(--glass-border)] bg-[color:var(--glass-bg-subtle)] text-muted-foreground',
+      )}
+      aria-live="polite"
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className={cn(
+            'h-2 w-2 shrink-0 rounded-full ring-4',
+            tone === 'healthy' && 'bg-emerald-500 ring-emerald-500/10',
+            tone === 'warning' && 'bg-amber-500 ring-amber-500/10',
+            tone === 'danger' && 'bg-destructive ring-destructive/10',
+            tone === 'neutral' && 'bg-muted-foreground/60 ring-muted-foreground/10',
+          )}
+          aria-hidden="true"
+        />
+        <span className="font-medium">{label}</span>
+      </div>
+
+      {health?.warning && health.needsReconnect && (
+        <span className="basis-full leading-5 text-current/80">{health.warning}</span>
+      )}
+
+      {health?.needsReconnect && (
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="h-7 border-current/25 px-2.5 text-xs text-current hover:bg-current/10"
+        >
+          <a href={reconnectUrl}>Reconnect</a>
+        </Button>
+      )}
+    </div>
+  );
+}
+
 function IntegrationsTab() {
   const utils = trpc.useUtils();
   const integrations = trpc.settings.integrations.useQuery();
+  const connectionHealth = trpc.settings.connectionHealth.useQuery(undefined, { refetchInterval: 60_000 });
   const [connecting, setConnecting] = useState<IntegrationPlatform | null>(null);
   const connect = trpc.settings.connect.useMutation({
     onSuccess: () => utils.settings.invalidate(),
@@ -211,6 +316,9 @@ function IntegrationsTab() {
   const [confirmText, setConfirmText] = useState('');
 
   const rows = (integrations.data ?? []) as IntegrationRecord[];
+  const healthByPlatform = new Map(
+    ((connectionHealth.data ?? []) as ConnectionHealthRecord[]).map((health) => [health.platform, health]),
+  );
   const connectedCount = rows.filter((integration) => integration.connected).length;
 
   if (integrations.isLoading) {
@@ -259,22 +367,29 @@ function IntegrationsTab() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {rows.map((integration) => (
-          <IntegrationPlatformCard
-            key={integration.platform}
-            integration={integration}
-            connectPending={connecting === integration.platform && connect.isPending}
-            setModePending={setMode.isPending}
-            onConnect={() => {
-              setConnecting(integration.platform);
-              connect.mutate({ platform: integration.platform });
-            }}
-            onGoLive={() => {
-              setMode.reset();
-              setConfirming(integration.platform);
-              setConfirmText('');
-            }}
-            onSwitchToSandbox={() => setMode.mutate({ platform: integration.platform, mode: 'sandbox' })}
-          />
+          <div key={integration.platform} className="space-y-2">
+            <IntegrationPlatformCard
+              integration={integration}
+              connectPending={connecting === integration.platform && connect.isPending}
+              setModePending={setMode.isPending}
+              onConnect={() => {
+                setConnecting(integration.platform);
+                connect.mutate({ platform: integration.platform });
+              }}
+              onGoLive={() => {
+                setMode.reset();
+                setConfirming(integration.platform);
+                setConfirmText('');
+              }}
+              onSwitchToSandbox={() => setMode.mutate({ platform: integration.platform, mode: 'sandbox' })}
+            />
+            <IntegrationHealthRow
+              integration={integration}
+              health={healthByPlatform.get(integration.platform)}
+              loading={connectionHealth.isLoading}
+              error={Boolean(connectionHealth.error)}
+            />
+          </div>
         ))}
       </div>
 
