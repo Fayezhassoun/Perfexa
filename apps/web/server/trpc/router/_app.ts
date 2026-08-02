@@ -24,6 +24,7 @@ import { reportsRouter } from './reports';
 import { modelsRouter } from './models';
 import { memoryRouter } from './memory';
 import { videoRouter } from './video';
+import { shareRouter } from './share';
 
 export const appRouter = router({
   auth: authRouter,
@@ -51,6 +52,7 @@ export const appRouter = router({
   models: modelsRouter,
   memory: memoryRouter,
   video: videoRouter,
+  share: shareRouter,
 });
 
 export type AppRouter = typeof appRouter;
