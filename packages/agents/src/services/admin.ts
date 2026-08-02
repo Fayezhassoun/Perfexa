@@ -1,7 +1,7 @@
 // Admin services (CONTRACTS §5): org user list + system health.
 
 import net from 'node:net';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, count, eq, inArray, max } from 'drizzle-orm';
 import {
   auditLogs,
   connectedAccounts,
@@ -109,12 +109,12 @@ export async function listOrgsOverview(
   const orgIds = orgRows.map((org) => org.id);
   const [memberRows, connectionRows, reportRows, activityRows] = await Promise.all([
     ctx.db
-      .select({ orgId: orgMembers.orgId, memberCount: sql<number>`count(*)::int` })
+      .select({ orgId: orgMembers.orgId, memberCount: count() })
       .from(orgMembers)
       .where(inArray(orgMembers.orgId, orgIds))
       .groupBy(orgMembers.orgId),
     ctx.db
-      .select({ orgId: connectedAccounts.orgId, liveConnections: sql<number>`count(*)::int` })
+      .select({ orgId: connectedAccounts.orgId, liveConnections: count() })
       .from(connectedAccounts)
       .where(
         and(
@@ -125,12 +125,12 @@ export async function listOrgsOverview(
       )
       .groupBy(connectedAccounts.orgId),
     ctx.db
-      .select({ orgId: weeklyReports.orgId, lastReportAt: sql<Date>`max(${weeklyReports.createdAt})` })
+      .select({ orgId: weeklyReports.orgId, lastReportAt: max(weeklyReports.createdAt) })
       .from(weeklyReports)
       .where(inArray(weeklyReports.orgId, orgIds))
       .groupBy(weeklyReports.orgId),
     ctx.db
-      .select({ orgId: auditLogs.orgId, lastActiveAt: sql<Date>`max(${auditLogs.createdAt})` })
+      .select({ orgId: auditLogs.orgId, lastActiveAt: max(auditLogs.createdAt) })
       .from(auditLogs)
       .where(inArray(auditLogs.orgId, orgIds))
       .groupBy(auditLogs.orgId),
@@ -149,11 +149,12 @@ export async function listOrgsOverview(
   const lastReportByOrg = new Map<string, Date>();
   const lastActiveByOrg = new Map<string, Date>();
   for (const row of reportRows) {
+    if (!row.lastReportAt) continue;
     lastReportByOrg.set(row.orgId, row.lastReportAt);
     lastActiveByOrg.set(row.orgId, row.lastReportAt);
   }
   for (const row of activityRows) {
-    if (!row.orgId) continue;
+    if (!row.orgId || !row.lastActiveAt) continue;
     const lastActive = lastActiveByOrg.get(row.orgId);
     if (!lastActive || row.lastActiveAt.getTime() > lastActive.getTime()) lastActiveByOrg.set(row.orgId, row.lastActiveAt);
   }
