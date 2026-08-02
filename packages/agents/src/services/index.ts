@@ -27,3 +27,4 @@ export * as memory from './memory.js';
 export * as video from './video.js';
 export * as adIntel from './ad-intel.js';
 export * as llmUsage from './llm-usage.js';
+export * as analytics from './analytics.js';

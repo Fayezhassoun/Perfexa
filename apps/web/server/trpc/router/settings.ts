@@ -133,6 +133,26 @@ export const settingsRouter = router({
     .input(z.object({ idempotencyKey: z.string().optional() }).optional())
     .mutation(({ ctx }) => services.sync.syncOrg(ctx.agentCtx)),
 
+  // First-party product analytics: the client emits a closed-vocabulary event
+  // (see services.analytics.ANALYTICS_EVENTS) with optional JSON props.
+  trackEvent: orgProcedure
+    .input(
+      z.object({
+        event: z.enum(services.analytics.ANALYTICS_EVENTS),
+        props: z.record(z.unknown()).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await services.analytics.track(ctx.agentCtx, input.event, input.props);
+      return { tracked: true as const };
+    }),
+
+  // Per-org engagement over the last N days (default 30): distinct active days,
+  // events by type, and last-active — so an org can see its own usage.
+  activity: orgProcedure
+    .input(z.object({ days: z.number().int().min(1).max(365).optional() }).optional())
+    .query(({ ctx, input }) => services.analytics.getOrgActivity(ctx.agentCtx, input?.days)),
+
   budgets: budgetsRouter,
   members: membersRouter,
   notifications: notificationsRouter,

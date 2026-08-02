@@ -395,6 +395,21 @@ export const auditLogs = pgTable('audit_logs', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
+// First-party product analytics (Fox Biz Phase 2 retention metrics). Deliberately
+// separate from the IMMUTABLE audit_logs: product telemetry is higher-frequency,
+// includes client-emitted UI events, and must not pollute the user-visible audit
+// trail. Keyed by (org, user, event, timestamp); see migration 0012.
+export const productEvents = pgTable('product_events', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  userId: uuid('user_id'),
+  event: text('event').notNull(),
+  props: jsonb('props').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
 // ---------------------------------------------------------------------------
 // Expansion: social media, content studio, competitor intel, reputation.
 // ---------------------------------------------------------------------------

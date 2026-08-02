@@ -11,6 +11,7 @@ import type { AgentContext } from '../types.js';
 import { createAgentContext } from '../context.js';
 import { loadLiveDeps } from '../live.js';
 import { mirrorCampaigns } from '../store.js';
+import { track } from './analytics.js';
 
 /** Ad platforms that expose listCampaigns() (ga4/gsc are data-only sources). */
 const AD_PLATFORMS: AdPlatform[] = ['google_ads', 'meta', 'tiktok'];
@@ -68,6 +69,7 @@ export async function syncOrgPlatform(
     entityId: platform,
     metadata: { platform, synced: campaigns.length },
   });
+  await track(ctx, 'sync_run', { platform, synced: campaigns.length });
 
   return { platform, synced: campaigns.length };
 }
