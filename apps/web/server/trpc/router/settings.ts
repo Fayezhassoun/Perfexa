@@ -126,6 +126,13 @@ export const settingsRouter = router({
     .input(z.object({ platform, idempotencyKey: z.string().optional() }))
     .mutation(({ ctx, input }) => services.settings.connectSandboxAccount(ctx.agentCtx, input.platform)),
 
+  // Force-refresh campaigns_mirror from the org's live-connected ad platforms.
+  // Non-connected platforms come back skipped; one platform failing won't abort
+  // the others (per-platform isolation lives in services.sync.syncOrg).
+  syncNow: orgProcedure
+    .input(z.object({ idempotencyKey: z.string().optional() }).optional())
+    .mutation(({ ctx }) => services.sync.syncOrg(ctx.agentCtx)),
+
   budgets: budgetsRouter,
   members: membersRouter,
   notifications: notificationsRouter,

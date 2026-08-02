@@ -14,6 +14,7 @@ export * as orgs from './orgs.js';
 export * as oauth from './oauth.js';
 export * as optimize from './optimize.js';
 export * as reports from './reports.js';
+export * as sync from './sync.js';
 export * as email from './email.js';
 export * as onboarding from './onboarding.js';
 export * as auditLog from './audit-log.js';
