@@ -19,7 +19,7 @@ import {
 } from '@growthcrew/integrations';
 import { loadLiveDeps } from './live.js';
 
-interface StoredCampaignView {
+export interface StoredCampaignView {
   externalId: string;
   platform: string;
   name: string;
@@ -28,7 +28,7 @@ interface StoredCampaignView {
   metrics: CampaignMetrics;
 }
 
-interface AdapterStateView {
+export interface AdapterStateView {
   campaigns?: StoredCampaignView[];
 }
 
@@ -40,7 +40,13 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-async function mirrorCampaigns(db: Db, orgId: string, platform: AdPlatform, state: AdapterStateView): Promise<void> {
+export async function mirrorCampaigns(
+  db: Db,
+  orgId: string,
+  platform: AdPlatform,
+  state: AdapterStateView,
+  mode: 'sandbox' | 'live' = 'sandbox',
+): Promise<void> {
   for (const c of state.campaigns ?? []) {
     const [existing] = await db
       .select()
@@ -67,7 +73,7 @@ async function mirrorCampaigns(db: Db, orgId: string, platform: AdPlatform, stat
         status: c.status,
         budgetDailyCents: c.budgetDailyCents,
         metrics,
-        mode: 'sandbox',
+        mode,
       });
     } else {
       const prev = (existing.metrics as MirrorMetrics | null) ?? { ...c.metrics, history: [] };
