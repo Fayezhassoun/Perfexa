@@ -446,7 +446,16 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
   const { getToolsForAgent } = await import('./tools.js');
   const { zodToJsonSchema } = await import('@growthcrew/llm');
   const tools = getToolsForAgent('orchestrator');
-  const specs = tools.map((t) => ({ name: t.name, description: t.description, parameters: zodToJsonSchema(t.schema) }));
+  // DeepSeek (and strict OpenAI-style APIs) reject tool names containing dots.
+  // Internal tool names use dots (e.g. "ads.list_campaigns"); sanitize to
+  // underscores for the wire and map back when dispatching the model's calls.
+  const toWireName = (n: string) => n.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const wireToInternal = new Map<string, string>();
+  const specs = tools.map((t) => {
+    const wire = toWireName(t.name);
+    wireToInternal.set(wire, t.name);
+    return { name: wire, description: t.description, parameters: zodToJsonSchema(t.schema) };
+  });
 
   const history = ctx.conversationId
     ? await ctx.db
@@ -515,15 +524,17 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
     }
     messages.push({ role: 'assistant', content: res.content });
     for (const call of res.toolCalls) {
-      const tool = getTool(call.name);
+      // Map the sanitized wire name back to the internal dotted tool name.
+      const internalName = wireToInternal.get(call.name) ?? call.name;
+      const tool = getTool(internalName);
       let toolResult: unknown;
       try {
         if (!tool || tool.gated) {
           toolResult = { error: 'This action requires human approval and cannot be executed by the assistant.' };
         } else {
-          const { result } = await executeTool(ctx, call.name, call.args);
+          const { result } = await executeTool(ctx, internalName, call.args);
           toolResult = result;
-          toolCallsMade.push(call.name);
+          toolCallsMade.push(internalName);
         }
       } catch (err) {
         toolResult = { error: err instanceof Error ? err.message : String(err) };
