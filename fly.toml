@@ -37,6 +37,23 @@ primary_region = "fra"
     hard_limit = 250
     soft_limit = 200
 
+# ── Weekly report cron ────────────────────────────────────────────
+# The weekly report email trigger is an HTTP endpoint on this web service:
+#
+#   POST https://growthcrew.fly.dev/api/cron/weekly-report
+#   Authorization: Bearer $CRON_SECRET
+#
+# Schedule it for Mondays 08:00 UTC (cron "0 8 * * 1"). Fly has no declarative
+# HTTP-cron field, so hit the endpoint from an external scheduler, e.g.:
+#
+#   flyctl machine run --schedule "0 8 * * 1" \
+#     "curl -fsS -X POST -H \"Authorization: Bearer $CRON_SECRET\" \
+#      https://growthcrew.fly.dev/api/cron/weekly-report"
+#
+# Set the secret once with: flyctl secrets set CRON_SECRET=<random>.
+# Without CRON_SECRET the endpoint returns 401 (cron disabled). The run is
+# idempotent per ISO week, so an early/late trigger won't double-send.
+
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
