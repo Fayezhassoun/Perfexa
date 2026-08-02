@@ -1,7 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import { and, eq, gt, isNull, or } from 'drizzle-orm';
 import { z } from 'zod';
-import { reportShares, weeklyReports } from '@growthcrew/db';
+import { TRPCError } from '@trpc/server';
+import { organizations, reportShares, weeklyReports } from '@growthcrew/db';
+import { services } from '@growthcrew/agents';
 import { publicProcedure, router, orgProcedure } from '../trpc';
 
 const brandColorSchema = z.string().regex(/^#[\da-f]{6}$/i, 'Brand color must be a six-digit hex color');
@@ -14,6 +16,18 @@ const shareInput = z.object({
 
 export const shareRouter = router({
   create: orgProcedure.input(shareInput).mutation(async ({ ctx, input }) => {
+    const [org] = await ctx.db
+      .select({ settings: organizations.settings })
+      .from(organizations)
+      .where(eq(organizations.id, ctx.orgId))
+      .limit(1);
+    if (!services.entitlements.canUse({ settings: org?.settings ?? {} }, 'whiteLabel')) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'White-label reports are available on the Growth plan and above.',
+      });
+    }
+
     const [report] = await ctx.db
       .select({ id: weeklyReports.id })
       .from(weeklyReports)

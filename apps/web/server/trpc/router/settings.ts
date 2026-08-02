@@ -104,6 +104,15 @@ const preferencesRouter = router({
 });
 
 export const settingsRouter = router({
+  plan: orgProcedure.query(async ({ ctx }) => {
+    const [org] = await ctx.agentCtx.db
+      .select({ settings: organizations.settings })
+      .from(organizations)
+      .where(eq(organizations.id, ctx.agentCtx.orgId))
+      .limit(1);
+    return services.entitlements.getEntitlements({ settings: org?.settings ?? {} });
+  }),
+
   integrations: orgProcedure.query(({ ctx }) => services.settings.listIntegrations(ctx.agentCtx)),
   connectionHealth: orgProcedure.query(({ ctx }) => services.connectionHealth.getConnectionHealth(ctx.agentCtx)),
 
