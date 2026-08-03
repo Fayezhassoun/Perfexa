@@ -2,7 +2,26 @@
 // (dashboard, campaigns, creative fatigue, anomaly alerts) shows a populated,
 // believable state. Run: node scripts/seed-demo-data.mjs
 // Requires DATABASE_URL pointing at prod (via `fly proxy`).
-import postgres from 'postgres';
+//
+// ⚠️  DEPRECATED — honesty-rail guard (2026-08-03):
+// This script writes UNLABELED simulated rows into real tables, which breaks
+// the "no fake metrics without labels" rule. The sanctioned demo path is now
+// `scripts/enable-demo-data.mjs` (settings-gated, labeled on every surface).
+// This script refuses to run unless you explicitly accept the risk:
+//   ENABLE_UNLABELED_SEED=1 node scripts/seed-demo-data.mjs
+if (process.env.ENABLE_UNLABELED_SEED !== '1') {
+  console.error(
+    '[seed-demo-data] BLOCKED: this script seeds unlabeled fake data into real tables.\n' +
+    'Use the labeled demo mode instead:  node scripts/enable-demo-data.mjs\n' +
+    '(Override only with explicit intent: ENABLE_UNLABELED_SEED=1)'
+  );
+  process.exit(1);
+}
+
+// Resolve `postgres` through packages/db (root scripts have no direct resolution path).
+import { createRequire } from 'node:module';
+const requireFromDb = createRequire(new URL('../packages/db/package.json', import.meta.url));
+const postgres = requireFromDb('postgres');
 
 const ORG = '7620b2f8-9031-4394-a84e-bb7e8d59f0a6';
 const url = process.env.DATABASE_URL;
