@@ -178,9 +178,13 @@ export async function listOrgsOverview(
   });
 }
 
-async function pingRedis(): Promise<'ok' | 'error'> {
+/**
+ * Redis is optional (single-instance deploys run without it): an unconfigured
+ * REDIS_URL is healthy — only a configured-but-unreachable Redis is an error.
+ */
+async function pingRedis(): Promise<'ok' | 'not-configured' | 'error'> {
   const url = process.env.REDIS_URL;
-  if (!url) return 'error';
+  if (!url) return 'not-configured';
   try {
     const { hostname, port } = new URL(url);
     return await new Promise<'ok' | 'error'>((resolve) => {
@@ -202,7 +206,7 @@ async function pingRedis(): Promise<'ok' | 'error'> {
 
 export interface SystemHealth {
   db: 'ok' | 'error';
-  redis: 'ok' | 'error';
+  redis: 'ok' | 'not-configured' | 'error';
   llm: string;
   stt: string;
   tts: string;

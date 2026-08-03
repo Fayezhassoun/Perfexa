@@ -202,7 +202,8 @@ optional `idempotencyKey: string`; duplicate keys return the original result.
   `settings.members.list/invite(stub)/remove`. `settings.notifications.update` (jsonb on org config — keep in orgs.goals? NO: add `orgs.settings jsonb default '{}'`).
 - `admin.users()` (role owner of FIRST seeded org only if `user.email` endsWith `@growthcrew.dev`
   OR org role owner — keep simple: any user can view admin page for own org list; platform-admin
-  = `ADMIN_EMAILS` env csv match), `admin.health()` → `{db: ok, redis: ok, llm: provider, adapters: [...]}`.
+  = `ADMIN_EMAILS` env csv match), `admin.health()` → `{db: ok, redis: ok | not-configured | error, llm: provider, adapters: [...]}`
+  (`redis` is `not-configured` — healthy — when `REDIS_URL` is absent; `error` only when configured but unreachable).
 
 Routers must be thin — all logic in `packages/agents/src/services/*.ts` (auth service may
 live in web). Service functions take explicit args, return plain objects.

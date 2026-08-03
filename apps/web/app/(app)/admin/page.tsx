@@ -186,7 +186,8 @@ export default function AdminPage() {
             {health.data ? (
               <div className="flex flex-wrap gap-2">
                 <Badge variant={health.data.db === 'ok' ? 'success' : 'destructive'}>db: {health.data.db}</Badge>
-                <Badge variant={health.data.redis === 'ok' ? 'success' : 'warning'}>redis: {health.data.redis}</Badge>
+                {/* redis "not-configured" is healthy — only a configured-but-unreachable Redis warns */}
+                <Badge variant={health.data.redis === 'error' ? 'warning' : 'success'}>redis: {health.data.redis}</Badge>
                 <Badge variant="secondary">llm: {health.data.llm}</Badge>
                 <Badge variant="secondary">stt: {health.data.stt}</Badge>
                 <Badge variant="secondary">tts: {health.data.tts}</Badge>
