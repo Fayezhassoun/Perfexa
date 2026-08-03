@@ -35,6 +35,16 @@ const PLATFORM_LABEL: Record<'google_ads' | 'meta' | 'tiktok', string> = {
   tiktok: 'TikTok',
 };
 
+/**
+ * Wire-safe tool name: DeepSeek (and strict OpenAI-style APIs) reject tool
+ * names containing dots, so internal dotted names (e.g. "ads.list_campaigns")
+ * are mapped to underscores before being sent on the wire. Names that already
+ * match `^[a-zA-Z0-9_-]+$` pass through unchanged.
+ */
+export function sanitizeToolName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
 function dollars(cents: number): string {
   return (cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
@@ -449,10 +459,9 @@ async function handleWithLLM(ctx: AgentContext, message: string, modality: 'voic
   // DeepSeek (and strict OpenAI-style APIs) reject tool names containing dots.
   // Internal tool names use dots (e.g. "ads.list_campaigns"); sanitize to
   // underscores for the wire and map back when dispatching the model's calls.
-  const toWireName = (n: string) => n.replace(/[^a-zA-Z0-9_-]/g, '_');
   const wireToInternal = new Map<string, string>();
   const specs = tools.map((t) => {
-    const wire = toWireName(t.name);
+    const wire = sanitizeToolName(t.name);
     wireToInternal.set(wire, t.name);
     return { name: wire, description: t.description, parameters: zodToJsonSchema(t.schema) };
   });
