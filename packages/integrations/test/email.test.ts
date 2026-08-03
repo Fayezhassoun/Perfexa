@@ -84,4 +84,19 @@ describe('renderWeeklyReportEmail', () => {
     expect(html).toContain('No ad spend this week.');
     expect(html).not.toContain('<table');
   });
+
+  it('carries the demo-data label when numbers are simulated', () => {
+    const html = renderWeeklyReportEmail('Acme', {
+      summary: 'This week you spent $515.60 for 55 conversions.',
+      highlights: [],
+      totals: { spendCents: 51_560, impressions: 130_250, clicks: 2_252, conversions: 55 },
+      demoData: true,
+    });
+    expect(html).toContain('Demo data — connect your account for live numbers.');
+  });
+
+  it('never shows the demo-data label for live numbers', () => {
+    const html = renderWeeklyReportEmail('Acme', { summary: 'This week you spent $15.00.', highlights: [] });
+    expect(html).not.toContain('Demo data');
+  });
 });

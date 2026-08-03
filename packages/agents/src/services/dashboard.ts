@@ -8,6 +8,7 @@ import type { AgentContext } from '../types.js';
 import type { MirrorMetrics } from '../store.js';
 import { tick as guardianTick } from '../guardian.js';
 import { getOrgAdapter } from '../store.js';
+import { DEMO_CAMPAIGNS, demoHistory, isDemoDataEnabled } from './demo-data.js';
 
 interface Totals {
   spendCents: number;
@@ -48,10 +49,38 @@ export interface OverviewResult {
   byPlatform: Record<string, OverviewTotals>;
   series: { date: string; spendCents: number; clicks: number; conversions: number }[];
   campaigns: number;
+  /** True when the numbers are simulated (demo-data mode) and must be labeled as such. */
+  demoData: boolean;
+}
+
+/** Deterministic simulated KPIs for demo-data orgs (see ./demo-data.ts). */
+function demoOverview(now: Date, range: { from?: string; to?: string } | undefined, avgValue: number): OverviewResult {
+  const byPlatform: Record<string, Totals> = {};
+  for (const c of DEMO_CAMPAIGNS) {
+    byPlatform[c.platform] ??= { impressions: 0, clicks: 0, spendCents: 0, conversions: 0 };
+    byPlatform[c.platform]!.impressions += c.impressions;
+    byPlatform[c.platform]!.clicks += c.clicks;
+    byPlatform[c.platform]!.spendCents += c.spendCents;
+    byPlatform[c.platform]!.conversions += c.conversions;
+  }
+  const totals = Object.values(byPlatform).reduce<Totals>(
+    (acc, p) => ({
+      impressions: acc.impressions + p.impressions,
+      clicks: acc.clicks + p.clicks,
+      spendCents: acc.spendCents + p.spendCents,
+      conversions: acc.conversions + p.conversions,
+    }),
+    { impressions: 0, clicks: 0, spendCents: 0, conversions: 0 },
+  );
+  const series = demoHistory(now)
+    .filter((p) => (!range?.from || p.date >= range.from) && (!range?.to || p.date <= range.to))
+    .map((p) => ({ date: p.date, spendCents: p.spendCents, clicks: p.clicks, conversions: p.conversions }));
+  const byPlatformDerived: Record<string, OverviewTotals> = {};
+  for (const [p, t] of Object.entries(byPlatform)) byPlatformDerived[p] = derive(t, avgValue);
+  return { totals: derive(totals, avgValue), byPlatform: byPlatformDerived, series, campaigns: DEMO_CAMPAIGNS.length, demoData: true };
 }
 
 export async function overview(ctx: AgentContext, range?: { from?: string; to?: string }): Promise<OverviewResult> {
-  const rows = await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
   const [org] = await ctx.db
     .select({ settings: organizations.settings })
     .from(organizations)
@@ -59,6 +88,13 @@ export async function overview(ctx: AgentContext, range?: { from?: string; to?: 
     .limit(1);
   const avgValue =
     ((org?.settings as Record<string, unknown> | undefined)?.avgConversionValueCents as number | undefined) ?? 10000;
+
+  // Demo-data mode: simulated KPIs, always labeled in the UI (never silent).
+  if (isDemoDataEnabled(org?.settings)) {
+    return demoOverview(ctx.now ?? new Date(), range, avgValue);
+  }
+
+  const rows = await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
 
   const byPlatform: Record<string, Totals> = {};
   const seriesByDate = new Map<string, Totals>();
@@ -101,7 +137,7 @@ export async function overview(ctx: AgentContext, range?: { from?: string; to?: 
   const byPlatformDerived: Record<string, OverviewTotals> = {};
   for (const [p, t] of Object.entries(byPlatform)) byPlatformDerived[p] = derive(t, avgValue);
 
-  return { totals: derive(totals, avgValue), byPlatform: byPlatformDerived, series, campaigns: rows.length };
+  return { totals: derive(totals, avgValue), byPlatform: byPlatformDerived, series, campaigns: rows.length, demoData: false };
 }
 
 export interface ActivityItem {

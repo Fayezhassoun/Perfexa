@@ -31,7 +31,7 @@ export {
   type ExchangedTokens,
 } from './oauth.js';
 export { liveFetchJson, platformLabel } from './live-http.js';
-export { sendEmail, renderWeeklyReportEmail, type SendEmailInput, type SendEmailResult, type WeeklyReportContent } from './email.js';
+export { sendEmail, renderWeeklyReportEmail, DEMO_DATA_LABEL, type SendEmailInput, type SendEmailResult, type WeeklyReportContent } from './email.js';
 
 export { encrypt, decrypt } from './crypto.js';
 export { withRetry } from './retry.js';

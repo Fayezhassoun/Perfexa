@@ -315,6 +315,8 @@ export interface WeeklyReportPayload {
   /** Whether the narrative came from the LLM or the deterministic fallback. */
   source: 'llm' | 'deterministic';
   generatedAt: string;
+  /** True when the numbers are simulated (demo-data mode) and must be labeled as such. */
+  demoData?: boolean;
 }
 
 // In-app weekly performance report (the #1 retention surface). Distinct from

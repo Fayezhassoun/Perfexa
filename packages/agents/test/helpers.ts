@@ -18,6 +18,7 @@ export async function freshOrg(opts?: {
   monthlyBudgetCeilingCents?: number;
   seedGlobalBudget?: boolean;
   now?: Date;
+  settings?: Record<string, unknown>;
 }): Promise<TestOrg> {
   const [user] = await db
     .insert(users)
@@ -31,7 +32,7 @@ export async function freshOrg(opts?: {
       goals: ['visibility', 'leads'],
       monthlyBudgetCeilingCents: opts?.monthlyBudgetCeilingCents ?? 50_000,
       onboardingStep: 'done',
-      settings: {},
+      settings: opts?.settings ?? {},
     })
     .returning({ id: organizations.id });
   await db.insert(orgMembers).values({ orgId: org!.id, userId: user!.id, role: 'owner' });

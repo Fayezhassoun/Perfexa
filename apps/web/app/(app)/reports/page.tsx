@@ -18,6 +18,7 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageShell, PageHeader } from '@/components/page-shell';
+import { DemoDataBanner } from '@/components/demo-data-banner';
 import { cn } from '@/lib/utils';
 import { Markdown } from './markdown';
 
@@ -34,6 +35,7 @@ interface ReportContent {
   fatiguedCreatives: number;
   source: 'llm' | 'deterministic';
   generatedAt: string;
+  demoData?: boolean;
 }
 
 interface WeeklyReportRow {
@@ -179,6 +181,8 @@ export default function ReportsPage() {
           {/* Detail */}
           {selected && content && (
             <div className="space-y-4">
+              {/* Demo-data mode: simulated numbers must always carry the label */}
+              {content.demoData && <DemoDataBanner />}
               <div className="glass-panel space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

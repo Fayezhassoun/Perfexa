@@ -27,6 +27,16 @@ import { createAuditLogger } from '../audit.js';
 import { createAgentContext } from '../context.js';
 import { isWithinBudget, recordUsage } from './llm-usage.js';
 import { track } from './analytics.js';
+import {
+  DEMO_CAMPAIGNS,
+  DEMO_DATA_LABEL,
+  demoBurningCampaigns,
+  demoCampaignRows,
+  demoPrevWeeklyTotals,
+  demoTotalsByPlatform,
+  demoWeeklyTotals,
+  isDemoDataEnabled,
+} from './demo-data.js';
 import type { AgentContext } from '../types.js';
 
 interface HistoryPoint {
@@ -75,7 +85,19 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
   const periodStart = isoDay(new Date(now.getTime() - dayMs(7)));
   const prevStart = isoDay(new Date(now.getTime() - dayMs(14)));
 
-  const campaigns = await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
+  const [orgRow] = await ctx.db
+    .select({ settings: organizations.settings })
+    .from(organizations)
+    .where(eq(organizations.id, ctx.orgId))
+    .limit(1);
+  const demo = isDemoDataEnabled(orgRow?.settings);
+
+  // Demo-data mode: aggregate the deterministic simulated dataset instead of
+  // the org's (empty) campaigns_mirror rows. The label travels in
+  // content.demoData and is rendered by the email template.
+  const campaigns = demo
+    ? demoCampaignRows(now)
+    : await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
   const totals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   const prevTotals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   const byPlatform: Record<string, WeeklyTotals> = {};
@@ -130,11 +152,14 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
     totals,
     byPlatform,
     periodLabel: `${periodStart} → ${periodEnd}`,
+    // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
+    demoData: demo ? true : undefined,
   };
 
   // LLM narrative (publication-grade): live providers rewrite the summary in
   // plain language; any failure keeps the deterministic text (CONTRACTS §3).
-  if (ctx.llm.name !== 'mock') {
+  // Demo mode stays fully deterministic.
+  if (!demo && ctx.llm.name !== 'mock') {
     try {
       const res = await ctx.llm.chat(
         [
@@ -272,7 +297,7 @@ function pctDelta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / previous) * 100);
 }
 
-interface WeekAggregation {
+export interface WeekAggregation {
   periodLabel: string;
   totals: WeeklyTotals;
   prevTotals: WeeklyTotals;
@@ -284,6 +309,40 @@ interface WeekAggregation {
   alerts: { total: number; critical: number; warning: number; notable: string[] };
   fatiguedCreatives: number;
   fatigueExamples: string[];
+}
+
+/**
+ * Deterministic simulated week for demo-data orgs (see ./demo-data.ts):
+ * three campaigns, believable totals and deltas, and one warning alert.
+ */
+function demoWeekAggregation(weekStart: Date, now: Date): WeekAggregation {
+  const totals = demoWeeklyTotals();
+  const byPlatform = demoTotalsByPlatform();
+  let bestPlatform: WeekAggregation['bestPlatform'] = null;
+  for (const [platform, t] of Object.entries(byPlatform)) {
+    if (t.conversions <= 0) continue;
+    const cpaCents = t.spendCents / t.conversions;
+    if (!bestPlatform || cpaCents < bestPlatform.cpaCents) bestPlatform = { platform, cpaCents };
+  }
+  const burning = demoBurningCampaigns();
+  return {
+    periodLabel: `${isoDay(weekStart)} → ${isoDay(now)}`,
+    totals,
+    prevTotals: demoPrevWeeklyTotals(),
+    byPlatform,
+    campaignCount: DEMO_CAMPAIGNS.length,
+    activeCampaigns: DEMO_CAMPAIGNS.filter((c) => c.status === 'active').length,
+    burningCampaigns: burning.length,
+    bestPlatform,
+    alerts: {
+      total: burning.length > 0 ? 1 : 0,
+      critical: 0,
+      warning: burning.length > 0 ? 1 : 0,
+      notable: burning.map((c) => `Demo: "${c.name}" is spending without conversions`),
+    },
+    fatiguedCreatives: 0,
+    fatigueExamples: [],
+  };
 }
 
 /** Pull the org's last-7-days performance into a single deterministic shape. */
@@ -631,15 +690,25 @@ export async function generateWeeklyReport(
   now: Date = ctx.now ?? new Date(),
 ): Promise<GeneratedWeeklyReport> {
   const weekStart = startOfWeek(now);
-  const agg = await aggregateWeek(ctx, weekStart, now);
+  const [orgRow] = await ctx.db
+    .select({ settings: organizations.settings })
+    .from(organizations)
+    .where(eq(organizations.id, ctx.orgId))
+    .limit(1);
+  const demo = isDemoDataEnabled(orgRow?.settings);
+
+  const agg = demo ? demoWeekAggregation(weekStart, now) : await aggregateWeek(ctx, weekStart, now);
   const brief = buildDeterministicBrief(agg);
 
-  let markdown = brief.markdown;
+  // Demo reports are labeled in the markdown itself so the label survives on
+  // every rendering surface (in-app, shared report, copy/paste).
+  let markdown = demo ? `**${DEMO_DATA_LABEL}**\n\n${brief.markdown}` : brief.markdown;
   let source: WeeklyReportPayload['source'] = 'deterministic';
 
   // LLM narrative — only when a real provider is configured AND the org is
   // within budget. Any failure keeps the deterministic brief (CONTRACTS §3).
-  if (ctx.llm.name !== 'mock' && (await isWithinBudget(ctx))) {
+  // Demo mode stays fully deterministic so the label and numbers never drift.
+  if (!demo && ctx.llm.name !== 'mock' && (await isWithinBudget(ctx))) {
     try {
       const res = await ctx.llm.chat(
         [
@@ -692,6 +761,8 @@ export async function generateWeeklyReport(
     fatiguedCreatives: agg.fatiguedCreatives,
     source,
     generatedAt: now.toISOString(),
+    // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
+    demoData: demo ? true : undefined,
   };
 
   // Upsert keyed to (org, weekStart) so regenerating refreshes rather than

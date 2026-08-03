@@ -50,11 +50,16 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
 // Weekly report email rendering (deterministic, self-contained HTML).
 // ---------------------------------------------------------------------------
 
+/** Shown on every surface that renders simulated numbers (demo-data mode). */
+export const DEMO_DATA_LABEL = 'Demo data — connect your account for live numbers.';
+
 export interface WeeklyReportContent {
   summary: string;
   highlights: string[];
   totals?: { spendCents: number; impressions: number; clicks: number; conversions: number };
   periodLabel?: string;
+  /** True when the numbers are simulated — the email must carry the demo label. */
+  demoData?: boolean;
 }
 
 function dollars(cents: number): string {
@@ -70,9 +75,13 @@ export function renderWeeklyReportEmail(orgName: string, content: WeeklyReportCo
        <tr><td style="padding:4px 12px 4px 0;color:#666">Conversions</td><td><strong>${t.conversions}</strong></td></tr>`
     : '';
   const highlights = content.highlights.map((h) => `<li style="margin:6px 0">${h}</li>`).join('');
+  const demoBanner = content.demoData
+    ? `<p style="background:#fff7ed;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;color:#92400e;font-size:13px;margin:12px 0"><strong>${DEMO_DATA_LABEL}</strong></p>`
+    : '';
   return `<!doctype html>
 <html><body style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
   <h1 style="font-size:20px">Your week at ${orgName}</h1>
+  ${demoBanner}
   <p style="color:#444">${content.summary}</p>
   ${t ? `<table style="border-collapse:collapse;margin:12px 0">${rows}</table>` : ''}
   ${content.highlights.length ? `<h2 style="font-size:15px;margin-top:20px">Highlights</h2><ul style="padding-left:18px">${highlights}</ul>` : ''}

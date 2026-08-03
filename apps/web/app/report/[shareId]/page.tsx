@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { appRouter } from '@/server/trpc/router/_app';
 import { db } from '@growthcrew/db';
 import { Markdown } from '@/app/(app)/reports/markdown';
+import { DemoDataBanner } from '@/components/demo-data-banner';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,6 +85,9 @@ export default async function PublicReportPage({ params }: { params: { shareId: 
             </div>
           </div>
         </header>
+
+        {/* Demo-data mode: simulated numbers must always carry the label */}
+        {content.demoData && <DemoDataBanner className="mt-6" />}
 
         <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
           {[

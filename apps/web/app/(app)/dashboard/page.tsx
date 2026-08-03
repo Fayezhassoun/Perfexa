@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { PageShell, PageHeader } from '@/components/page-shell';
 import { ProofFlow, type ProofFlowHandle } from '@/components/proof-flow';
 import { ActivationCard } from '@/components/activation-card';
+import { DemoDataBanner } from '@/components/demo-data-banner';
 import { cn } from '@/lib/utils';
 
 function dollars(cents: number): string {
@@ -109,6 +110,9 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* Demo-data mode: simulated KPIs must always carry the label */}
+      {overview.data?.demoData && <DemoDataBanner />}
 
       {/* Guided proof moment — real anomaly walkthrough, dismissible per org */}
       <ProofFlow ref={proofFlowRef} />
