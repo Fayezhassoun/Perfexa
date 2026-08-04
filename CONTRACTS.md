@@ -161,6 +161,15 @@ App tables:
   (runId, promptId, `engine perplexity|gemini`, `brandMentioned`, `brandRank`, `answerExcerpt`,
   `citations jsonb`, `competitorMentions jsonb`, `sentiment`, `parseFailed`). Every metric
   traces to a `geo_results` row; engines never queried are never shown as tracked (honesty rail).
+- Visibility Phase 2 (`seo_*`, `content_plans`): `seoAudits` `seo_audits` (orgId, `siteUrl`,
+  `status pending|running|done|failed`, `truncated` — hit the 5-minute cap, `error`, finishedAt),
+  `seoFindings` `seo_findings` (auditId, `category cwv|robots|sitemap|links|images|meta`,
+  `severity pass|info|warn|fail`, `code` machine slug, `message`, `detail jsonb`). Every finding is
+  a deterministic check really run against the live site — a missing PageSpeed key stores an info
+  finding (`psi_key_missing`), never a simulated score. `contentPlans` `content_plans` (orgId,
+  `horizon 30|60|90`, nullable `promptId` → the GEO gap it closes, `title`, `brief jsonb`,
+  `status idea|approved|drafted|published`, `dueDate`); unique `(org_id, prompt_id, horizon)` makes
+  plan generation idempotent. Distinct from `content_pieces` (finished studio drafts).
 
 ## 5. tRPC surface (`apps/web/server/trpc/router/*`, `appRouter`)
 
@@ -242,6 +251,18 @@ live in web). Service functions take explicit args, return plain objects.
 - `api/geo/briefs/route.ts` — POST `{promptId}` → stateless DeepSeek content brief `{title, outline, target_queries}`.
   All `/api/geo/*` return 404 when `GEO_ENABLED=false`. Honesty rail: an engine is only "tracked"
   if a real API call ran; ChatGPT is shown as "soon".
+- `api/geo/authority-targets/route.ts` — GET domains (from stored `geo_results` citations) that cite
+  competitors but never the brand; optional `?run_id=` (default latest). Deterministic, $0.
+- `api/geo/plans/route.ts` — GET the org's 30/60/90 content plans (horizon-first) with gap prompt text.
+- `api/geo/plans/generate/route.ts` — POST one DeepSeek brief per visibility gap → `idea` plans over
+  30/60/90. Idempotent per (prompt, horizon). 400 no run / over budget / no parser.
+- `api/geo/plans/[id]/route.ts` — PATCH `{status}` forward-only transitions
+  (idea → approved → drafted → published); 400 backwards, 404 unknown plan.
+- `api/seo/audit/route.ts` — POST a REAL technical audit (org site or `{siteUrl}`); 1 per 6h per org,
+  `?force=1` bypasses the limit only. 409 already running, 400 no site.
+- `api/seo/latest/route.ts` — latest audit summary (severity counts, PSI scores, findings + static fix
+  hints) from stored `seo_findings` rows; `{summary:null}` when there is no audit (empty state).
+- `api/seo/history/route.ts` — last 12 audits with severity counts.
 
 ## 7. Integrations contracts (`packages/integrations/src`)
 
@@ -490,12 +511,13 @@ Hono `/health` + BullMQ queues on REDIS_URL:
 - `email` queue (weekly, Mon 09:00, Phase 3): `services.reports.runWeeklyReportsForAllOrgs`
   — builds the `reports` row per org and emails owners via Resend when RESEND_API_KEY
   is set (log-only otherwise). Same runner backs `POST /api/cron/weekly-report`.
-- `geo-scan` queue (weekly, Mon 07:00): `services.geo.runGeoScansForAllOrgs` — per org,
-  queries each active prompt against the configured REAL engines (Perplexity Sonar via
-  OpenRouter, Gemini with grounding), parses with DeepSeek, stores `geo_results`. Metered
-  into the same `llm_usage` budget as orchestrator turns. Orgs without prompts/keys are
-  skipped, never simulated. Not registered when `GEO_ENABLED=false`. Manual trigger:
-  `POST /api/geo/scan`.
+- `geo-scan` queue (weekly, Mon 07:00): `services.seoAudit.runGeoScansAndSeoAuditsForAllOrgs`
+  — first the GEO scan (per org, queries each active prompt against the configured REAL
+  engines — Perplexity Sonar via OpenRouter, Gemini with grounding — parses with DeepSeek,
+  stores `geo_results`, metered into the same `llm_usage` budget as orchestrator turns; orgs
+  without prompts/keys are skipped, never simulated), then a technical SEO audit per org with a
+  site URL (deterministic, $0, no LLM). Not registered when `GEO_ENABLED=false`. Manual
+  triggers: `POST /api/geo/scan`, `POST /api/seo/audit`.
 Worker must not be required for web to function; web has an inline "simulate" fallback
 button on dashboard (dev only) that calls the same service directly.
 
