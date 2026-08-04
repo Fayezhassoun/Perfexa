@@ -723,7 +723,18 @@ export async function crawlOnPage(
   let imageSizeChecks = 0;
 
   const sitemapDriven = urls.length > 0;
-  const dedupeKey = (url: string) => url.split('#')[0]!;
+  // Canonical form for dedupe: drop fragment + trailing slashes so "/" and ""
+  // (and "/blog/" vs "/blog") are the same page.
+  const dedupeKey = (url: string) => {
+    const noHash = url.split('#')[0]!;
+    try {
+      const u = new URL(noHash);
+      const path = u.pathname === '/' ? '/' : u.pathname.replace(/\/+$/, '');
+      return `${u.origin}${path}${u.search}`;
+    } catch {
+      return noHash;
+    }
+  };
 
   // Build the crawl queue. With a sitemap we trust its URLs; without one we
   // first fetch the homepage and seed the queue from its internal links.
@@ -771,6 +782,9 @@ export async function crawlOnPage(
       return { findings, truncated: false, pagesChecked: 0 };
     }
     pagesChecked += 1;
+    // Already checked — keep a self-referencing link from re-queueing it.
+    queued.add(dedupeKey(home.finalUrl || siteUrl));
+    queued.add(dedupeKey(siteUrl));
     const parsedHome = checkPageHtml(home.finalUrl || siteUrl, home.body);
     findings.push(...parsedHome.findings);
     await checkImageWeights(parsedHome.imageUrls);
