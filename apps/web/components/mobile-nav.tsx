@@ -37,7 +37,7 @@ const GROUPS: { title: string; hrefs: string[] }[] = [
   },
   {
     title: 'Grow',
-    hrefs: ['/competitors', '/reviews', '/leads', '/knowledge', '/memory'],
+    hrefs: ['/competitors', '/visibility', '/reviews', '/leads', '/knowledge', '/memory'],
   },
   {
     title: 'Workspace',
@@ -45,7 +45,7 @@ const GROUPS: { title: string; hrefs: string[] }[] = [
   },
 ];
 
-export function MobileNav() {
+export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) {
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -61,7 +61,7 @@ export function MobileNav() {
     setSheetOpen(false);
   }, [pathname]);
 
-  const byHref = new Map(NAV.map((n) => [n.href, n]));
+  const byHref = new Map(NAV.filter((n) => !n.geo || geoEnabled).map((n) => [n.href, n]));
 
   const isOnPrimary = PRIMARY.some(
     (p) => pathname === p.href || pathname.startsWith(`${p.href}/`),

@@ -28,6 +28,7 @@ import {
   Gauge,
   Globe,
   FileText,
+  Radar,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ export const NAV = [
   { href: '/content', label: 'Content studio', icon: PenLine },
   { href: '/video', label: 'Video studio', icon: Clapperboard },
   { href: '/competitors', label: 'Competitors', icon: Swords },
+  { href: '/visibility', label: 'AI Visibility', icon: Radar, geo: true },
   { href: '/reviews', label: 'Reviews', icon: Star },
   { href: '/leads', label: 'Leads', icon: Users },
   { href: '/knowledge', label: 'Knowledge', icon: BookOpen },
@@ -60,11 +62,12 @@ export const NAV = [
   { href: '/admin', label: 'Admin', icon: ShieldCheck },
 ];
 
-export function AppNav() {
+export function AppNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) {
   const pathname = usePathname();
+  const items = NAV.filter((item) => !item.geo || geoEnabled);
   return (
     <nav className="flex-1 space-y-1 overflow-y-auto p-3" data-testid="app-nav">
-      {NAV.map(({ href, label, icon: Icon }, i) => {
+      {items.map(({ href, label, icon: Icon }, i) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link

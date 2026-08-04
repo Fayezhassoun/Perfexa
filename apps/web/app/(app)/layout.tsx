@@ -6,6 +6,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { db, organizations } from '@growthcrew/db';
 import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
+import { env } from '@/lib/env';
 import { Button } from '@/components/ui/button';
 import { AppNav, ThemeToggle } from '@/components/app-nav';
 import { MobileNav } from '@/components/mobile-nav';
@@ -32,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="glass-divider-b flex h-16 items-center px-5">
           <BrandMark href="/console" size="md" />
         </div>
-        <AppNav />
+        <AppNav geoEnabled={env.GEO_ENABLED} />
         <div className="glass-divider-t p-4">
           <div className="glass-tile mb-3 space-y-2 rounded-xl px-3 py-2.5">
             <OrgSwitcher
@@ -73,7 +74,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="min-w-0 flex-1 pb-20 md:pb-0">{children}</main>
       </div>
-      <MobileNav />
+      <MobileNav geoEnabled={env.GEO_ENABLED} />
     </div>
   );
 }
