@@ -4,10 +4,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   createAnthropicProvider,
+  createGeminiProvider,
   createOpenAIProvider,
   getLLM,
   type ChatMessage,
 } from '../src/index.js';
+import { extractGroundingCitations } from '../src/providers/gemini.js';
 
 interface RecordedCall {
   url: string;
@@ -53,6 +55,7 @@ function bodyOf(call: RecordedCall | undefined): Record<string, unknown> {
 const savedProvider = process.env.LLM_PROVIDER;
 const savedOpenAI = process.env.OPENAI_API_KEY;
 const savedAnthropic = process.env.ANTHROPIC_API_KEY;
+const savedGemini = process.env.GEMINI_API_KEY;
 
 afterEach(() => {
   if (savedProvider === undefined) delete process.env.LLM_PROVIDER;
@@ -61,6 +64,8 @@ afterEach(() => {
   else process.env.OPENAI_API_KEY = savedOpenAI;
   if (savedAnthropic === undefined) delete process.env.ANTHROPIC_API_KEY;
   else process.env.ANTHROPIC_API_KEY = savedAnthropic;
+  if (savedGemini === undefined) delete process.env.GEMINI_API_KEY;
+  else process.env.GEMINI_API_KEY = savedGemini;
 });
 
 describe('getLLM', () => {
@@ -211,6 +216,76 @@ describe('Anthropic provider', () => {
     const provider = createAnthropicProvider({ fetch });
     await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/ANTHROPIC_API_KEY/);
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe('Gemini provider', () => {
+  it('hits the OpenAI-compat endpoint and maps usage for metering', async () => {
+    const { fetch, calls } = fakeFetch(() => ({
+      body: {
+        choices: [{ message: { role: 'assistant', content: 'Grounded answer.' } }],
+        usage: { prompt_tokens: 12, completion_tokens: 34, total_tokens: 46 },
+      },
+    }));
+    const provider = createGeminiProvider({ apiKey: 'gm-test', model: 'gemini-test', fetch });
+    const res = await provider.chat([{ role: 'user', content: 'Best CRM for small biz?' }]);
+
+    expect(res.content).toBe('Grounded answer.');
+    expect(res.usage).toEqual({ promptTokens: 12, completionTokens: 34, totalTokens: 46 });
+    expect(calls[0]!.url).toContain('generativelanguage.googleapis.com/v1beta/openai/chat/completions');
+  });
+
+  it('sends the google_search grounding tool and extracts real citations', async () => {
+    const { fetch, calls } = fakeFetch(() => ({
+      body: {
+        choices: [
+          {
+            message: {
+              role: 'assistant',
+              content: 'Acme is a popular option [1].',
+              grounding_metadata: {
+                grounding_chunks: [
+                  { web: { uri: 'https://example.com/review', title: 'Acme review' } },
+                  { web: { uri: 'https://example.com/review' } }, // duplicate URL — deduped
+                  { web: { uri: 'https://other.com/list', title: 'Top CRMs' } },
+                  { web: {} }, // no URL — dropped (honesty rail)
+                ],
+              },
+            },
+          },
+        ],
+        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+      },
+    }));
+    const provider = createGeminiProvider({ apiKey: 'gm-test', fetch });
+    const res = await provider.chat([{ role: 'user', content: 'Best CRM?' }], { searchGrounding: true });
+
+    const body = bodyOf(calls[0]);
+    expect(body.tools).toEqual([{ type: 'google_search' }]);
+    // grounding-only request must not force a function tool_choice
+    expect(body.tool_choice).toBeUndefined();
+    expect(res.groundingCitations).toEqual([
+      { title: 'Acme review', url: 'https://example.com/review' },
+      { title: 'Top CRMs', url: 'https://other.com/list' },
+    ]);
+  });
+});
+
+describe('extractGroundingCitations', () => {
+  it('returns undefined for missing metadata or empty chunks', () => {
+    expect(extractGroundingCitations(undefined)).toBeUndefined();
+    expect(extractGroundingCitations({ content: 'x' })).toBeUndefined();
+    expect(extractGroundingCitations({ grounding_metadata: {} })).toBeUndefined();
+    expect(extractGroundingCitations({ grounding_metadata: { grounding_chunks: [] } })).toBeUndefined();
+  });
+
+  it('accepts camelCase metadata and keeps only entries with a real URL', () => {
+    const got = extractGroundingCitations({
+      groundingMetadata: {
+        groundingChunks: [{ web: { uri: 'https://a.com' } }, { web: { title: 'no url' } }],
+      },
+    });
+    expect(got).toEqual([{ url: 'https://a.com' }]);
   });
 });
 

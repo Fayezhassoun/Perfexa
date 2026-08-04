@@ -27,10 +27,18 @@ export interface LLMUsage {
   totalTokens: number;
 }
 
+/** A web citation surfaced by an engine's grounding/search tool. */
+export interface GroundingCitation {
+  title?: string;
+  url: string;
+}
+
 export interface LLMResponse {
   content: string;
   toolCalls?: ToolCall[];
   usage?: LLMUsage;
+  /** Real web citations from a grounding/search tool (Gemini google_search). */
+  groundingCitations?: GroundingCitation[];
 }
 
 export interface ChatOptions {
@@ -38,6 +46,8 @@ export interface ChatOptions {
   toolChoice?: 'auto' | 'none' | { name: string };
   temperature?: number;
   maxTokens?: number;
+  /** Enable the provider's native web-search grounding (Gemini google_search). */
+  searchGrounding?: boolean;
 }
 
 export interface LLMProvider {
