@@ -23,7 +23,7 @@ import {
 } from '@growthcrew/db';
 import {
   createDeepSeekProvider,
-  createGeminiProvider,
+  createGeminiGroundedProvider,
   createOpenAIProvider,
   type ChatMessage,
   type LLMProvider,
@@ -44,6 +44,9 @@ const SONAR_MODEL = 'perplexity/sonar';
 const SONAR_SYSTEM_PROMPT =
   'You are a search assistant. Answer the user’s question with current web sources.';
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+// DeepSeek parse/generation model. Explicit (never inherits LLM_MODEL, which can
+// be empty) and cheap — flash tier fits the thin-margin cost model.
+const DEFAULT_PARSER_MODEL = 'deepseek-v4-flash';
 const ANSWER_EXCERPT_CHARS = 600;
 
 // ---------------------------------------------------------------------------
@@ -76,7 +79,8 @@ export function createGeoEngineClients(
   }
   const geminiKey = env.GEMINI_API_KEY?.trim();
   if (geminiKey) {
-    clients.gemini = createGeminiProvider({
+    // Native grounded Gemini (google_search tool) — answers cite real sources.
+    clients.gemini = createGeminiGroundedProvider({
       apiKey: geminiKey,
       model: env.GEO_GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
       ...(fetchImpl ? { fetch: fetchImpl } : {}),
@@ -86,6 +90,7 @@ export function createGeoEngineClients(
   if (deepseekKey) {
     clients.parser = createDeepSeekProvider({
       apiKey: deepseekKey,
+      model: env.GEO_PARSER_MODEL?.trim() || DEFAULT_PARSER_MODEL,
       ...(fetchImpl ? { fetch: fetchImpl } : {}),
     });
   }
@@ -287,7 +292,7 @@ export interface GeoScanOptions {
 }
 
 export type GeoScanOutcome =
-  | { status: 'skipped'; reason: 'no-prompts' }
+  | { status: 'skipped'; reason: 'no-prompts' | 'no-engines' }
   | { status: 'budget_exceeded' }
   | { status: 'run'; run: GeoRun };
 
@@ -409,6 +414,10 @@ export async function runGeoScan(
   if (!(await isWithinBudget(ctx))) return { status: 'budget_exceeded' };
 
   const clients = opts.clients ?? createGeoEngineClients(opts.env ?? process.env, opts.fetchImpl);
+  // No engines configured → nothing can REALLY be queried → skip, never fake.
+  if (!clients.perplexity && !clients.gemini) {
+    return { status: 'skipped', reason: 'no-engines' };
+  }
   if (!clients.parser) {
     // Parsing is mandatory — without it we cannot extract structured facts.
     throw new Error('GEO scan unavailable: DEEPSEEK_API_KEY is not configured.');
@@ -449,13 +458,9 @@ export async function runGeoScan(
           { role: 'system', content: SONAR_SYSTEM_PROMPT },
           { role: 'user', content: prompt.text },
         ];
-        const res = await withTimeout(
-          engine === 'gemini'
-            ? client.chat(messages, { searchGrounding: true, maxTokens: 1024 })
-            : client.chat(messages, { maxTokens: 1024 }),
-          timeoutMs,
-          engine,
-        );
+        // The Gemini client is the grounded provider (google_search tool); the
+        // Perplexity client is Sonar via OpenRouter. Both return real citations.
+        const res = await withTimeout(client.chat(messages, { maxTokens: 1024 }), timeoutMs, engine);
         answer = (res.content ?? '').trim();
         groundingCitations = res.groundingCitations;
         record(res.usage);
