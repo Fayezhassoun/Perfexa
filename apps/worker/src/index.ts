@@ -46,9 +46,10 @@ const processors = {
     await services.reports.runWeeklyReportsForAllOrgs(db);
   },
   // geo-scan (weekly, Mon 07:00): AI-visibility scan per org (real engines only;
-  // orgs without prompts or engine keys are skipped, never simulated).
+  // orgs without prompts or engine keys are skipped, never simulated), followed
+  // by a technical SEO audit per org with a site URL (Phase 2 weekly hook).
   'geo-scan': async () => {
-    await services.geo.runGeoScansForAllOrgs(db);
+    await services.seoAudit.runGeoScansAndSeoAuditsForAllOrgs(db);
   },
 } as const;
 
