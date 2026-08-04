@@ -13,6 +13,7 @@
     "@growthcrew/db": "workspace:*",
     "@growthcrew/integrations": "workspace:*",
     "@growthcrew/llm": "workspace:*",
+    "cheerio": "1.0.0",
     "drizzle-orm": "0.36.4",
     "zod": "3.23.8"
   },

@@ -30,3 +30,5 @@ export * as llmUsage from './llm-usage.js';
 export * as analytics from './analytics.js';
 export * as entitlements from './entitlements.js';
 export * as geo from './geo.js';
+export * as seoAudit from './seo-audit.js';
+export * as geoPlans from './geo-plans.js';

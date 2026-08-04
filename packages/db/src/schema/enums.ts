@@ -108,3 +108,18 @@ export type GeoEngine = z.infer<typeof geoEngineSchema>;
 
 export const geoSentimentSchema = z.enum(['positive', 'neutral', 'negative']);
 export type GeoSentiment = z.infer<typeof geoSentimentSchema>;
+
+export const seoAuditStatusSchema = z.enum(['pending', 'running', 'done', 'failed']);
+export type SeoAuditStatus = z.infer<typeof seoAuditStatusSchema>;
+
+export const seoFindingCategorySchema = z.enum(['cwv', 'robots', 'sitemap', 'links', 'images', 'meta']);
+export type SeoFindingCategory = z.infer<typeof seoFindingCategorySchema>;
+
+export const seoFindingSeveritySchema = z.enum(['pass', 'info', 'warn', 'fail']);
+export type SeoFindingSeverity = z.infer<typeof seoFindingSeveritySchema>;
+
+export const contentPlanHorizonSchema = z.union([z.literal(30), z.literal(60), z.literal(90)]);
+export type ContentPlanHorizon = z.infer<typeof contentPlanHorizonSchema>;
+
+export const contentPlanStatusSchema = z.enum(['idea', 'approved', 'drafted', 'published']);
+export type ContentPlanStatus = z.infer<typeof contentPlanStatusSchema>;

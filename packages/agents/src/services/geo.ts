@@ -729,6 +729,131 @@ export async function getHistory(ctx: AgentContext, limit = 12): Promise<GeoHist
 }
 
 // ---------------------------------------------------------------------------
+// Authority targets (Visibility Phase 2 Feature 2) — targeting intelligence
+// derived ONLY from citations stored in geo_results. A domain "vouches for" a
+// competitor when it appears in the citations of an answer where that
+// competitor was mentioned; targets are domains that vouch for competitors but
+// never appear in an answer where the BRAND was mentioned.
+// ---------------------------------------------------------------------------
+
+export interface GeoAuthorityTarget {
+  domain: string;
+  citationCount: number;
+  competitorsCited: string[];
+  prompts: string[];
+  engines: GeoEngine[];
+  /** A real citation URL for link-out (redirect-free when possible). */
+  sampleUrl: string;
+}
+
+/** Hostnames Google's grounding redirects hide — the real domain is in the citation title. */
+const OPAQUE_CITATION_HOSTS = new Set(['vertexaisearch.cloud.google.com']);
+
+/** Resolve the real domain behind a citation, or null when unknowable. */
+export function citationDomain(citation: GeoCitation): { domain: string; url: string } | null {
+  let host: string | null = null;
+  try {
+    host = new URL(citation.url).hostname.toLowerCase();
+  } catch {
+    host = null;
+  }
+  if (host && OPAQUE_CITATION_HOSTS.has(host)) {
+    // Grounded Gemini citations are opaque redirects; the display title is the domain.
+    const title = citation.title?.trim().toLowerCase();
+    if (title && !/\s/.test(title) && title.includes('.')) {
+      const domain = title.replace(/^www\./, '');
+      return { domain, url: `https://${domain}` };
+    }
+    return null;
+  }
+  if (!host) return null;
+  return { domain: host.replace(/^www\./, ''), url: citation.url };
+}
+
+function isBrandDomain(domain: string, brandDomain: string | null): boolean {
+  if (!brandDomain) return false;
+  const bare = brandDomain.replace(/^www\./, '').toLowerCase();
+  return domain === bare || domain.endsWith(`.${bare}`);
+}
+
+export async function getAuthorityTargets(
+  ctx: AgentContext,
+  opts: { runId?: string } = {},
+): Promise<{ runId: string | null; targets: GeoAuthorityTarget[] }> {
+  let run: GeoRun | null = null;
+  if (opts.runId) {
+    const [row] = await ctx.db
+      .select()
+      .from(geoRuns)
+      .where(and(eq(geoRuns.id, opts.runId), eq(geoRuns.orgId, ctx.orgId)))
+      .limit(1);
+    run = row ?? null;
+  } else {
+    run = await latestRun(ctx);
+  }
+  if (!run) return { runId: null, targets: [] };
+
+  const [results, prompts, brand] = await Promise.all([
+    ctx.db.select().from(geoResults).where(eq(geoResults.runId, run.id)),
+    listPrompts(ctx, { activeOnly: false }),
+    getGeoBrandInfo(ctx),
+  ]);
+  const promptText = new Map(prompts.map((p) => [p.id, p.text]));
+
+  interface DomainAgg {
+    citationCount: number;
+    competitors: Set<string>;
+    prompts: Set<string>;
+    engines: Set<GeoEngine>;
+    sampleUrl: string;
+  }
+  const byDomain = new Map<string, DomainAgg>();
+  const domainsWithBrandMention = new Set<string>();
+
+  for (const result of results) {
+    const mentionedHere: string[] = (result.competitorMentions ?? []).map((m) => m.name);
+    const domainsInRow: string[] = [];
+    for (const citation of result.citations ?? []) {
+      const resolved = citationDomain(citation);
+      if (!resolved) continue;
+      if (isBrandDomain(resolved.domain, brand.domain)) continue; // own coverage, not a target
+      domainsInRow.push(resolved.domain);
+      const agg = byDomain.get(resolved.domain) ?? {
+        citationCount: 0,
+        competitors: new Set<string>(),
+        prompts: new Set<string>(),
+        engines: new Set<GeoEngine>(),
+        sampleUrl: resolved.url,
+      };
+      agg.citationCount += 1;
+      for (const name of mentionedHere) agg.competitors.add(name);
+      const text = promptText.get(result.promptId);
+      if (text) agg.prompts.add(text);
+      agg.engines.add(result.engine as GeoEngine);
+      byDomain.set(resolved.domain, agg);
+    }
+    if (result.brandMentioned) {
+      for (const domain of domainsInRow) domainsWithBrandMention.add(domain);
+    }
+  }
+
+  const targets: GeoAuthorityTarget[] = [...byDomain.entries()]
+    .filter(([domain, agg]) => agg.competitors.size > 0 && !domainsWithBrandMention.has(domain))
+    .map(([domain, agg]) => ({
+      domain,
+      citationCount: agg.citationCount,
+      competitorsCited: [...agg.competitors].sort(),
+      prompts: [...agg.prompts],
+      engines: [...agg.engines],
+      sampleUrl: agg.sampleUrl,
+    }))
+    .sort((a, b) => b.citationCount - a.citationCount || a.domain.localeCompare(b.domain))
+    .slice(0, 20);
+
+  return { runId: run.id, targets };
+}
+
+// ---------------------------------------------------------------------------
 // Content briefs (stateless generation — nothing stored in Phase 1)
 // ---------------------------------------------------------------------------
 

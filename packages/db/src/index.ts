@@ -50,6 +50,12 @@ export type GeoRun = InferSelectModel<typeof schema.geoRuns>;
 export type NewGeoRun = InferInsertModel<typeof schema.geoRuns>;
 export type GeoResult = InferSelectModel<typeof schema.geoResults>;
 export type NewGeoResult = InferInsertModel<typeof schema.geoResults>;
+export type SeoAudit = InferSelectModel<typeof schema.seoAudits>;
+export type NewSeoAudit = InferInsertModel<typeof schema.seoAudits>;
+export type SeoFinding = InferSelectModel<typeof schema.seoFindings>;
+export type NewSeoFinding = InferInsertModel<typeof schema.seoFindings>;
+export type ContentPlan = InferSelectModel<typeof schema.contentPlans>;
+export type NewContentPlan = InferInsertModel<typeof schema.contentPlans>;
 
 let client: postgres.Sql | undefined;
 let instance: Db | undefined;
