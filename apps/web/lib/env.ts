@@ -21,6 +21,12 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().default(''),
   DEEPSEEK_API_KEY: z.string().default(''),
   GEMINI_API_KEY: z.string().default(''),
+  // GEO / AI Visibility module (OpenRouter hosts Perplexity Sonar).
+  OPENROUTER_API_KEY: z.string().default(''),
+  GEO_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
   GROQ_API_KEY: z.string().default(''),
   MISTRAL_API_KEY: z.string().default(''),
   QWEN_API_KEY: z.string().default(''),
@@ -61,6 +67,8 @@ export const env = envSchema.parse({
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
   DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+  GEO_ENABLED: process.env.GEO_ENABLED,
   GROQ_API_KEY: process.env.GROQ_API_KEY,
   MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
   QWEN_API_KEY: process.env.QWEN_API_KEY,
