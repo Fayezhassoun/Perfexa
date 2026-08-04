@@ -88,33 +88,19 @@ export function createGeminiProvider(options?: GeminiProviderOptions): LLMProvid
     name: 'gemini',
     async chat(messages: ChatMessage[], opts?: ChatOptions): Promise<LLMResponse> {
       const model = options?.model ?? process.env.LLM_MODEL ?? 'gemini-2.0-flash';
-
-      // Function tools + optional native Google-Search grounding. Grounding is
-      // a distinct tool type ({type:'google_search'}), not a function spec.
-      const fnTools = (opts?.tools ?? []).map((t) => ({
-        type: 'function' as const,
-        function: { name: t.name, description: t.description, parameters: t.parameters },
-      }));
-      const groundingTool = opts?.searchGrounding ? [{ type: 'google_search' as const }] : [];
-      const tools = [...fnTools, ...groundingTool];
-      const hasFnTools = fnTools.length > 0;
-
       const res = await getClient().chat.completions.create({
         model,
         messages: toOAIMessages(messages) as OpenAI.ChatCompletionMessageParam[],
-        ...(tools.length
+        ...(opts?.tools?.length
           ? {
-              tools: tools as OpenAI.ChatCompletionTool[],
-              // tool_choice only applies to function tools; never force it when
-              // the caller asked for search grounding (model picks freely).
-              ...(hasFnTools
-                ? {
-                    tool_choice:
-                      typeof opts?.toolChoice === 'object'
-                        ? { type: 'function' as const, function: { name: opts.toolChoice.name } }
-                        : (opts?.toolChoice ?? 'auto'),
-                  }
-                : {}),
+              tools: opts.tools.map((t) => ({
+                type: 'function' as const,
+                function: { name: t.name, description: t.description, parameters: t.parameters },
+              })),
+              tool_choice:
+                typeof opts.toolChoice === 'object'
+                  ? { type: 'function' as const, function: { name: opts.toolChoice.name } }
+                  : (opts.toolChoice ?? 'auto'),
             }
           : {}),
         temperature: opts?.temperature ?? 0.3,
@@ -141,7 +127,94 @@ export function createGeminiProvider(options?: GeminiProviderOptions): LLMProvid
               totalTokens: res.usage.total_tokens ?? 0,
             }
           : undefined,
-        groundingCitations: extractGroundingCitations(choice),
+      };
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Grounded Gemini (native generateContent + Google-Search tool).
+// The OpenAI-compat surface only accepts function tools and rejects the
+// google_search grounding tool, so grounded answers (answers that cite real web
+// sources) require the native endpoint. Used by the GEO module's Gemini engine.
+// ---------------------------------------------------------------------------
+
+const GEMINI_NATIVE_BASE_URL = 'https://generativelanguage.googleapis.com';
+
+export interface GeminiGroundedProviderOptions {
+  /** Defaults to GEMINI_API_KEY. Sent as the x-goog-api-key header. */
+  apiKey?: string;
+  /** Defaults to https://generativelanguage.googleapis.com */
+  baseURL?: string;
+  /** Defaults to gemini-2.5-flash. */
+  model?: string;
+  /** Injectable fetch — used by tests. */
+  fetch?: typeof fetch;
+}
+
+export function createGeminiGroundedProvider(options?: GeminiGroundedProviderOptions): LLMProvider {
+  const fetchImpl = options?.fetch ?? fetch;
+  return {
+    name: 'gemini',
+    async chat(messages: ChatMessage[], opts?: ChatOptions): Promise<LLMResponse> {
+      const apiKey = options?.apiKey ?? process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('GEMINI_API_KEY is not set. Set it or use LLM_PROVIDER=mock.');
+      }
+      const model = options?.model ?? 'gemini-2.5-flash';
+      const base = options?.baseURL ?? GEMINI_NATIVE_BASE_URL;
+
+      const system = messages
+        .filter((m) => m.role === 'system')
+        .map((m) => m.content)
+        .join('\n');
+      const contents = messages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }));
+
+      const body = {
+        ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
+        contents,
+        // Native Google-Search grounding tool — the model answers from live web
+        // sources and returns groundingMetadata with the cited URLs.
+        tools: [{ google_search: {} }],
+        generationConfig: {
+          temperature: opts?.temperature ?? 0.3,
+          maxOutputTokens: opts?.maxTokens ?? 1024,
+        },
+      };
+
+      const res = await fetchImpl(`${base}/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify(body),
+      });
+      const json = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      if (!res.ok || json?.error) {
+        const message = (json?.error as Record<string, unknown> | undefined)?.message ?? res.statusText;
+        throw new Error(`Gemini grounded call failed (${res.status}): ${message}`);
+      }
+
+      const candidate = (json?.candidates as unknown[] | undefined)?.[0] as Record<string, unknown> | undefined;
+      const parts = (candidate?.content as Record<string, unknown> | undefined)?.parts as
+        | { text?: string }[]
+        | undefined;
+      const content = (parts ?? []).map((p) => p?.text ?? '').join('');
+      const usage = json?.usageMetadata as Record<string, number> | undefined;
+
+      return {
+        content,
+        usage: usage
+          ? {
+              promptTokens: usage.promptTokenCount ?? 0,
+              completionTokens: usage.candidatesTokenCount ?? 0,
+              totalTokens: usage.totalTokenCount ?? 0,
+            }
+          : undefined,
+        groundingCitations: extractGroundingCitations(candidate),
       };
     },
   };

@@ -4,12 +4,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   createAnthropicProvider,
+  createGeminiGroundedProvider,
   createGeminiProvider,
   createOpenAIProvider,
   getLLM,
   type ChatMessage,
 } from '../src/index.js';
 import { extractGroundingCitations } from '../src/providers/gemini.js';
+import { extractUrlCitations } from '../src/providers/openai.js';
 
 interface RecordedCall {
   url: string;
@@ -235,39 +237,69 @@ describe('Gemini provider', () => {
     expect(calls[0]!.url).toContain('generativelanguage.googleapis.com/v1beta/openai/chat/completions');
   });
 
-  it('sends the google_search grounding tool and extracts real citations', async () => {
+  it('returns no grounding citations from the OpenAI-compat surface', async () => {
+    const { fetch } = fakeFetch(() => ({
+      body: { choices: [{ message: { role: 'assistant', content: 'plain answer' } }] },
+    }));
+    const provider = createGeminiProvider({ apiKey: 'gm-test', fetch });
+    const res = await provider.chat([{ role: 'user', content: 'Best CRM?' }]);
+    expect(res.groundingCitations).toBeUndefined();
+  });
+});
+
+describe('Gemini grounded provider (native generateContent)', () => {
+  it('calls the native endpoint with the google_search tool and x-goog-api-key', async () => {
     const { fetch, calls } = fakeFetch(() => ({
       body: {
-        choices: [
+        candidates: [
           {
-            message: {
-              role: 'assistant',
-              content: 'Acme is a popular option [1].',
-              grounding_metadata: {
-                grounding_chunks: [
-                  { web: { uri: 'https://example.com/review', title: 'Acme review' } },
-                  { web: { uri: 'https://example.com/review' } }, // duplicate URL — deduped
-                  { web: { uri: 'https://other.com/list', title: 'Top CRMs' } },
-                  { web: {} }, // no URL — dropped (honesty rail)
-                ],
-              },
+            content: { parts: [{ text: 'HubSpot is a strong pick.' }] },
+            groundingMetadata: {
+              groundingChunks: [
+                { web: { uri: 'https://example.com/review', title: 'CRM review' } },
+                { web: { uri: 'https://example.com/review' } }, // duplicate URL — deduped
+                { web: { uri: 'https://other.com/list', title: 'Top CRMs' } },
+                { web: {} }, // no URL — dropped (honesty rail)
+              ],
             },
           },
         ],
-        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+        usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 34, totalTokenCount: 46 },
       },
     }));
-    const provider = createGeminiProvider({ apiKey: 'gm-test', fetch });
-    const res = await provider.chat([{ role: 'user', content: 'Best CRM?' }], { searchGrounding: true });
+    const provider = createGeminiGroundedProvider({ apiKey: 'gm-test', model: 'gemini-test', fetch });
+    const res = await provider.chat([
+      { role: 'system', content: 'You are a search assistant.' },
+      { role: 'user', content: 'Best CRM?' },
+    ]);
 
+    expect(calls[0]!.url).toContain('/v1beta/models/gemini-test:generateContent');
+    expect(calls[0]!.init?.headers?.['x-goog-api-key']).toBe('gm-test');
     const body = bodyOf(calls[0]);
-    expect(body.tools).toEqual([{ type: 'google_search' }]);
-    // grounding-only request must not force a function tool_choice
-    expect(body.tool_choice).toBeUndefined();
+    expect(body.tools).toEqual([{ google_search: {} }]);
+    expect(body.systemInstruction).toEqual({ parts: [{ text: 'You are a search assistant.' }] });
+    expect(body.contents).toEqual([{ role: 'user', parts: [{ text: 'Best CRM?' }] }]);
+
+    expect(res.content).toBe('HubSpot is a strong pick.');
+    expect(res.usage).toEqual({ promptTokens: 12, completionTokens: 34, totalTokens: 46 });
     expect(res.groundingCitations).toEqual([
-      { title: 'Acme review', url: 'https://example.com/review' },
+      { title: 'CRM review', url: 'https://example.com/review' },
       { title: 'Top CRMs', url: 'https://other.com/list' },
     ]);
+  });
+
+  it('throws a clear error without an API key (no network call)', async () => {
+    delete process.env.GEMINI_API_KEY;
+    const { fetch, calls } = fakeFetch(() => ({ body: {} }));
+    const provider = createGeminiGroundedProvider({ fetch });
+    await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/GEMINI_API_KEY/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('surfaces native API errors', async () => {
+    const { fetch } = fakeFetch(() => ({ status: 400, body: { error: { message: 'bad model' } } }));
+    const provider = createGeminiGroundedProvider({ apiKey: 'gm-test', fetch });
+    await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/bad model/);
   });
 });
 
@@ -286,6 +318,51 @@ describe('extractGroundingCitations', () => {
       },
     });
     expect(got).toEqual([{ url: 'https://a.com' }]);
+  });
+});
+
+describe('extractUrlCitations (OpenAI annotations)', () => {
+  it('returns undefined when there are no annotations', () => {
+    expect(extractUrlCitations(undefined)).toBeUndefined();
+    expect(extractUrlCitations({ content: 'x' })).toBeUndefined();
+    expect(extractUrlCitations({ annotations: [] })).toBeUndefined();
+  });
+
+  it('maps url_citation annotations, dedupes, and drops entries without a URL', () => {
+    const got = extractUrlCitations({
+      annotations: [
+        { type: 'url_citation', url_citation: { url: 'https://a.com', title: 'A', start_index: 0, end_index: 1 } },
+        { type: 'url_citation', url_citation: { url: 'https://a.com', title: 'dup' } },
+        { type: 'url_citation', url_citation: { url: 'https://b.com' } },
+        { type: 'url_citation', url_citation: { title: 'no url' } },
+        { type: 'something_else' },
+      ],
+    });
+    expect(got).toEqual([
+      { title: 'A', url: 'https://a.com' },
+      { url: 'https://b.com' },
+    ]);
+  });
+
+  it('is surfaced as groundingCitations by the OpenAI provider', async () => {
+    const { fetch } = fakeFetch(() => ({
+      body: {
+        choices: [
+          {
+            message: {
+              role: 'assistant',
+              content: 'Answer [1].',
+              annotations: [
+                { type: 'url_citation', url_citation: { url: 'https://src.example/x', title: 'Src' } },
+              ],
+            },
+          },
+        ],
+      },
+    }));
+    const provider = createOpenAIProvider({ apiKey: 'sk-test', fetch });
+    const res = await provider.chat([{ role: 'user', content: 'q' }]);
+    expect(res.groundingCitations).toEqual([{ title: 'Src', url: 'https://src.example/x' }]);
   });
 });
 

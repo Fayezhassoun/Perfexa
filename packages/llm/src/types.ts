@@ -46,8 +46,6 @@ export interface ChatOptions {
   toolChoice?: 'auto' | 'none' | { name: string };
   temperature?: number;
   maxTokens?: number;
-  /** Enable the provider's native web-search grounding (Gemini google_search). */
-  searchGrounding?: boolean;
 }
 
 export interface LLMProvider {

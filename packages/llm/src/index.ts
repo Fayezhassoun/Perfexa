@@ -41,11 +41,12 @@ export {
   createOllamaProvider,
   createQwenProvider,
 };
+export { createGeminiGroundedProvider } from './providers/gemini.js';
 
 export type { OpenAIProviderOptions } from './providers/openai.js';
 export type { AnthropicProviderOptions } from './providers/anthropic.js';
 export type { DeepSeekProviderOptions } from './providers/deepseek.js';
-export type { GeminiProviderOptions } from './providers/gemini.js';
+export type { GeminiProviderOptions, GeminiGroundedProviderOptions } from './providers/gemini.js';
 export type { GroqProviderOptions } from './providers/groq.js';
 export type { MistralProviderOptions } from './providers/mistral.js';
 export type { OllamaProviderOptions } from './providers/ollama.js';

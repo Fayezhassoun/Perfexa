@@ -1,7 +1,14 @@
 // OpenAI provider (chat completions with function calling).
 
 import OpenAI from 'openai';
-import type { ChatMessage, ChatOptions, LLMProvider, LLMResponse, ToolCall } from '../types.js';
+import type {
+  ChatMessage,
+  ChatOptions,
+  GroundingCitation,
+  LLMProvider,
+  LLMResponse,
+  ToolCall,
+} from '../types.js';
 
 type OAIMessage =
   | { role: 'system' | 'user'; content: string }
@@ -16,6 +23,33 @@ function toOAIMessages(messages: ChatMessage[]): OAIMessage[] {
     if (m.role === 'assistant') return { role: 'assistant', content: m.content };
     return { role: m.role, content: m.content };
   });
+}
+
+/**
+ * Extract real web citations from OpenAI-style `url_citation` message
+ * annotations (OpenRouter passes Perplexity Sonar's sources through here).
+ * Only entries with an actual URL survive — the GEO honesty rail forbids
+ * invented sources.
+ */
+export function extractUrlCitations(message: unknown): GroundingCitation[] | undefined {
+  const annotations = (message as Record<string, unknown> | null)?.annotations;
+  if (!Array.isArray(annotations)) return undefined;
+  const citations: GroundingCitation[] = [];
+  const seen = new Set<string>();
+  for (const annotation of annotations) {
+    if (!annotation || typeof annotation !== 'object') continue;
+    const rec = annotation as Record<string, unknown>;
+    const uc = (rec.url_citation ?? (rec.type === 'url_citation' ? rec : null)) as
+      | Record<string, unknown>
+      | null;
+    if (!uc) continue;
+    const url = typeof uc.url === 'string' ? uc.url : null;
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    const title = typeof uc.title === 'string' && uc.title ? uc.title : undefined;
+    citations.push(title ? { title, url } : { url });
+  }
+  return citations.length > 0 ? citations : undefined;
 }
 
 export interface OpenAIProviderOptions {
@@ -84,6 +118,7 @@ export function createOpenAIProvider(options?: OpenAIProviderOptions): LLMProvid
               totalTokens: res.usage.total_tokens ?? 0,
             }
           : undefined,
+        groundingCitations: extractUrlCitations(choice),
       };
     },
   };
