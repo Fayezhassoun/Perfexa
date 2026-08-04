@@ -21,6 +21,7 @@ import {
   parseStrictJson,
   removePrompt,
   runGeoScan,
+  runGeoScansForAllOrgs,
   updatePrompt,
   type GeoEngineClients,
 } from '../src/services/geo.js';
@@ -419,6 +420,65 @@ describe('runGeoScan', () => {
     const history = await getHistory(org.ctx);
     expect(history).toHaveLength(2);
     expect(history[0]!.createdAt.getTime()).toBeLessThanOrEqual(history[1]!.createdAt.getTime());
+  });
+});
+
+describe('runGeoScansForAllOrgs (worker entry point)', () => {
+  beforeEach(async () => {
+    await truncateAll(db);
+  });
+
+  it('scans every org with prompts, skips those without, and isolates errors', async () => {
+    // Two orgs with a tracked prompt each, one org with none.
+    const orgA = await freshOrg();
+    const orgB = await freshOrg();
+    const orgEmpty = await freshOrg();
+    await addPrompt(orgA.ctx, { text: 'Best tool for X?' });
+    await addPrompt(orgB.ctx, { text: 'Best tool for Y?' });
+
+    const clients: GeoEngineClients = {
+      perplexity: scripted('perplexity', () => ({ content: 'Test Business is the pick.' })).provider,
+      gemini: undefined,
+      parser: smartParser().provider,
+    };
+
+    const run = await runGeoScansForAllOrgs(db, { clients });
+    expect(run.orgs).toBe(3);
+    expect(run.scanned).toBe(2); // orgA + orgB
+    expect(run.skipped).toBe(1); // orgEmpty has no prompts
+    expect(run.errors).toEqual([]);
+
+    // A done run + stored results for each scanned org.
+    for (const org of [orgA, orgB]) {
+      const runs = await db.select().from(geoRuns).where(eq(geoRuns.orgId, org.orgId));
+      expect(runs).toHaveLength(1);
+      expect(runs[0]!.status).toBe('done');
+      expect(runs[0]!.trigger).toBe('scheduled');
+      const results = await db.select().from(geoResults).where(eq(geoResults.runId, runs[0]!.id));
+      expect(results.length).toBeGreaterThan(0);
+    }
+    expect(await db.select().from(geoRuns).where(eq(geoRuns.orgId, orgEmpty.orgId))).toHaveLength(0);
+  });
+
+  it('collects per-org errors without sinking the batch', async () => {
+    const orgA = await freshOrg();
+    const orgB = await freshOrg();
+    await addPrompt(orgA.ctx, { text: 'Best tool for X?' });
+    await addPrompt(orgB.ctx, { text: 'Best tool for Y?' });
+
+    // Engine errors are isolated inside a run (fail-fast), so the batch-level
+    // hard error is a missing parser: every org with prompts fails the same way
+    // and the error is collected, not thrown.
+    const run = await runGeoScansForAllOrgs(db, {
+      clients: {
+        perplexity: scripted('perplexity', () => ({ content: 'Test Business is the pick.' })).provider,
+        parser: undefined,
+      },
+    });
+    expect(run.orgs).toBe(2);
+    expect(run.scanned).toBe(0);
+    expect(run.errors).toHaveLength(2);
+    for (const err of run.errors) expect(err).toContain('DEEPSEEK_API_KEY');
   });
 });
 
