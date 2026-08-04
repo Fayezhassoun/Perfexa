@@ -41,6 +41,10 @@ import {
 } from '@/components/ui/table';
 import { MetricCard, PageHeader, PageShell, StatusChip } from '@/components/page-shell';
 import { cn } from '@/lib/utils';
+import { geoFetch, hostnameOf } from './visibility-fetch';
+import { SiteHealthSection } from './site-health-section';
+import { AuthorityTargetsSection } from './authority-targets-section';
+import { ContentCalendarSection } from './content-calendar-section';
 
 // ── API payload types (mirror services/geo.ts) ─────────────────────────────
 
@@ -135,29 +139,9 @@ const SUGGESTED_PROMPTS = [
   'What is the most reliable e-commerce platform?',
 ];
 
-async function geoFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
-    headers: { 'content-type': 'application/json' },
-    ...init,
-  });
-  const data = (await res.json().catch(() => null)) as (T & { error?: string }) | null;
-  if (!res.ok) {
-    throw new Error(data?.error ?? `Request failed (${res.status})`);
-  }
-  return data as T;
-}
-
 function pct(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
   return `${Math.round(value * 100)}%`;
-}
-
-function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return url;
-  }
 }
 
 export function VisibilityDashboard() {
@@ -576,6 +560,14 @@ export function VisibilityDashboard() {
           />
         </>
       )}
+
+      {/* Visibility Phase 2: technical audit, placement targets, 30/60/90 calendar */}
+      <SiteHealthSection />
+      <AuthorityTargetsSection />
+      <ContentCalendarSection
+        runExists={Boolean(run)}
+        gapCount={run ? run.prompts.filter((row) => !row.mentionedAnywhere).length : 0}
+      />
 
       {/* Row drawer: answer excerpts + citations */}
       {drawer && <ResultDrawer row={drawer} onClose={() => setDrawer(null)} />}
