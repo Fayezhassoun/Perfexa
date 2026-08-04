@@ -85,6 +85,9 @@ Packages are consumed as TS source (no build step): each package.json has
 | `NEXT_PUBLIC_STT_PROVIDER` | `mock` | client picks browser vs mock capture |
 | `NEXT_PUBLIC_TTS_PROVIDER` | `mock` | client picks speechSynthesis vs server audio |
 | `DEMO_SEED` | `true` | seed demo org on migrate |
+| `OPENROUTER_API_KEY` | empty | GEO engine: Perplexity Sonar via OpenRouter (`https://openrouter.ai/api/v1`); empty = engine untracked |
+| `GEO_ENABLED` | `true` | AI Visibility module flag; `false` hides nav + `/visibility` + `/api/geo/*` + worker queue |
+| `GEO_SONAR_MODEL` / `GEO_GEMINI_MODEL` | `perplexity/sonar` / `gemini-2.5-flash` | optional GEO engine model overrides |
 
 Rule: with the defaults above (`cp .env.example .env`, `pnpm dev`), EVERYTHING works
 with no external network calls. Anything requiring a key degrades gracefully.
@@ -151,6 +154,13 @@ App tables:
   `actorId text`, `action text`, `entityType text`, `entityId text`,
   `payloadHash text` (sha256 of canonical JSON), `metadata jsonb`, createdAt.
   IMMUTABLE: never update/delete; enforced in code (no exported update helpers).
+- GEO / AI Visibility (`geo_*`): `geoPrompts` `geo_prompts` (orgId, `text`, `category`,
+  `position`, `active`; cap 60 active per org in code), `geoRuns` `geo_runs` (orgId,
+  `status pending|running|done|failed`, `trigger scheduled|manual`, `engines jsonb` — ONLY
+  engines actually queried, `error`, startedAt, finishedAt), `geoResults` `geo_results`
+  (runId, promptId, `engine perplexity|gemini`, `brandMentioned`, `brandRank`, `answerExcerpt`,
+  `citations jsonb`, `competitorMentions jsonb`, `sentiment`, `parseFailed`). Every metric
+  traces to a `geo_results` row; engines never queried are never shown as tracked (honesty rail).
 
 ## 5. tRPC surface (`apps/web/server/trpc/router/*`, `appRouter`)
 
@@ -223,6 +233,15 @@ live in web). Service functions take explicit args, return plain objects.
 - `api/webhooks/leads/[platform]/route.ts` — POST receiver for platform lead ads (mock-verified),
   inserts lead with `sourceCampaignId` when resolvable.
 - `api/cron/weekly-report/route.ts` — bearer `CRON_SECRET`, phase-3 stub returning 501.
+- `api/geo/prompts/route.ts` — GET/POST/PATCH/DELETE the tracked prompt set (org session). Cap 60 active.
+- `api/geo/scan/route.ts` — POST manual REAL scan (1 per 6h per org; `?force=1` bypasses the limit,
+  never the budget guardrail). 400 no prompts / no engines, 402 over budget, 409 already running.
+- `api/geo/latest/route.ts` — latest run summary computed from stored `geo_results` rows +
+  engine-key availability for the chips. `{run:null}` when there is no data (empty state, never fake).
+- `api/geo/history/route.ts` — last 12 runs for the trend sparkline.
+- `api/geo/briefs/route.ts` — POST `{promptId}` → stateless DeepSeek content brief `{title, outline, target_queries}`.
+  All `/api/geo/*` return 404 when `GEO_ENABLED=false`. Honesty rail: an engine is only "tracked"
+  if a real API call ran; ChatGPT is shown as "soon".
 
 ## 7. Integrations contracts (`packages/integrations/src`)
 
@@ -471,6 +490,12 @@ Hono `/health` + BullMQ queues on REDIS_URL:
 - `email` queue (weekly, Mon 09:00, Phase 3): `services.reports.runWeeklyReportsForAllOrgs`
   — builds the `reports` row per org and emails owners via Resend when RESEND_API_KEY
   is set (log-only otherwise). Same runner backs `POST /api/cron/weekly-report`.
+- `geo-scan` queue (weekly, Mon 07:00): `services.geo.runGeoScansForAllOrgs` — per org,
+  queries each active prompt against the configured REAL engines (Perplexity Sonar via
+  OpenRouter, Gemini with grounding), parses with DeepSeek, stores `geo_results`. Metered
+  into the same `llm_usage` budget as orchestrator turns. Orgs without prompts/keys are
+  skipped, never simulated. Not registered when `GEO_ENABLED=false`. Manual trigger:
+  `POST /api/geo/scan`.
 Worker must not be required for web to function; web has an inline "simulate" fallback
 button on dashboard (dev only) that calls the same service directly.
 

@@ -24,6 +24,10 @@ primary_region = "fra"
   NEXT_PUBLIC_TTS_PROVIDER = "mock"
   NEXT_PUBLIC_APP_URL = "https://growthcrew.fly.dev"
   AUTH_URL = "https://growthcrew.fly.dev"
+  # AI Visibility (GEO) module. Secrets below (OPENROUTER_API_KEY,
+  # GEMINI_API_KEY) must be set with `flyctl secrets set` before the module
+  # returns data — without them it shows honest empty states, never fake ones.
+  GEO_ENABLED = "true"
 
 [http_service]
   internal_port = 3000
@@ -71,6 +75,18 @@ primary_region = "fra"
 # Without CRON_SECRET the endpoint returns 401 (cron disabled). The sync is
 # an idempotent upsert, so an early/late trigger is harmless. Per-platform
 # failures are isolated — one bad account won't abort the rest of the run.
+
+# ── AI Visibility (GEO) secrets ─────────────────────────────────────────────
+# The GEO module queries REAL engines; nothing is simulated. Set these before
+# deploy (do NOT commit real values):
+#
+#   flyctl secrets set OPENROUTER_API_KEY=<key>   # Perplexity Sonar via OpenRouter
+#   flyctl secrets set GEMINI_API_KEY=<key>       # Gemini flash + Google-Search grounding
+#
+# DEEPSEEK_API_KEY is also required for the parse/brief step (already used by
+# the LLM layer). GEO scans are metered into the same per-org llm_usage budget
+# as orchestrator turns. The weekly scan runs in the worker (Mon 07:00 UTC);
+# manual scans are POST /api/geo/scan (1 per 6h per org, ?force=1 to bypass).
 
 [[vm]]
   cpu_kind = "shared"
