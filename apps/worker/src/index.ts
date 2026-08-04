@@ -24,6 +24,9 @@ async function eachOrg(fn: (ctx: ReturnType<typeof createAgentContext>, orgId: s
   }
 }
 
+/** GEO module kill-switch (defaults on). When off the queue is not registered. */
+const geoEnabled = (process.env.GEO_ENABLED ?? 'true').toLowerCase() !== 'false';
+
 /** CONTRACTS §11 consumers — web keeps working when the worker is down. */
 const processors = {
   // metrics-poll (5 min): adapter.getMetrics → campaigns_mirror → guardian tick.
@@ -41,6 +44,11 @@ const processors = {
   // email (weekly, Mon 09:00): weekly report per org (+ Resend when configured).
   email: async () => {
     await services.reports.runWeeklyReportsForAllOrgs(db);
+  },
+  // geo-scan (weekly, Mon 07:00): AI-visibility scan per org (real engines only;
+  // orgs without prompts or engine keys are skipped, never simulated).
+  'geo-scan': async () => {
+    await services.geo.runGeoScansForAllOrgs(db);
   },
 } as const;
 
@@ -62,6 +70,8 @@ async function registerQueues(): Promise<void> {
   const metricsPoll = new Queue('metrics-poll', { connection });
   const optimize = new Queue('optimize', { connection });
   const email = new Queue('email', { connection });
+  const geoScan = geoEnabled ? new Queue('geo-scan', { connection }) : null;
+  const queues = [metricsPoll, optimize, email, ...(geoScan ? [geoScan] : [])];
   const workers: Worker[] = [];
 
   try {
@@ -70,7 +80,11 @@ async function registerQueues(): Promise<void> {
         await metricsPoll.add('poll', {}, { repeat: { every: 5 * 60 * 1000 } });
         await optimize.add('tick', {}, { repeat: { every: 60 * 60 * 1000 } });
         await email.add('weekly-report', {}, { repeat: { pattern: '0 9 * * 1' } });
+        if (geoScan) {
+          await geoScan.add('scan', {}, { repeat: { pattern: '0 7 * * 1' } });
+        }
         for (const [name, fn] of Object.entries(processors)) {
+          if (name === 'geo-scan' && !geoEnabled) continue;
           workers.push(
             new Worker(
               name,
@@ -85,7 +99,10 @@ async function registerQueues(): Promise<void> {
             ),
           );
         }
-        console.log('[worker] bullmq queues live: metrics-poll (5min), optimize (1h), email (weekly)');
+        console.log(
+          '[worker] bullmq queues live: metrics-poll (5min), optimize (1h), email (weekly)' +
+            (geoScan ? ', geo-scan (weekly)' : ''),
+        );
       })(),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('redis connection timed out')), 5000),
@@ -97,9 +114,7 @@ async function registerQueues(): Promise<void> {
         'Web app keeps working without the worker.',
     );
     await Promise.allSettled(workers.map((w) => w.close()));
-    metricsPoll.close().catch(() => {});
-    optimize.close().catch(() => {});
-    email.close().catch(() => {});
+    for (const queue of queues) queue.close().catch(() => {});
     connection.disconnect();
   }
 }
