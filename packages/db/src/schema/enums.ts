@@ -96,3 +96,15 @@ export type KnowledgeSource = z.infer<typeof knowledgeSourceSchema>;
 
 export const actorTypeSchema = z.enum(['user', 'agent', 'system']);
 export type ActorType = z.infer<typeof actorTypeSchema>;
+
+export const geoRunStatusSchema = z.enum(['pending', 'running', 'done', 'failed']);
+export type GeoRunStatus = z.infer<typeof geoRunStatusSchema>;
+
+export const geoTriggerSchema = z.enum(['scheduled', 'manual']);
+export type GeoTrigger = z.infer<typeof geoTriggerSchema>;
+
+export const geoEngineSchema = z.enum(['perplexity', 'gemini']);
+export type GeoEngine = z.infer<typeof geoEngineSchema>;
+
+export const geoSentimentSchema = z.enum(['positive', 'neutral', 'negative']);
+export type GeoSentiment = z.infer<typeof geoSentimentSchema>;

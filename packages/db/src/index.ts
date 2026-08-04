@@ -44,6 +44,12 @@ export type Competitor = InferSelectModel<typeof schema.competitors>;
 export type CompetitorAdScan = InferSelectModel<typeof schema.competitorAdScans>;
 export type VideoJob = InferSelectModel<typeof schema.videoJobs>;
 export type Review = InferSelectModel<typeof schema.reviews>;
+export type GeoPrompt = InferSelectModel<typeof schema.geoPrompts>;
+export type NewGeoPrompt = InferInsertModel<typeof schema.geoPrompts>;
+export type GeoRun = InferSelectModel<typeof schema.geoRuns>;
+export type NewGeoRun = InferInsertModel<typeof schema.geoRuns>;
+export type GeoResult = InferSelectModel<typeof schema.geoResults>;
+export type NewGeoResult = InferInsertModel<typeof schema.geoResults>;
 
 let client: postgres.Sql | undefined;
 let instance: Db | undefined;

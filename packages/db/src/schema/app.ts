@@ -609,3 +609,76 @@ export const llmUsage = pgTable(
   },
   (t) => [unique('llm_usage_org_month_unique').on(t.orgId, t.month)],
 );
+
+// ---------------------------------------------------------------------------
+// GEO — AI visibility: is the brand cited when AI engines answer tracked
+// questions? Every stored datapoint traces to a REAL engine query (honesty
+// rail): engines that were not actually queried are never shown as tracked.
+// ---------------------------------------------------------------------------
+
+/** Questions the org wants to track in AI engine answers. Cap: 60 active per org (enforced in the API/service layer). */
+export const geoPrompts = pgTable('geo_prompts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  text: text('text').notNull(),
+  category: text('category'),
+  position: integer('position').default(0).notNull(),
+  active: boolean('active').default(true).notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+/** A citation extracted from an engine answer. */
+export interface GeoCitation {
+  title?: string;
+  url: string;
+}
+
+/** A competitor mention counted in an engine answer. */
+export interface GeoCompetitorMention {
+  name: string;
+  count: number;
+}
+
+/** Per-engine outcome of one run: only engines actually queried appear here. */
+export interface GeoRunEngine {
+  status: 'ok' | 'failed';
+  error?: string;
+}
+export type GeoRunEngines = Partial<Record<'perplexity' | 'gemini', GeoRunEngine>>;
+
+export const geoRuns = pgTable('geo_runs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  orgId: uuid('org_id')
+    .notNull()
+    .references(() => organizations.id),
+  status: text('status').default('pending').notNull(), // pending|running|done|failed
+  // 'trigger' is a SQL keyword — always quoted in DDL/queries.
+  trigger: text('trigger').default('manual').notNull(), // scheduled|manual
+  engines: jsonb('engines').$type<GeoRunEngines>().default({}).notNull(),
+  error: text('error'),
+  startedAt: timestamp('started_at', { mode: 'date' }),
+  finishedAt: timestamp('finished_at', { mode: 'date' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
+
+export const geoResults = pgTable('geo_results', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  runId: uuid('run_id')
+    .notNull()
+    .references(() => geoRuns.id),
+  promptId: uuid('prompt_id')
+    .notNull()
+    .references(() => geoPrompts.id),
+  engine: text('engine').notNull(), // perplexity|gemini
+  brandMentioned: boolean('brand_mentioned').default(false).notNull(),
+  // 1-based position of the first brand mention in the answer; null when absent.
+  brandRank: integer('brand_rank'),
+  answerExcerpt: text('answer_excerpt'),
+  citations: jsonb('citations').$type<GeoCitation[]>().default([]).notNull(),
+  competitorMentions: jsonb('competitor_mentions').$type<GeoCompetitorMention[]>().default([]).notNull(),
+  sentiment: text('sentiment'), // positive|neutral|negative|null (null when brand absent)
+  parseFailed: boolean('parse_failed').default(false).notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+});
