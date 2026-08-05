@@ -72,7 +72,7 @@ Packages are consumed as TS source (no build step): each package.json has
 | `CRON_SECRET` | empty | Bearer secret for `/api/cron/*` (weekly report); empty = cron disabled |
 | `ENCRYPTION_KEY` | `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f` | 64 hex chars, AES-256-GCM for tokens |
 | `LLM_PROVIDER` | `mock` | `mock`\|`openai`\|`anthropic` |
-| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | empty | live LLM |
+| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | empty | live LLM; `OPENAI_API_KEY` also enables the GEO ChatGPT engine (Responses API web_search); empty = engine untracked |
 | `LLM_MODEL` | empty (provider default) | model override |
 | `STT_PROVIDER` | `mock` | `mock`\|`browser`\|`whisper`\|`deepgram` (browser handled client-side; mock for tests/dev) |
 | `DEEPGRAM_API_KEY` | empty | deepgram STT |
@@ -87,7 +87,7 @@ Packages are consumed as TS source (no build step): each package.json has
 | `DEMO_SEED` | `true` | seed demo org on migrate |
 | `OPENROUTER_API_KEY` | empty | GEO engine: Perplexity Sonar via OpenRouter (`https://openrouter.ai/api/v1`); empty = engine untracked |
 | `GEO_ENABLED` | `true` | AI Visibility module flag; `false` hides nav + `/visibility` + `/api/geo/*` + worker queue |
-| `GEO_SONAR_MODEL` / `GEO_GEMINI_MODEL` | `perplexity/sonar` / `gemini-2.5-flash` | optional GEO engine model overrides |
+| `GEO_SONAR_MODEL` / `GEO_GEMINI_MODEL` / `GEO_CHATGPT_MODEL` | `perplexity/sonar` / `gemini-2.5-flash` / `gpt-5.1-mini` | optional GEO engine model overrides |
 
 Rule: with the defaults above (`cp .env.example .env`, `pnpm dev`), EVERYTHING works
 with no external network calls. Anything requiring a key degrades gracefully.
@@ -158,7 +158,7 @@ App tables:
   `position`, `active`; cap 60 active per org in code), `geoRuns` `geo_runs` (orgId,
   `status pending|running|done|failed`, `trigger scheduled|manual`, `engines jsonb` — ONLY
   engines actually queried, `error`, startedAt, finishedAt), `geoResults` `geo_results`
-  (runId, promptId, `engine perplexity|gemini`, `brandMentioned`, `brandRank`, `answerExcerpt`,
+  (runId, promptId, `engine perplexity|gemini|chatgpt`, `brandMentioned`, `brandRank`, `answerExcerpt`,
   `citations jsonb`, `competitorMentions jsonb`, `sentiment`, `parseFailed`). Every metric
   traces to a `geo_results` row; engines never queried are never shown as tracked (honesty rail).
 - Visibility Phase 2 (`seo_*`, `content_plans`): `seoAudits` `seo_audits` (orgId, `siteUrl`,
@@ -250,7 +250,7 @@ live in web). Service functions take explicit args, return plain objects.
 - `api/geo/history/route.ts` — last 12 runs for the trend sparkline.
 - `api/geo/briefs/route.ts` — POST `{promptId}` → stateless DeepSeek content brief `{title, outline, target_queries}`.
   All `/api/geo/*` return 404 when `GEO_ENABLED=false`. Honesty rail: an engine is only "tracked"
-  if a real API call ran; ChatGPT is shown as "soon".
+  if a real API call ran; an engine without its key is shown as unconfigured, never simulated.
 - `api/geo/authority-targets/route.ts` — GET domains (from stored `geo_results` citations) that cite
   competitors but never the brand; optional `?run_id=` (default latest). Deterministic, $0.
 - `api/geo/plans/route.ts` — GET the org's 30/60/90 content plans (horizon-first) with gap prompt text.
@@ -513,7 +513,8 @@ Hono `/health` + BullMQ queues on REDIS_URL:
   is set (log-only otherwise). Same runner backs `POST /api/cron/weekly-report`.
 - `geo-scan` queue (weekly, Mon 07:00): `services.seoAudit.runGeoScansAndSeoAuditsForAllOrgs`
   — first the GEO scan (per org, queries each active prompt against the configured REAL
-  engines — Perplexity Sonar via OpenRouter, Gemini with grounding — parses with DeepSeek,
+  engines — Perplexity Sonar via OpenRouter, Gemini with grounding, ChatGPT via the OpenAI
+  Responses API web_search tool — parses with DeepSeek,
   stores `geo_results`, metered into the same `llm_usage` budget as orchestrator turns; orgs
   without prompts/keys are skipped, never simulated), then a technical SEO audit per org with a
   site URL (deterministic, $0, no LLM). Not registered when `GEO_ENABLED=false`. Manual
