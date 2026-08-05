@@ -21,7 +21,7 @@ export async function GET() {
   const config = {
     perplexityConfigured: Boolean(clients.perplexity),
     geminiConfigured: Boolean(clients.gemini),
-    chatgpt: 'soon' as const,
+    chatgptConfigured: Boolean(clients.chatgpt),
   };
 
   if (!summary) {

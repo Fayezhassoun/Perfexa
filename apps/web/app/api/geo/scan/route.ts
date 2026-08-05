@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const error =
       outcome.reason === 'no-prompts'
         ? 'Add at least one prompt before running a scan.'
-        : 'No engines are configured. Set OPENROUTER_API_KEY and/or GEMINI_API_KEY.';
+        : 'No engines are configured. Set OPENROUTER_API_KEY, GEMINI_API_KEY, and/or OPENAI_API_KEY.';
     return NextResponse.json({ error, reason: outcome.reason }, { status: 400 });
   }
   if (outcome.status === 'budget_exceeded') {

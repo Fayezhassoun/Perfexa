@@ -2,8 +2,9 @@
 
 // AI Visibility (GEO) dashboard — Phase 1 surface.
 // Honesty rail in the UI: engines are only ever shown as "live" when the
-// latest run actually queried them; ChatGPT is labeled "soon"; anything
-// without stored data renders an empty state — never simulated numbers.
+// latest run actually queried them; an engine without its API key shows as
+// unconfigured ("needs API key") — anything without stored data renders an
+// empty state, never simulated numbers.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -48,6 +49,8 @@ import { ContentCalendarSection } from './content-calendar-section';
 
 // ── API payload types (mirror services/geo.ts) ─────────────────────────────
 
+type GeoEngineKey = 'perplexity' | 'gemini' | 'chatgpt';
+
 interface GeoCitation {
   title?: string;
   url: string;
@@ -64,7 +67,7 @@ interface GeoPrompt {
 }
 interface GeoResult {
   id: string;
-  engine: 'perplexity' | 'gemini';
+  engine: GeoEngineKey;
   brandMentioned: boolean;
   brandRank: number | null;
   answerExcerpt: string | null;
@@ -74,7 +77,7 @@ interface GeoResult {
   parseFailed: boolean;
 }
 interface EngineSummary {
-  engine: 'perplexity' | 'gemini';
+  engine: GeoEngineKey;
   status: 'ok' | 'failed';
   error?: string;
   prompts: number;
@@ -83,7 +86,7 @@ interface EngineSummary {
 }
 interface RunSummaryPrompt {
   prompt: GeoPrompt;
-  results: Partial<Record<'perplexity' | 'gemini', GeoResult | undefined>>;
+  results: Partial<Record<GeoEngineKey, GeoResult | undefined>>;
   mentionedAnywhere: boolean;
 }
 interface RunSummary {
@@ -91,7 +94,7 @@ interface RunSummary {
     id: string;
     status: string;
     trigger: string;
-    engines: Partial<Record<'perplexity' | 'gemini', { status: 'ok' | 'failed'; error?: string }>>;
+    engines: Partial<Record<GeoEngineKey, { status: 'ok' | 'failed'; error?: string }>>;
     error: string | null;
     createdAt: string;
     finishedAt: string | null;
@@ -106,7 +109,7 @@ interface RunSummary {
 interface GeoConfig {
   perplexityConfigured: boolean;
   geminiConfigured: boolean;
-  chatgpt: 'soon';
+  chatgptConfigured: boolean;
 }
 interface LatestPayload {
   run: RunSummary | null;
@@ -392,10 +395,7 @@ export function VisibilityDashboard() {
           <div className="flex flex-wrap items-center gap-2" data-testid="engine-chips">
             <EngineChip engine="perplexity" run={run} configured={config?.perplexityConfigured ?? false} />
             <EngineChip engine="gemini" run={run} configured={config?.geminiConfigured ?? false} />
-            {/* Honesty rail: no real ChatGPT access path exists yet — never shown as tracked. */}
-            <StatusChip>
-              {ENGINE_LABELS.chatgpt} <Badge variant="secondary">soon</Badge>
-            </StatusChip>
+            <EngineChip engine="chatgpt" run={run} configured={config?.chatgptConfigured ?? false} />
           </div>
 
           {/* Empty state 2: prompts exist but no run yet */}
@@ -407,9 +407,9 @@ export function VisibilityDashboard() {
                 </div>
                 <p className="font-medium">Ready for your first scan</p>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  GrowthCrew will ask Perplexity and Gemini your {activePrompts.length} tracked{' '}
-                  {activePrompts.length === 1 ? 'question' : 'questions'} and record where your brand
-                  shows up. Only real engine answers are stored.
+                  GrowthCrew will ask Perplexity, Gemini, and ChatGPT your {activePrompts.length}{' '}
+                  tracked {activePrompts.length === 1 ? 'question' : 'questions'} and record where
+                  your brand shows up. Only real engine answers are stored.
                 </p>
                 <Button onClick={runScan} disabled={scanBusy}>
                   {scanBusy ? <Loader2 className="animate-spin" /> : <Play />}
@@ -525,6 +525,7 @@ export function VisibilityDashboard() {
                         <TableHead>Prompt</TableHead>
                         <TableHead>Perplexity</TableHead>
                         <TableHead>Gemini</TableHead>
+                        <TableHead>ChatGPT</TableHead>
                         <TableHead>Top cited domains</TableHead>
                         <TableHead>Sentiment</TableHead>
                         <TableHead />
@@ -649,7 +650,7 @@ function EngineChip({
   run,
   configured,
 }: {
-  engine: 'perplexity' | 'gemini';
+  engine: GeoEngineKey;
   run: RunSummary | null;
   configured: boolean;
 }) {
@@ -749,6 +750,9 @@ function PromptRow({
       <TableCell>
         <MentionCell result={row.results.gemini} />
       </TableCell>
+      <TableCell>
+        <MentionCell result={row.results.chatgpt} />
+      </TableCell>
       <TableCell className="max-w-[12rem]">
         {topDomains.length ? (
           <span className="truncate text-xs text-muted-foreground">
@@ -801,7 +805,7 @@ function ResultDrawer({ row, onClose }: { row: RunSummaryPrompt; onClose: () => 
             <X className="h-4 w-4" />
           </button>
         </div>
-        {(['perplexity', 'gemini'] as const).map((engine) => {
+        {(['perplexity', 'gemini', 'chatgpt'] as const).map((engine) => {
           const result = row.results[engine];
           if (!result) {
             return (
@@ -895,7 +899,7 @@ function PromptManager({
         {prompts.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Add the questions your customers ask AI engines. GrowthCrew scans them weekly on
-            Perplexity and Gemini — ChatGPT support is coming soon.
+            Perplexity, Gemini, and ChatGPT — only real engine answers are stored.
           </p>
         )}
         <form
