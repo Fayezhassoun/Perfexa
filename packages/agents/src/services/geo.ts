@@ -22,6 +22,7 @@ import {
   type GeoRunEngines,
 } from '@growthcrew/db';
 import {
+  createChatGPTGroundedProvider,
   createDeepSeekProvider,
   createGeminiGroundedProvider,
   createOpenAIProvider,
@@ -37,13 +38,14 @@ import { isWithinBudget, recordUsage } from './llm-usage.js';
 
 export const GEO_MAX_ACTIVE_PROMPTS = 60;
 export const GEO_ENGINE_TIMEOUT_MS = 30_000;
-export const GEO_ENGINES: GeoEngine[] = ['perplexity', 'gemini'];
+export const GEO_ENGINES: GeoEngine[] = ['perplexity', 'gemini', 'chatgpt'];
 
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 const SONAR_MODEL = 'perplexity/sonar';
 const SONAR_SYSTEM_PROMPT =
   'You are a search assistant. Answer the user’s question with current web sources.';
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+const DEFAULT_CHATGPT_MODEL = 'gpt-5.1-mini';
 // DeepSeek parse/generation model. Explicit (never inherits LLM_MODEL, which can
 // be empty) and cheap — flash tier fits the thin-margin cost model.
 const DEFAULT_PARSER_MODEL = 'deepseek-v4-flash';
@@ -58,6 +60,8 @@ export interface GeoEngineClients {
   perplexity?: LLMProvider;
   /** Gemini flash with Google-Search grounding enabled. */
   gemini?: LLMProvider;
+  /** ChatGPT via the OpenAI Responses API web_search tool. */
+  chatgpt?: LLMProvider;
   /** DeepSeek — parsing/generation only, never used as a tracked engine. */
   parser?: LLMProvider;
 }
@@ -83,6 +87,15 @@ export function createGeoEngineClients(
     clients.gemini = createGeminiGroundedProvider({
       apiKey: geminiKey,
       model: env.GEO_GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
+      ...(fetchImpl ? { fetch: fetchImpl } : {}),
+    });
+  }
+  const openaiKey = env.OPENAI_API_KEY?.trim();
+  if (openaiKey) {
+    // Grounded ChatGPT (Responses API web_search tool) — answers cite real sources.
+    clients.chatgpt = createChatGPTGroundedProvider({
+      apiKey: openaiKey,
+      model: env.GEO_CHATGPT_MODEL?.trim() || DEFAULT_CHATGPT_MODEL,
       ...(fetchImpl ? { fetch: fetchImpl } : {}),
     });
   }
@@ -415,7 +428,7 @@ export async function runGeoScan(
 
   const clients = opts.clients ?? createGeoEngineClients(opts.env ?? process.env, opts.fetchImpl);
   // No engines configured → nothing can REALLY be queried → skip, never fake.
-  if (!clients.perplexity && !clients.gemini) {
+  if (!clients.perplexity && !clients.gemini && !clients.chatgpt) {
     return { status: 'skipped', reason: 'no-engines' };
   }
   if (!clients.parser) {
@@ -458,8 +471,8 @@ export async function runGeoScan(
           { role: 'system', content: SONAR_SYSTEM_PROMPT },
           { role: 'user', content: prompt.text },
         ];
-        // The Gemini client is the grounded provider (google_search tool); the
-        // Perplexity client is Sonar via OpenRouter. Both return real citations.
+        // Perplexity is Sonar via OpenRouter; Gemini and ChatGPT are grounded
+        // providers (google_search / web_search tools). All return real citations.
         const res = await withTimeout(client.chat(messages, { maxTokens: 1024 }), timeoutMs, engine);
         answer = (res.content ?? '').trim();
         groundingCitations = res.groundingCitations;
@@ -527,7 +540,11 @@ export async function runGeoScan(
     await persistEngines();
   }
 
-  await Promise.all([runEngine('perplexity', clients.perplexity), runEngine('gemini', clients.gemini)]);
+  await Promise.all([
+    runEngine('perplexity', clients.perplexity),
+    runEngine('gemini', clients.gemini),
+    runEngine('chatgpt', clients.chatgpt),
+  ]);
 
   const anyOk = Object.values(engines).some((e) => e.status === 'ok');
   const status = anyOk ? 'done' : 'failed';

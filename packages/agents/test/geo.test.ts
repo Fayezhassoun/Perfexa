@@ -11,8 +11,10 @@ import { competitors, contentPieces, geoResults, geoRuns, llmUsage } from '@grow
 import type { ChatMessage, LLMProvider, LLMResponse } from '@growthcrew/llm';
 import {
   addPrompt,
+  createGeoEngineClients,
   extractInlineCitations,
   generateGeoBrief,
+  GEO_ENGINES,
   GEO_MAX_ACTIVE_PROMPTS,
   GeoPromptLimitError,
   getHistory,
@@ -85,6 +87,8 @@ const SONAR_ANSWER =
   'Rival Tools also comes up [Rival](https://rival.example.com/home). See https://listing.example.com/top-tools.';
 const GEMINI_ANSWER =
   'Based on current sources, Test Business ranks highly for this need, while Rival Tools is an alternative.';
+const CHATGPT_ANSWER =
+  'According to recent comparisons, Test Business is a strong option for this use case; Rival Tools is a common alternative.';
 
 describe('geo prompt CRUD', () => {
   beforeEach(async () => {
@@ -153,9 +157,50 @@ describe('extractInlineCitations / parseStrictJson', () => {
   });
 });
 
+describe('createGeoEngineClients', () => {
+  // Construction is lazy — no key means no client, never a fake one. The fetch
+  // stub is never invoked here (no chat call), it just satisfies injectability.
+  const fetchStub = (() => Promise.resolve(new Response())) as typeof fetch;
+
+  it('builds a client per key present; chatgpt requires OPENAI_API_KEY', () => {
+    expect(createGeoEngineClients({}, fetchStub)).toEqual({});
+
+    const all = createGeoEngineClients(
+      {
+        OPENROUTER_API_KEY: 'or-x',
+        GEMINI_API_KEY: 'gm-x',
+        OPENAI_API_KEY: 'sk-x',
+        DEEPSEEK_API_KEY: 'ds-x',
+      },
+      fetchStub,
+    );
+    expect(all.perplexity?.name).toBe('openai'); // Sonar via the OpenAI-compat surface
+    expect(all.gemini?.name).toBe('gemini');
+    expect(all.chatgpt?.name).toBe('chatgpt');
+    expect(all.parser?.name).toBe('deepseek');
+
+    const withoutOpenAI = createGeoEngineClients(
+      { OPENROUTER_API_KEY: 'or-x', GEMINI_API_KEY: 'gm-x', DEEPSEEK_API_KEY: 'ds-x' },
+      fetchStub,
+    );
+    expect(withoutOpenAI.chatgpt).toBeUndefined();
+    expect(withoutOpenAI.perplexity).toBeDefined();
+    expect(withoutOpenAI.gemini).toBeDefined();
+  });
+
+  it('treats whitespace-only keys as absent (weekly scans skip cleanly, no paid call)', () => {
+    const clients = createGeoEngineClients({ OPENAI_API_KEY: '   ' }, fetchStub);
+    expect(clients.chatgpt).toBeUndefined();
+  });
+});
+
 describe('runGeoScan', () => {
   beforeEach(async () => {
     await truncateAll(db);
+  });
+
+  it('tracks chatgpt alongside perplexity and gemini', () => {
+    expect(GEO_ENGINES).toEqual(['perplexity', 'gemini', 'chatgpt']);
   });
 
   it('queries every prompt x engine, stores real parsed rows, and aggregates', async () => {
@@ -201,7 +246,13 @@ describe('runGeoScan', () => {
     expect(outcome.status).toBe('run');
     if (outcome.status !== 'run') return;
     expect(outcome.run.status).toBe('done');
-    expect(outcome.run.engines).toEqual({ perplexity: { status: 'ok' }, gemini: { status: 'ok' } });
+    // ChatGPT is additive: with no client it is marked not-configured and
+    // stores nothing — perplexity+gemini are unaffected (honesty rail).
+    expect(outcome.run.engines).toEqual({
+      perplexity: { status: 'ok' },
+      gemini: { status: 'ok' },
+      chatgpt: { status: 'failed', error: 'engine not configured (missing API key)' },
+    });
 
     const results = await db.select().from(geoResults).where(eq(geoResults.runId, outcome.run.id));
     expect(results).toHaveLength(4); // 2 prompts x 2 engines
@@ -235,6 +286,14 @@ describe('runGeoScan', () => {
     expect(summary!.engines).toEqual([
       { engine: 'perplexity', status: 'ok', error: undefined, prompts: 2, mentions: 1, visibility: 0.5 },
       { engine: 'gemini', status: 'ok', error: undefined, prompts: 2, mentions: 1, visibility: 0.5 },
+      {
+        engine: 'chatgpt',
+        status: 'failed',
+        error: 'engine not configured (missing API key)',
+        prompts: 0,
+        mentions: 0,
+        visibility: null,
+      },
     ]);
 
     // Metering: every engine + parser call with usage hit the org's llm_usage rollup.
@@ -306,9 +365,59 @@ describe('runGeoScan', () => {
     expect(results.every((r) => r.engine === 'gemini')).toBe(true);
 
     const summary = await getLatestSummary(org.ctx);
-    expect(summary!.engines.map((e) => e.engine)).toEqual(['perplexity', 'gemini']);
+    expect(summary!.engines.map((e) => e.engine)).toEqual(['perplexity', 'gemini', 'chatgpt']);
     expect(summary!.engines[0]!.visibility).toBeNull(); // failed engine → no data
     expect(summary!.engines[1]!.visibility).toBe(1);
+    expect(summary!.engines[2]!.visibility).toBeNull(); // absent engine → no data
+  });
+
+  it('runs a complete scan with only the chatgpt engine configured (additive engine)', async () => {
+    const org = await freshOrg();
+    await addPrompt(org.ctx, { text: 'Best tool for X?' });
+
+    const chatgpt = scripted('chatgpt', () => ({
+      content: CHATGPT_ANSWER,
+      usage: { promptTokens: 500, completionTokens: 200, totalTokens: 700 },
+      groundingCitations: [{ title: 'Review', url: 'https://reviews.example.com/test-business' }],
+    }));
+
+    const outcome = await runGeoScan(org.ctx, {
+      clients: { chatgpt: chatgpt.provider, parser: smartParser().provider },
+    });
+    expect(outcome.status).toBe('run');
+    if (outcome.status !== 'run') return;
+    expect(outcome.run.status).toBe('done');
+    expect(outcome.run.engines.chatgpt).toEqual({ status: 'ok' });
+    expect(outcome.run.engines.perplexity).toEqual({
+      status: 'failed',
+      error: 'engine not configured (missing API key)',
+    });
+    expect(outcome.run.engines.gemini).toEqual({
+      status: 'failed',
+      error: 'engine not configured (missing API key)',
+    });
+
+    const results = await db.select().from(geoResults).where(eq(geoResults.runId, outcome.run.id));
+    expect(results).toHaveLength(1);
+    expect(results[0]!.engine).toBe('chatgpt');
+    expect(results[0]!.brandMentioned).toBe(true);
+    expect(results[0]!.parseFailed).toBe(false);
+    // Citations come from the Responses API web_search grounding annotations —
+    // never parsed out of the prose.
+    expect(results[0]!.citations).toEqual([
+      { title: 'Review', url: 'https://reviews.example.com/test-business' },
+    ]);
+
+    const summary = await getLatestSummary(org.ctx);
+    expect(summary!.visibilityCombined).toBe(1);
+    const chatgptSummary = summary!.engines.find((e) => e.engine === 'chatgpt');
+    expect(chatgptSummary).toMatchObject({ status: 'ok', prompts: 1, mentions: 1, visibility: 1 });
+
+    // Metered like the other engines: 1 engine call + 1 parse.
+    const [usage] = await db.select().from(llmUsage).where(eq(llmUsage.orgId, org.orgId));
+    expect(usage).toBeDefined();
+    expect(usage!.requestCount).toBe(2);
+    expect(usage!.totalTokens).toBeGreaterThan(0);
   });
 
   it('fails the run (not aborts) when every engine errors', async () => {
