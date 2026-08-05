@@ -646,7 +646,7 @@ export interface GeoRunEngine {
   status: 'ok' | 'failed';
   error?: string;
 }
-export type GeoRunEngines = Partial<Record<'perplexity' | 'gemini', GeoRunEngine>>;
+export type GeoRunEngines = Partial<Record<'perplexity' | 'gemini' | 'chatgpt', GeoRunEngine>>;
 
 export const geoRuns = pgTable('geo_runs', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -671,7 +671,7 @@ export const geoResults = pgTable('geo_results', {
   promptId: uuid('prompt_id')
     .notNull()
     .references(() => geoPrompts.id),
-  engine: text('engine').notNull(), // perplexity|gemini
+  engine: text('engine').notNull(), // perplexity|gemini|chatgpt
   brandMentioned: boolean('brand_mentioned').default(false).notNull(),
   // 1-based position of the first brand mention in the answer; null when absent.
   brandRank: integer('brand_rank'),

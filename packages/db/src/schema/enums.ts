@@ -103,7 +103,7 @@ export type GeoRunStatus = z.infer<typeof geoRunStatusSchema>;
 export const geoTriggerSchema = z.enum(['scheduled', 'manual']);
 export type GeoTrigger = z.infer<typeof geoTriggerSchema>;
 
-export const geoEngineSchema = z.enum(['perplexity', 'gemini']);
+export const geoEngineSchema = z.enum(['perplexity', 'gemini', 'chatgpt']);
 export type GeoEngine = z.infer<typeof geoEngineSchema>;
 
 export const geoSentimentSchema = z.enum(['positive', 'neutral', 'negative']);
