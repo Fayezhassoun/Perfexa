@@ -18,12 +18,11 @@ const FAQS = [
   {
     question: 'What is the catch with the design-partner pricing?',
     answer:
-      'The pilot is priced for a small group of operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
+      'The listed rates are planned monthly tiers. Gate-1 pilot access is free during beta for operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
   },
   {
     question: 'Can I cancel anytime?',
-    answer:
-      'Yes. There is no long-term contract. Cancel before your next billing cycle and you will keep access through the period you already paid for.',
+    answer: 'Yes. The Gate-1 pilot is free during beta, with no card and no long-term contract. If you stop, access ends when you choose.',
   },
   {
     question: 'What happens after I sign up?',
@@ -44,11 +43,6 @@ export default function PricingPage() {
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
           </Button>
-          <Button asChild>
-            <Link href="/register">
-              Get started <ArrowRight />
-            </Link>
-          </Button>
         </nav>
       </header>
 
@@ -59,21 +53,26 @@ export default function PricingPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            Design partner pricing · live product
+            Design partner pricing · Gate 1 pilot
           </div>
           <h1 className="animate-fade-up animation-delay-100 mt-7 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.25rem]">
             A sharper marketing week,
             <span className="mt-2 block text-primary">without another dashboard to babysit.</span>
           </h1>
           <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
-            Start small, connect the accounts that matter, and get a useful weekly readout under your brand. Pick the
-            level of operator support that fits how you work.
+            Start small, connect the accounts that matter, and get a useful weekly readout under your brand. Pick the level of support that
+            fits how you work.
+          </p>
+          <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Gate 1 is about the first report: connect an ad account, then decide whether the weekly readout is useful.
           </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-6xl">
           <PricingTiers />
-          <p className="mt-5 text-center text-xs text-muted-foreground">All plans are month-to-month. No card required to explore the pilot.</p>
+          <p className="mt-5 text-center text-xs text-muted-foreground">
+            Planned monthly rates are shown for transparency. Gate-1 pilot access is free during beta, with no card required.
+          </p>
         </div>
       </section>
 
@@ -88,17 +87,17 @@ export default function PricingPage() {
               Founding pricing, direct founder access.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              We are keeping the pilot small enough to work closely with every team. In exchange for honest feedback,
-              design partners get the founding rates while the product earns its sharp edges.
+              We are working with a small group so we can stay close to every team. In exchange for honest feedback, design partners get the
+              founding rates while the product gets sharper.
             </p>
           </div>
           <div className="relative mt-7 shrink-0 lg:mt-0">
             <Button size="lg" className="h-12 w-full px-7 text-base sm:w-auto" asChild>
               <Link href="/register?plan=growth">
-                Start the conversation <ArrowRight />
+                Start the pilot <ArrowRight />
               </Link>
             </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground lg:text-right">No hard sell. Just a fit check.</p>
+            <p className="mt-3 text-center text-xs text-muted-foreground lg:text-right">Pilot signup starts with a fit check.</p>
           </div>
         </div>
       </section>
@@ -150,7 +149,7 @@ export default function PricingPage() {
         <Check className="mx-auto h-6 w-6 text-emerald-500" />
         <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Start with the signal, not the software.</h2>
         <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-          Choose a plan, connect what you need, and let the first weekly report show you where GrowthCrew earns its keep.
+          Choose a plan, connect what you need, and let the first weekly report show you where GrowthCrew is useful.
         </p>
         <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
           <Link href="/register?plan=growth">
