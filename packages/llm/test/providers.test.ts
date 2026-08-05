@@ -4,6 +4,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   createAnthropicProvider,
+  createChatGPTGroundedProvider,
   createGeminiGroundedProvider,
   createGeminiProvider,
   createOpenAIProvider,
@@ -299,6 +300,98 @@ describe('Gemini grounded provider (native generateContent)', () => {
   it('surfaces native API errors', async () => {
     const { fetch } = fakeFetch(() => ({ status: 400, body: { error: { message: 'bad model' } } }));
     const provider = createGeminiGroundedProvider({ apiKey: 'gm-test', fetch });
+    await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/bad model/);
+  });
+});
+
+describe('ChatGPT grounded provider (Responses API + web_search)', () => {
+  it('calls /responses with the web_search tool and bearer key, maps answer + citations + usage', async () => {
+    const { fetch, calls } = fakeFetch(() => ({
+      body: {
+        id: 'resp_1',
+        status: 'completed',
+        output: [
+          { type: 'web_search_call', id: 'ws_1', status: 'completed' },
+          {
+            type: 'message',
+            role: 'assistant',
+            content: [
+              {
+                type: 'output_text',
+                text: 'HubSpot is a strong pick. ',
+                annotations: [
+                  {
+                    type: 'url_citation',
+                    url_citation: {
+                      url: 'https://example.com/review',
+                      title: 'CRM review',
+                      start_index: 0,
+                      end_index: 6,
+                    },
+                  },
+                ],
+              },
+              {
+                type: 'output_text',
+                text: 'Salesforce comes up too.',
+                annotations: [
+                  {
+                    type: 'url_citation',
+                    url_citation: { url: 'https://example.com/review', title: 'dup' }, // deduped
+                  },
+                  { type: 'url_citation', url_citation: { url: 'https://other.com/list', title: 'Top CRMs' } },
+                  { type: 'url_citation', url_citation: { title: 'no url' } }, // dropped (honesty rail)
+                ],
+              },
+            ],
+          },
+        ],
+        usage: { input_tokens: 12, output_tokens: 34, total_tokens: 46 },
+      },
+    }));
+    const provider = createChatGPTGroundedProvider({ apiKey: 'sk-test', model: 'gpt-test', fetch });
+    const res = await provider.chat(
+      [{ role: 'system', content: 'You are a search assistant.' }, { role: 'user', content: 'Best CRM?' }],
+      { maxTokens: 512 },
+    );
+
+    expect(calls[0]!.url).toContain('api.openai.com/v1/responses');
+    expect(calls[0]!.init?.headers?.authorization).toBe('Bearer sk-test');
+    const body = bodyOf(calls[0]);
+    expect(body.model).toBe('gpt-test');
+    expect(body.instructions).toBe('You are a search assistant.');
+    expect(body.input).toEqual([{ role: 'user', content: 'Best CRM?' }]);
+    expect(body.tools).toEqual([{ type: 'web_search' }]);
+    expect(body.max_output_tokens).toBe(512);
+
+    expect(res.content).toBe('HubSpot is a strong pick. Salesforce comes up too.');
+    expect(res.usage).toEqual({ promptTokens: 12, completionTokens: 34, totalTokens: 46 });
+    expect(res.groundingCitations).toEqual([
+      { title: 'CRM review', url: 'https://example.com/review' },
+      { title: 'Top CRMs', url: 'https://other.com/list' },
+    ]);
+  });
+
+  it('defaults to gpt-5.1-mini and omits instructions when there is no system message', async () => {
+    const { fetch, calls } = fakeFetch(() => ({ body: { output: [], usage: {} } }));
+    const provider = createChatGPTGroundedProvider({ apiKey: 'sk-test', fetch });
+    await provider.chat([{ role: 'user', content: 'Best CRM?' }]);
+    const body = bodyOf(calls[0]);
+    expect(body.model).toBe('gpt-5.1-mini');
+    expect('instructions' in body).toBe(false);
+  });
+
+  it('throws a clear error without an API key (no network call)', async () => {
+    delete process.env.OPENAI_API_KEY;
+    const { fetch, calls } = fakeFetch(() => ({ body: {} }));
+    const provider = createChatGPTGroundedProvider({ fetch });
+    await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/OPENAI_API_KEY/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('surfaces Responses API errors', async () => {
+    const { fetch } = fakeFetch(() => ({ status: 400, body: { error: { message: 'bad model' } } }));
+    const provider = createChatGPTGroundedProvider({ apiKey: 'sk-test', fetch });
     await expect(provider.chat([{ role: 'user', content: 'hi' }])).rejects.toThrow(/bad model/);
   });
 });

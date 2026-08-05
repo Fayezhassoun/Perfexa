@@ -42,8 +42,9 @@ export {
   createQwenProvider,
 };
 export { createGeminiGroundedProvider } from './providers/gemini.js';
+export { createChatGPTGroundedProvider } from './providers/openai.js';
 
-export type { OpenAIProviderOptions } from './providers/openai.js';
+export type { OpenAIProviderOptions, ChatGPTGroundedProviderOptions } from './providers/openai.js';
 export type { AnthropicProviderOptions } from './providers/anthropic.js';
 export type { DeepSeekProviderOptions } from './providers/deepseek.js';
 export type { GeminiProviderOptions, GeminiGroundedProviderOptions } from './providers/gemini.js';
