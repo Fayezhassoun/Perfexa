@@ -39,7 +39,7 @@ const TIERS: PricingTier[] = [
     price: '$99',
     description: 'For small teams managing several brands and wanting room to grow.',
     features: ['Everything in Growth', 'Team seats', 'Multi-brand workspace', 'Priority support'],
-    cta: 'Book a call',
+    cta: 'Start pilot',
     href: '/register?plan=agency',
   },
 ];
@@ -55,7 +55,7 @@ function PricingTierCard({ tier }: { tier: PricingTier }) {
     >
       {tier.popular ? (
         <div className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3.5 w-3.5" /> Most popular
+          <Sparkles className="h-3.5 w-3.5" /> Best for pilots
         </div>
       ) : (
         <div className="mb-6 h-7" aria-hidden="true" />
