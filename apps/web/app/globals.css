@@ -440,7 +440,10 @@
   .growthcrew-wordmark {
     font-family: 'Space Grotesk Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     letter-spacing: -0.035em;
-    color: hsl(var(--foreground));
+    color: hsl(var(--ink));
+  }
+  .dark .growthcrew-wordmark {
+    color: hsl(var(--cream));
   }
   .growthcrew-descriptor {
     font-family: 'DM Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -526,4 +529,171 @@
   .page-shell { padding-top: 22px; }
   .page-header { align-items: flex-start; flex-direction: column; }
   .liquid-sidebar { border-radius: 0; }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Public surface · Warm Editorial
+   Art direction for the public marketing pages (/, /pricing,
+   /login, /register): warm cream ground, forest ink, coral + mint
+   accents used sparingly. The glass system above stays intact for
+   the auth-gated app under (app)/.
+   ──────────────────────────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    --cream: 50 19% 94%;       /* #F2F1EC */
+    --cream-deep: 47 19% 91%;  /* #ECEAE3 */
+    --ink: 164 51% 12%;        /* #0F2E26 */
+    --ink-soft: 163 14% 33%;   /* muted body copy on cream */
+    --coral: 10 87% 62%;       /* #F2664A */
+    --mint: 168 47% 66%;       /* #7FD1C0 */
+    --public-radius: 26px;
+    --public-radius-lg: 30px;
+  }
+}
+
+@layer components {
+  .public-shell {
+    background: hsl(var(--cream));
+    color: hsl(var(--ink));
+  }
+  .public-shell ::selection {
+    background: hsl(var(--coral) / 0.24);
+  }
+  .public-shell :is(h1, h2, h3, h4) {
+    font-family: 'DM Sans Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.04em;
+  }
+  .public-shell :where(button, a, input, textarea, select):focus-visible {
+    box-shadow: 0 0 0 2px hsl(var(--cream)), 0 0 0 4px hsl(var(--ink) / 0.55);
+  }
+
+  .public-nav {
+    border-bottom: 1px solid hsl(var(--ink) / 0.07);
+    background: color-mix(in srgb, hsl(var(--cream)) 88%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .public-card {
+    border: 1px solid hsl(var(--ink) / 0.08);
+    border-radius: var(--public-radius);
+    background: #fff;
+    box-shadow: 0 1px 2px hsl(var(--ink) / 0.04), 0 16px 40px -30px hsl(var(--ink) / 0.24);
+  }
+
+  .public-tile {
+    border: 1px solid hsl(var(--ink) / 0.08);
+    border-radius: 18px;
+    background: hsl(var(--cream));
+  }
+
+  .public-panel-ink {
+    background: hsl(var(--ink));
+    color: hsl(var(--cream));
+    border-radius: var(--public-radius-lg);
+  }
+
+  .headline-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 0.92em;
+    height: 0.92em;
+    margin: 0 0.1em;
+    border-radius: 0.28em;
+    vertical-align: -0.1em;
+    color: #fff;
+  }
+  .headline-chip svg { width: 0.5em; height: 0.5em; }
+  .headline-chip-coral {
+    background: linear-gradient(135deg, hsl(18 92% 64%), hsl(var(--coral)) 55%, hsl(2 74% 54%));
+  }
+  .headline-chip-mint {
+    background: linear-gradient(135deg, hsl(160 52% 62%), hsl(var(--mint)) 52%, hsl(178 48% 42%));
+  }
+
+  .public-input {
+    border: 1px solid hsl(var(--ink) / 0.16);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: none;
+    color: hsl(var(--ink));
+  }
+  .public-input:hover {
+    border-color: hsl(var(--ink) / 0.32);
+    background: #fff;
+    box-shadow: none;
+  }
+  .public-input:focus,
+  .public-input:focus-visible {
+    border-color: hsl(var(--ink) / 0.55);
+    box-shadow: 0 0 0 3px hsl(var(--ink) / 0.12);
+  }
+  .public-input::placeholder { color: hsl(var(--ink-soft) / 0.6); }
+}
+
+@layer utilities {
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .btn-pill-ink {
+    background: hsl(var(--ink));
+    color: hsl(var(--cream));
+    box-shadow: 0 10px 24px -14px hsl(var(--ink) / 0.55);
+  }
+  .btn-pill-ink:hover {
+    background: hsl(163 42% 20%);
+    color: hsl(var(--cream));
+    box-shadow: 0 14px 28px -14px hsl(var(--ink) / 0.6);
+  }
+  .btn-pill-outline {
+    border: 1px solid hsl(var(--ink) / 0.18);
+    background: transparent;
+    color: hsl(var(--ink));
+    box-shadow: none;
+  }
+  .btn-pill-outline:hover {
+    border-color: hsl(var(--ink) / 0.42);
+    background: hsl(var(--ink) / 0.05);
+    color: hsl(var(--ink));
+    box-shadow: none;
+  }
+
+  .engine-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--cream) / 0.24);
+    background: hsl(var(--cream) / 0.08);
+    padding: 0.55rem 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: hsl(var(--cream));
+  }
+
+  .public-lift {
+    transition: transform 220ms var(--smooth), box-shadow 220ms var(--smooth), border-color 220ms var(--smooth);
+  }
+  .public-lift:hover {
+    transform: translateY(-3px);
+    border-color: hsl(var(--ink) / 0.16);
+    box-shadow: 0 2px 3px hsl(var(--ink) / 0.05), 0 24px 48px -30px hsl(var(--ink) / 0.32);
+  }
+
+  .public-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+  }
 }
