@@ -32,13 +32,13 @@ export function BrandMarkIcon({
     >
       <defs>
         <linearGradient id={bgGradId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2563EB" />
-          <stop offset="50%" stopColor="#0284C7" />
-          <stop offset="100%" stopColor="#06B6D4" />
+          <stop offset="0%" stopColor="#1E5A47" />
+          <stop offset="52%" stopColor="#14402F" />
+          <stop offset="100%" stopColor="#0F2E26" />
         </linearGradient>
         <linearGradient id={waveGradId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="100%" stopColor="#E0F2FE" />
+          <stop offset="0%" stopColor="#7FD1C0" />
+          <stop offset="100%" stopColor="#F2F1EC" />
         </linearGradient>
       </defs>
 
