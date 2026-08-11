@@ -47,35 +47,33 @@ const TIERS: PricingTier[] = [
 function PricingTierCard({ tier }: { tier: PricingTier }) {
   return (
     <article
-      className={`glass-panel flex h-full flex-col rounded-3xl p-6 sm:p-7 ${
-        tier.popular
-          ? 'border-primary/50 bg-primary/[0.07] shadow-[0_0_42px_-18px_hsl(var(--primary)/0.72)]'
-          : ''
+      className={`public-card flex h-full flex-col p-6 sm:p-7 ${
+        tier.popular ? 'border-[hsl(var(--ink)/0.28)] bg-[hsl(var(--cream))]' : ''
       }`}
     >
       {tier.popular ? (
-        <div className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3.5 w-3.5" /> Best for pilots
+        <div className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full bg-[hsl(var(--ink))] px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--cream))]">
+          <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--coral))]" /> Best for pilots
         </div>
       ) : (
         <div className="mb-6 h-7" aria-hidden="true" />
       )}
 
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">{tier.name}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ink-soft))]">{tier.name}</p>
         <div className="mt-4 flex items-end gap-2">
-          <span className="font-display text-5xl font-semibold tracking-[-0.06em]">{tier.price}</span>
-          <span className="mb-2 text-sm text-muted-foreground">/ month</span>
+          <span className="font-sans text-5xl font-semibold tracking-[-0.06em]">{tier.price}</span>
+          <span className="mb-2 text-sm text-[hsl(var(--ink-soft))]">/ month</span>
         </div>
-        <p className="mt-4 min-h-[3.5rem] text-sm leading-relaxed text-muted-foreground">{tier.description}</p>
+        <p className="mt-4 min-h-[3.5rem] text-sm leading-relaxed text-[hsl(var(--ink-soft))]">{tier.description}</p>
       </div>
 
-      <div className="my-7 h-px bg-[color:var(--glass-divider)]" />
+      <div className="my-7 h-px bg-[hsl(var(--ink)/0.1)]" />
 
       <ul className="space-y-3.5 text-sm">
         {tier.features.map((feature) => (
           <li key={feature} className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-500">
+            <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--mint)/0.28)] text-[hsl(170_55%_30%)]">
               <Check className="h-3 w-3" strokeWidth={2.5} />
             </span>
             <span className="leading-relaxed">{feature}</span>
@@ -83,7 +81,10 @@ function PricingTierCard({ tier }: { tier: PricingTier }) {
         ))}
       </ul>
 
-      <Button className="mt-8 h-11 w-full" variant={tier.popular ? 'default' : 'outline'} asChild>
+      <Button
+        className={`mt-8 h-11 w-full ${tier.popular ? 'btn-pill btn-pill-ink' : 'btn-pill btn-pill-outline'}`}
+        asChild
+      >
         <Link href={tier.href}>
           {tier.cta} <ArrowRight />
         </Link>
@@ -94,7 +95,7 @@ function PricingTierCard({ tier }: { tier: PricingTier }) {
 
 export function PricingTiers() {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-5 lg:grid-cols-3">
       {TIERS.map((tier) => (
         <PricingTierCard key={tier.name} tier={tier} />
       ))}

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ArrowRight, Check, LockKeyhole, MessageCircle, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { BrandMark } from '@/components/brand-mark';
 import { PricingTiers } from '@/components/pricing-tiers';
 
@@ -33,94 +32,103 @@ const FAQS = [
 
 export default function PricingPage() {
   return (
-    <main className="liquid-shell min-h-screen overflow-x-hidden">
-      <header className="liquid-topbar sticky top-0 z-50 mx-auto flex h-[68px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-        <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
-        <nav className="flex items-center gap-2" aria-label="Main navigation">
-          <Button variant="ghost" asChild>
-            <Link href="/">Product</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/login">Sign in</Link>
-          </Button>
-        </nav>
+    <main className="public-shell min-h-screen overflow-x-hidden">
+      <header className="public-nav sticky top-0 z-50">
+        <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8">
+          <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
+          <nav className="flex items-center gap-2 sm:gap-3" aria-label="Main navigation">
+            <Link
+              href="/"
+              className="rounded-full px-3 py-2 text-sm font-medium text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink)/0.05)]"
+            >
+              Product
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-full px-3 py-2 text-sm font-medium text-[hsl(var(--ink))] hover:bg-[hsl(var(--ink)/0.05)]"
+            >
+              Sign in
+            </Link>
+            <Link href="/register?plan=growth" className="btn-pill btn-pill-ink h-10 px-5 text-sm">
+              Start the pilot
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <section className="mx-auto max-w-[1440px] px-5 pb-20 pt-16 sm:px-8 lg:px-12 lg:pb-24 lg:pt-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="glass-chip animate-fade-up inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium text-muted-foreground">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-            Design partner pricing · Gate 1 pilot
-          </div>
-          <h1 className="animate-fade-up animation-delay-100 mt-7 text-balance font-display text-5xl font-semibold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.25rem]">
-            A sharper marketing week,
-            <span className="mt-2 block text-primary">without another dashboard to babysit.</span>
-          </h1>
-          <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
-            Start small, connect the accounts that matter, and get a useful weekly readout under your brand. Pick the level of support that
-            fits how you work.
-          </p>
-          <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Gate 1 is about the first report: connect an ad account, then decide whether the weekly readout is useful.
-          </p>
+      <section className="mx-auto max-w-6xl px-5 pb-20 pt-16 text-center sm:px-8 lg:pb-24 lg:pt-24">
+        <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[hsl(var(--ink)/0.1)] bg-white px-3.5 py-2 text-xs font-medium text-[hsl(var(--ink-soft))]">
+          <span className="public-dot bg-[hsl(var(--coral))]" />
+          Design partner pricing · Gate-1 pilot
         </div>
+        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-3xl text-balance font-sans text-[clamp(2.75rem,5.5vw,4.25rem)] font-medium leading-[1.05] tracking-[-0.045em]">
+          A sharper marketing week,
+          <span className="block text-[hsl(var(--coral))]">without another dashboard to babysit.</span>
+        </h1>
+        <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
+          Start small, connect the accounts that matter, and get a useful weekly readout under your brand. Pick the
+          level of support that fits how you work.
+        </p>
+        <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
+          Gate 1 is about the first report: connect an ad account, then decide whether the weekly readout is useful.
+        </p>
 
-        <div className="mx-auto mt-12 max-w-6xl">
+        <div className="mx-auto mt-12 max-w-5xl text-left">
           <PricingTiers />
-          <p className="mt-5 text-center text-xs text-muted-foreground">
-            Planned monthly rates are shown for transparency. Gate-1 pilot access is free during beta, with no card required.
+          <p className="mt-5 text-center text-xs text-[hsl(var(--ink-soft))]">
+            Planned monthly rates are shown for transparency. Gate-1 pilot access is free during beta, with no card
+            required.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1440px] px-5 pb-24 sm:px-8 lg:px-12">
-        <div className="glass-panel relative overflow-hidden rounded-3xl p-7 sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-12">
-          <div className="absolute -right-24 -top-28 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+      <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
+        <div className="public-card relative overflow-hidden p-7 sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-12">
+          <div className="absolute -right-24 -top-28 h-64 w-64 rounded-full bg-[hsl(var(--mint)/0.18)] blur-3xl" aria-hidden="true" />
           <div className="relative max-w-2xl">
-            <div className="flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">
-              <span className="h-px w-6 bg-primary" /> Design Partner Program
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
+              <span className="h-px w-6 bg-[hsl(var(--coral))]" /> Design Partner Program
             </div>
-            <h2 className="mt-4 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="mt-4 font-sans text-2xl font-semibold tracking-tight sm:text-3xl">
               Founding pricing, direct founder access.
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              We are working with a small group so we can stay close to every team. In exchange for honest feedback, design partners get the
-              founding rates while the product gets sharper.
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
+              We are working with a small group so we can stay close to every team. In exchange for honest feedback,
+              design partners get the founding rates while the product gets sharper.
             </p>
           </div>
           <div className="relative mt-7 shrink-0 lg:mt-0">
-            <Button size="lg" className="h-12 w-full px-7 text-base sm:w-auto" asChild>
-              <Link href="/register?plan=growth">
-                Start the pilot <ArrowRight />
-              </Link>
-            </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground lg:text-right">Pilot signup starts with a fit check.</p>
+            <Link href="/register?plan=growth" className="btn-pill btn-pill-ink h-12 px-7 text-base">
+              Start the pilot <ArrowRight className="h-4 w-4" />
+            </Link>
+            <p className="mt-3 text-center text-xs text-[hsl(var(--ink-soft))] lg:text-right">
+              Pilot signup starts with a fit check.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1120px] px-5 pb-24 sm:px-8 lg:px-12" id="faq">
+      <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8" id="faq">
         <div className="grid gap-12 lg:grid-cols-[0.8fr,1.2fr] lg:gap-20">
           <div>
-            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">The useful details</p>
-            <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Questions worth asking.</h2>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
+              The useful details
+            </p>
+            <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">Questions worth asking.</h2>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
               A clear pilot is better than a polished promise. Here is what the first version actually includes.
             </p>
             <div className="mt-8 space-y-3">
-              <div className="glass-tile flex items-start gap-3 rounded-2xl p-4">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+              <div className="public-tile flex items-start gap-3 p-4">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--mint))]" strokeWidth={2.5} />
                 <p className="text-sm leading-relaxed">Read-only connections and approval before action.</p>
               </div>
-              <div className="glass-tile flex items-start gap-3 rounded-2xl p-4">
-                <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="public-tile flex items-start gap-3 p-4">
+                <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--ink))]" strokeWidth={2.5} />
                 <p className="text-sm leading-relaxed">Encrypted tokens, with your reporting under your brand.</p>
               </div>
-              <div className="glass-tile flex items-start gap-3 rounded-2xl p-4">
-                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+              <div className="public-tile flex items-start gap-3 p-4">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--coral))]" strokeWidth={2.5} />
                 <p className="text-sm leading-relaxed">Direct feedback loop while the pilot stays intentionally small.</p>
               </div>
             </div>
@@ -128,17 +136,25 @@ export default function PricingPage() {
 
           <div className="space-y-3">
             {FAQS.map((faq, index) => (
-              <details key={faq.question} className="glass-panel group rounded-2xl px-5 py-4 open:bg-[color:var(--glass-bg-strong)]">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-base font-semibold tracking-tight [&::-webkit-details-marker]:hidden">
+              <details
+                key={faq.question}
+                className="public-card group rounded-[20px] px-5 py-4 open:bg-[hsl(var(--cream))]"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-sans text-base font-semibold tracking-tight [&::-webkit-details-marker]:hidden">
                   <span>
-                    <span className="mr-3 font-mono text-xs font-medium text-primary">0{index + 1}</span>
+                    <span className="mr-3 text-xs font-semibold text-[hsl(var(--coral))]">0{index + 1}</span>
                     {faq.question}
                   </span>
-                  <span className="text-xl font-normal text-muted-foreground transition-transform group-open:rotate-45" aria-hidden="true">
+                  <span
+                    className="text-xl font-normal text-[hsl(var(--ink-soft))] transition-transform group-open:rotate-45"
+                    aria-hidden="true"
+                  >
                     +
                   </span>
                 </summary>
-                <p className="max-w-2xl pb-1 pl-8 pt-3 text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
+                <p className="max-w-2xl pb-1 pl-8 pt-3 text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
+                  {faq.answer}
+                </p>
               </details>
             ))}
           </div>
@@ -146,20 +162,22 @@ export default function PricingPage() {
       </section>
 
       <section className="mx-auto max-w-3xl px-5 pb-28 text-center sm:px-8">
-        <Check className="mx-auto h-6 w-6 text-emerald-500" />
-        <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Start with the signal, not the software.</h2>
-        <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--ink))] text-[hsl(var(--mint))]">
+          <Check className="h-6 w-6" strokeWidth={2.5} />
+        </span>
+        <h2 className="mt-5 font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
+          Start with the signal, not the software.
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-[hsl(var(--ink-soft))]">
           Choose a plan, connect what you need, and let the first weekly report show you where GrowthCrew is useful.
         </p>
-        <Button size="lg" className="mt-8 h-12 px-7 text-base" asChild>
-          <Link href="/register?plan=growth">
-            Start the pilot <ArrowRight />
-          </Link>
-        </Button>
+        <Link href="/register?plan=growth" className="btn-pill btn-pill-ink mx-auto mt-8 h-12 px-7 text-base">
+          Start the pilot <ArrowRight className="h-4 w-4" />
+        </Link>
       </section>
 
-      <footer className="glass-divider-t">
-        <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-muted-foreground sm:flex-row sm:px-8 lg:px-12">
+      <footer className="border-t border-[hsl(var(--ink)/0.08)]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-[hsl(var(--ink-soft))] sm:flex-row sm:px-8">
           <BrandMark size="sm" />
           <span>Built for people who would rather run their business than babysit their ads.</span>
         </div>
