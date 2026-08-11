@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BrandMark } from '@/components/brand-mark';
@@ -32,52 +31,50 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
-      <Card className="glass-panel animate-fade-up w-full max-w-sm rounded-[var(--glass-radius-lg)]">
-        <CardHeader className="text-center">
-          <div className="mb-2 flex justify-center">
-            <BrandMark layout="mark" size="lg" ariaLabel="GrowthCrew logo" />
+    <div className="public-shell flex min-h-screen items-center justify-center p-4">
+      <div className="public-card animate-fade-up w-full max-w-sm rounded-[var(--public-radius-lg)] p-8">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <BrandMark layout="mark" size="lg" ariaLabel="GrowthCrew logo" />
+          <h1 className="mt-5 font-sans text-xl font-semibold tracking-tight">Welcome back</h1>
+          <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Sign in to talk to your marketing team</p>
+        </div>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="public-input h-11"
+            />
           </div>
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Sign in to talk to your marketing team</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={busy}>
-              {busy ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            New here?{' '}
-            <Link href="/register" className="text-foreground underline underline-offset-4">
-              Create an account
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="public-input h-11"
+            />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="btn-pill btn-pill-ink h-11 w-full" disabled={busy}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+        <p className="mt-5 text-center text-sm text-[hsl(var(--ink-soft))]">
+          New here?{' '}
+          <Link href="/register" className="font-medium text-[hsl(var(--ink))] underline underline-offset-4">
+            Create an account
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
