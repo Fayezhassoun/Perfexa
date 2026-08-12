@@ -35,6 +35,7 @@ export { approveProposal, getOrCreateAgent, type ApproveProposalResult } from '.
 export { runSpecialistAgent, type SpecialistResult } from './specialists.js';
 export { createAgentContext, createAgentContextWithOrgLLM } from './context.js';
 export * as services from './services/index.js';
+export { handleGeoCron } from './cron.js';
 export { leadsToCsv } from './services/leads.js';
 export type { LeadField } from './services/leads.js';
 export type { SendMessageInput, SendMessageResult, ConversationSummary } from './services/conversations.js';
