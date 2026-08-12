@@ -69,7 +69,7 @@ Packages are consumed as TS source (no build step): each package.json has
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | empty | Google Ads API developer token — required to connect google_ads live |
 | `META_APP_ID` / `META_APP_SECRET` | empty | Meta app credentials — required to connect meta live |
 | `TIKTOK_APP_ID` / `TIKTOK_APP_SECRET` | empty | TikTok Marketing API app — required to connect tiktok live |
-| `CRON_SECRET` | empty | Bearer secret for `/api/cron/*` (weekly report); empty = cron disabled |
+| `CRON_SECRET` | empty | Bearer secret for `/api/cron/*` (weekly report, sync, geo); empty = cron disabled |
 | `ENCRYPTION_KEY` | `000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f` | 64 hex chars, AES-256-GCM for tokens |
 | `LLM_PROVIDER` | `mock` | `mock`\|`openai`\|`anthropic` |
 | `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` | empty | live LLM; `OPENAI_API_KEY` also enables the GEO ChatGPT engine (Responses API web_search); empty = engine untracked |
@@ -242,6 +242,12 @@ live in web). Service functions take explicit args, return plain objects.
 - `api/webhooks/leads/[platform]/route.ts` — POST receiver for platform lead ads (mock-verified),
   inserts lead with `sourceCampaignId` when resolvable.
 - `api/cron/weekly-report/route.ts` — bearer `CRON_SECRET`, phase-3 stub returning 501.
+- `api/cron/sync/route.ts` — bearer `CRON_SECRET`; runs `services.sync.syncAllOrgs` (live campaigns →
+  `campaigns_mirror`) in the web process. 401 without the secret; 207 when any platform errored.
+- `api/cron/geo/route.ts` — bearer `CRON_SECRET`; runs `services.seoAudit.runGeoScansAndSeoAuditsForAllOrgs`
+  (the worker `geo-scan` weekly hook) in the web process, so the weekly GEO + SEO pass fires even on
+  hosts where the worker never starts. 401 without the secret. Honesty rail unchanged: real engines
+  only, orgs without prompts/keys are skipped, never simulated.
 - `api/geo/prompts/route.ts` — GET/POST/PATCH/DELETE the tracked prompt set (org session). Cap 60 active.
 - `api/geo/scan/route.ts` — POST manual REAL scan (1 per 6h per org; `?force=1` bypasses the limit,
   never the budget guardrail). 400 no prompts / no engines, 402 over budget, 409 already running.
@@ -518,7 +524,8 @@ Hono `/health` + BullMQ queues on REDIS_URL:
   stores `geo_results`, metered into the same `llm_usage` budget as orchestrator turns; orgs
   without prompts/keys are skipped, never simulated), then a technical SEO audit per org with a
   site URL (deterministic, $0, no LLM). Not registered when `GEO_ENABLED=false`. Manual
-  triggers: `POST /api/geo/scan`, `POST /api/seo/audit`.
+  triggers: `POST /api/geo/scan`, `POST /api/seo/audit`. Same runner backs `POST /api/cron/geo`
+  (web process — the weekly pass fires there even when the worker app is not running).
 Worker must not be required for web to function; web has an inline "simulate" fallback
 button on dashboard (dev only) that calls the same service directly.
 
