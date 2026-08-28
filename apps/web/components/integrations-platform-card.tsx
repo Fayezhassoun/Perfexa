@@ -113,16 +113,61 @@ function PlatformIcon({ platform }: { platform: IntegrationPlatform }) {
   );
 }
 
-function ConnectionStatus({ integration }: { integration: IntegrationRecord }) {
+/**
+ * The truthful state of one integration, derived only from the server-provided
+ * record. Live connections are supported by the product — `setup_needed` means
+ * this deployment is missing the platform's OAuth app credentials, not that the
+ * feature is "coming soon".
+ */
+export type IntegrationConnectionState =
+  | 'setup_needed' // OAuth not configured on this deployment; sandbox still works
+  | 'ready_to_connect' // OAuth configured; no account connected yet
+  | 'connected_sandbox' // connected, still in sandbox mode
+  | 'connected_live' // connected and live
+  | 'connection_error'; // connected row exists but the connection needs attention
+
+export function integrationConnectionState(integration: IntegrationRecord): IntegrationConnectionState {
   if (!integration.connected) {
-    return <Badge variant="secondary">Not connected</Badge>;
+    return integration.oauthConfigured ? 'ready_to_connect' : 'setup_needed';
   }
+  if (integration.status !== 'connected') return 'connection_error';
+  return integration.mode === 'live' ? 'connected_live' : 'connected_sandbox';
+}
 
-  if (integration.mode === 'sandbox') {
-    return <Badge variant="warning">Sandbox</Badge>;
+/** The next actionable step for the operator, one per connection state. */
+export function integrationNextStep(integration: IntegrationRecord): string {
+  const config = PLATFORM_CONFIG[integration.platform];
+  switch (integrationConnectionState(integration)) {
+    case 'setup_needed':
+      return `Sandbox mode works now. A live ${config.name} connection needs an operator to add the OAuth app credentials to this deployment first.`;
+    case 'ready_to_connect':
+      return `Next step: connect your ${config.name} account with read-only OAuth — it starts in sandbox until you approve live mode.`;
+    case 'connected_sandbox':
+      return integration.oauthConfigured
+        ? 'Next step: review the sandbox data, then Go Live when you are ready — you will type LIVE to confirm.'
+        : `Sandbox mode works now. Going live needs an operator to add the ${config.name} OAuth app credentials to this deployment first.`;
+    case 'connected_live':
+      return 'Live mode is on — GrowthCrew reads real account data. Campaign changes still need your explicit approval.';
+    case 'connection_error':
+      return integration.connectUrl
+        ? 'This connection needs attention — reconnect to restore syncing.'
+        : `This connection needs attention — an operator must restore the ${config.name} OAuth app credentials before you can reconnect.`;
   }
+}
 
-  return <Badge variant="success">Connected</Badge>;
+function ConnectionStatus({ integration }: { integration: IntegrationRecord }) {
+  switch (integrationConnectionState(integration)) {
+    case 'setup_needed':
+      return <Badge variant="secondary">Setup needed</Badge>;
+    case 'ready_to_connect':
+      return <Badge variant="outline">Ready to connect</Badge>;
+    case 'connection_error':
+      return <Badge variant="destructive">Needs reconnect</Badge>;
+    case 'connected_sandbox':
+      return <Badge variant="warning">Sandbox</Badge>;
+    case 'connected_live':
+      return <Badge variant="success">Live</Badge>;
+  }
 }
 
 function HealthIndicator({ integration }: { integration: IntegrationRecord }) {
@@ -156,6 +201,7 @@ export function IntegrationPlatformCard({
   setModePending: boolean;
 }) {
   const config = PLATFORM_CONFIG[integration.platform];
+  const state = integrationConnectionState(integration);
 
   return (
     <Card className="group relative min-w-0 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--glass-shadow-hover)]">
@@ -194,25 +240,27 @@ export function IntegrationPlatformCard({
           {!integration.oauthConfigured && (
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2.5 text-xs leading-5 text-amber-700 dark:text-amber-300">
               <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span>Live connection coming soon — sandbox mode available now.</span>
+              <span>
+                Live {config.name} connection is supported, but it is not configured on this deployment yet — an
+                operator needs to add the {config.name} OAuth app credentials. Sandbox mode is fully available now.
+              </span>
             </div>
           )}
 
           <div className="flex flex-col gap-2 border-t border-[color:var(--glass-divider)] pt-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 text-xs text-muted-foreground">
-              {integration.connected ? (
+              {integration.connected && (
                 <span className="flex min-w-0 items-center gap-1.5">
                   <span className="truncate">{integration.externalAccountId ?? 'Connected account'}</span>
                   <span aria-hidden="true">·</span>
                   <span className="shrink-0">{integration.mode === 'live' ? 'Live mode' : 'Sandbox mode'}</span>
                 </span>
-              ) : (
-                <span>Starts in a safe sandbox</span>
               )}
+              <p className={cn('leading-5', integration.connected && 'mt-1')}>{integrationNextStep(integration)}</p>
             </div>
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              {!integration.connected && integration.oauthConfigured && integration.connectUrl && (
+              {state === 'ready_to_connect' && integration.connectUrl && (
                 <Button variant="default" size="sm" asChild className="w-full sm:w-auto">
                   <a href={integration.connectUrl}>
                     Connect account
@@ -233,7 +281,16 @@ export function IntegrationPlatformCard({
                 </Button>
               )}
 
-              {integration.connected && integration.mode === 'sandbox' && (
+              {state === 'connection_error' && integration.connectUrl && (
+                <Button variant="default" size="sm" asChild className="w-full sm:w-auto">
+                  <a href={integration.connectUrl}>
+                    Reconnect
+                    <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                </Button>
+              )}
+
+              {state === 'connected_sandbox' && integration.oauthConfigured && (
                 <Button
                   variant="default"
                   size="sm"
@@ -245,7 +302,7 @@ export function IntegrationPlatformCard({
                 </Button>
               )}
 
-              {integration.connected && integration.mode === 'live' && (
+              {(state === 'connected_live' || (state === 'connection_error' && integration.mode === 'live')) && (
                 <Button
                   variant="outline"
                   size="sm"

@@ -182,8 +182,8 @@ function OAuthNotice() {
   if (connected) {
     return (
       <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
-        {PLATFORM_LABELS[connected] ?? connected} connected — it&apos;s in sandbox mode. Switch to live below when
-        you&apos;re ready (you&apos;ll type LIVE to confirm).
+        {PLATFORM_LABELS[connected] ?? connected} connected — the card below shows the connected account, and it&apos;s
+        in sandbox mode. Switch to live when you&apos;re ready (you&apos;ll type LIVE to confirm).
       </p>
     );
   }
@@ -238,7 +238,11 @@ function IntegrationHealthRow({
   const expiring = Boolean(health?.needsReconnect && tokenExpiresAt && tokenExpiresAt.getTime() > Date.now());
   const tone =
     !health || loading || error ? 'neutral' : health.needsReconnect ? (expiring ? 'warning' : 'danger') : 'healthy';
-  const reconnectUrl = integration.connectUrl ?? `/api/integrations/${integration.platform}/connect`;
+  // Reconnect goes through the signed OAuth connect route. When this
+  // deployment has no OAuth credentials for the platform there is no working
+  // route — the card-level setup message is the actionable path instead, so
+  // don't render a button that can only bounce back with an error.
+  const reconnectUrl = integration.connectUrl;
   const label = loading
     ? 'Checking connection health…'
     : error
@@ -282,7 +286,7 @@ function IntegrationHealthRow({
         <span className="basis-full leading-5 text-current/80">{health.warning}</span>
       )}
 
-      {health?.needsReconnect && (
+      {health?.needsReconnect && reconnectUrl && (
         <Button
           variant="outline"
           size="sm"
