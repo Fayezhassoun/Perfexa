@@ -86,7 +86,7 @@ export async function mirrorCampaigns(
       const metrics: MirrorMetrics = { ...c.metrics, history: history.slice(-90) };
       await db
         .update(campaignsMirror)
-        .set({ name: c.name, status: c.status, budgetDailyCents: c.budgetDailyCents, metrics })
+        .set({ name: c.name, status: c.status, budgetDailyCents: c.budgetDailyCents, metrics, mode })
         .where(eq(campaignsMirror.id, existing.id));
     }
   }

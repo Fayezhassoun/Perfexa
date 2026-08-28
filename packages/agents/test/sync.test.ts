@@ -120,6 +120,12 @@ describe('syncOrgPlatform', () => {
     expect(metrics.impressions).toBe(5);
     expect(metrics.spendCents).toBe(100);
 
+    const [account] = await db
+      .select({ updatedAt: connectedAccounts.updatedAt })
+      .from(connectedAccounts)
+      .where(eq(connectedAccounts.orgId, orgId));
+    expect(account?.updatedAt).toBeInstanceOf(Date);
+
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, orgId));
     expect(audits.some((a) => a.action === 'sync.platform')).toBe(true);
   });
@@ -146,6 +152,25 @@ describe('syncOrgPlatform', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]!.status).toBe('paused');
     expect((rows[0]!.metrics as { impressions: number }).impressions).toBe(9);
+  });
+
+  it('promotes a matching sandbox mirror row to live during sync', async () => {
+    const { ctx, orgId } = await freshOrg();
+    await insertLiveAccount(orgId, 'google_ads', 'at-live');
+    await db.insert(campaignsMirror).values({
+      orgId,
+      platform: 'google_ads',
+      externalId: '9',
+      name: 'Sandbox copy',
+      mode: 'sandbox',
+      metrics: { impressions: 0, clicks: 0, spendCents: 0, conversions: 0 },
+    });
+
+    await syncOrgPlatform(ctx, 'google_ads', { fetchImpl: fakeFetch({ 'googleAds:searchStream': GOOGLE_CAMPAIGNS }) });
+
+    const rows = await db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, orgId));
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ externalId: '9', mode: 'live', name: 'Live Campaign' });
   });
 });
 

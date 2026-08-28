@@ -24,6 +24,8 @@ import { PageShell, PageHeader } from '@/components/page-shell';
 import { ProofFlow, type ProofFlowHandle } from '@/components/proof-flow';
 import { ActivationCard } from '@/components/activation-card';
 import { DemoDataBanner } from '@/components/demo-data-banner';
+import { DataSourceNotice } from '@/components/data-source-notice';
+import { CustomerReadinessChecklist } from '@/components/customer-readiness-checklist';
 import { cn } from '@/lib/utils';
 
 function dollars(cents: number): string {
@@ -113,6 +115,14 @@ export default function DashboardPage() {
 
       {/* Demo-data mode: simulated KPIs must always carry the label */}
       {overview.data?.demoData && <DemoDataBanner />}
+      {overview.data && !overview.data.demoData && (
+        <DataSourceNotice
+          source={overview.data.dataSource === 'demo' ? 'none' : overview.data.dataSource}
+          actionHref="/settings"
+          actionLabel="Review connections"
+        />
+      )}
+      <CustomerReadinessChecklist />
 
       {/* Guided proof moment — real anomaly walkthrough, dismissible per org */}
       <ProofFlow ref={proofFlowRef} />

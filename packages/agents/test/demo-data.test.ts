@@ -64,6 +64,7 @@ describe('dashboard KPIs', () => {
     const result = await overview(org.ctx);
     expect(result.demoData).toBe(false);
     expect(result.campaigns).toBe(0);
+    expect(result.dataSource).toBe('none');
     expect(result.totals.spendCents).toBe(0);
     expect(result.totals.impressions).toBe(0);
     expect(result.series).toEqual([]);
@@ -75,6 +76,7 @@ describe('dashboard KPIs', () => {
     const totals = demoWeeklyTotals();
 
     expect(result.demoData).toBe(true);
+    expect(result.dataSource).toBe('demo');
     expect(result.campaigns).toBe(DEMO_CAMPAIGNS.length);
     expect(result.totals.spendCents).toBe(totals.spendCents);
     expect(result.totals.impressions).toBe(totals.impressions);
@@ -105,6 +107,7 @@ describe('in-app weekly report (/reports)', () => {
     const org = await freshOrg({ now: NOW });
     const { content } = await generateWeeklyReport(org.ctx);
     expect(content.demoData).toBeFalsy();
+    expect(content.dataSource).toBe('none');
     expect(content.markdown).not.toContain(DEMO_DATA_LABEL);
     expect(content.totals.spendCents).toBe(0);
   });
@@ -115,6 +118,7 @@ describe('in-app weekly report (/reports)', () => {
     const totals = demoWeeklyTotals();
 
     expect(content.demoData).toBe(true);
+    expect(content.dataSource).toBe('demo');
     expect(content.totals.spendCents).toBe(totals.spendCents);
     expect(content.totals.conversions).toBe(totals.conversions);
     expect(content.alertCount).toBe(1);
@@ -134,6 +138,7 @@ describe('emailed weekly report (cron path)', () => {
     const org = await freshOrg({ now: NOW });
     const { content } = await buildWeeklyReport(org.ctx);
     expect(content.demoData).toBeUndefined();
+    expect(content.dataSource).toBe('none');
     expect(content.totals.spendCents).toBe(0);
   });
 
@@ -143,6 +148,7 @@ describe('emailed weekly report (cron path)', () => {
     const totals = demoWeeklyTotals();
 
     expect(content.demoData).toBe(true);
+    expect(content.dataSource).toBe('demo');
     expect(content.totals.spendCents).toBe(totals.spendCents);
     expect(content.totals.impressions).toBe(totals.impressions);
     expect(content.summary).toContain(`$${(totals.spendCents / 100).toFixed(2)}`);

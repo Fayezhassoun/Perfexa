@@ -11,6 +11,7 @@ export const authRouter = router({
         name: z.string().min(1),
         email: z.string().email(),
         password: z.string().min(8),
+        plan: z.enum(['starter', 'growth', 'agency']).optional(),
       }),
     )
     .mutation(({ input }) => registerUser(input)),

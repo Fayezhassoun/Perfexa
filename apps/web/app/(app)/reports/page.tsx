@@ -10,6 +10,7 @@ import {
   Gauge,
   Inbox,
   MousePointerClick,
+  Printer,
   RefreshCw,
   Sparkles,
   Target,
@@ -19,6 +20,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageShell, PageHeader } from '@/components/page-shell';
 import { DemoDataBanner } from '@/components/demo-data-banner';
+import { DataSourceNotice } from '@/components/data-source-notice';
+import { ShareReportButton } from '@/components/share-report-button';
 import { cn } from '@/lib/utils';
 import { Markdown } from './markdown';
 
@@ -36,6 +39,7 @@ interface ReportContent {
   source: 'llm' | 'deterministic';
   generatedAt: string;
   demoData?: boolean;
+  dataSource?: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
 }
 
 interface WeeklyReportRow {
@@ -69,6 +73,8 @@ export default function ReportsPage() {
   const utils = trpc.useUtils();
 
   const list = trpc.reports.weekly.list.useQuery();
+  const me = trpc.auth.me.useQuery();
+  const brand = trpc.settings.brand.get.useQuery();
   const generate = trpc.reports.weekly.generate.useMutation({
     onSuccess: (result) => {
       setSelectedId(result.report.id);
@@ -86,6 +92,14 @@ export default function ReportsPage() {
 
   const selected = rows.find((r) => r.id === selectedId) ?? rows[0] ?? null;
   const content = selected?.content;
+  const brandProfile = (brand.data ?? {}) as { companyName?: unknown; brandColors?: unknown };
+  const shareBrandName = typeof brandProfile.companyName === 'string' ? brandProfile.companyName : me.data?.org?.name ?? 'GrowthCrew';
+  const candidateBrandColor = Array.isArray(brandProfile.brandColors) && typeof brandProfile.brandColors[0] === 'string'
+    ? brandProfile.brandColors[0]
+    : undefined;
+  const shareBrandColor = candidateBrandColor && /^#[\da-f]{6}$/i.test(candidateBrandColor)
+    ? candidateBrandColor
+    : undefined;
 
   const stats = content
     ? [
@@ -103,12 +117,28 @@ export default function ReportsPage() {
         title="Weekly Reports"
         description="Your week in review — wins, losses, and what to do next. Generated from your live campaign, alert, and creative-health data, then narrated by AI."
         actions={
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending} data-testid="generate-report">
-            {generate.isPending ? <RefreshCw className="animate-spin" /> : <Sparkles />}
-            {generate.isPending ? 'Generating…' : 'Generate this week'}
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button variant="outline" onClick={() => window.print()} disabled={!selected} data-testid="print-report">
+              <Printer /> Print / save PDF
+            </Button>
+            <Button onClick={() => generate.mutate()} disabled={generate.isPending} data-testid="generate-report">
+              {generate.isPending ? <RefreshCw className="animate-spin" /> : <Sparkles />}
+              {generate.isPending ? 'Generating…' : 'Generate this week'}
+            </Button>
+          </div>
         }
       />
+
+      {generate.error && (
+        <p className="rounded-xl border border-destructive/35 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+          We couldn&apos;t generate this report. {generate.error.message}
+        </p>
+      )}
+      {list.error && (
+        <p className="rounded-xl border border-destructive/35 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+          We couldn&apos;t load your reports. {list.error.message}
+        </p>
+      )}
 
       {list.isLoading ? (
         <div className="glass-panel flex items-center justify-center gap-3 p-12 text-muted-foreground">
@@ -183,19 +213,31 @@ export default function ReportsPage() {
             <div className="space-y-4">
               {/* Demo-data mode: simulated numbers must always carry the label */}
               {content.demoData && <DemoDataBanner />}
+              {!content.demoData && content.dataSource && (
+                <DataSourceNotice
+                  source={content.dataSource === 'demo' ? 'none' : content.dataSource}
+                  actionHref={content.dataSource === 'none' ? '/settings' : undefined}
+                  actionLabel={content.dataSource === 'none' ? 'Connect an account' : undefined}
+                />
+              )}
               <div className="glass-panel space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-4 w-4 text-primary" />
                     <h2 className="font-display text-lg font-semibold tracking-tight">{weekLabel(selected.weekStart)}</h2>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     <Badge variant={content.source === 'llm' ? 'default' : 'secondary'}>
                       <Sparkles className="mr-1 h-3 w-3" />
                       {content.source === 'llm' ? 'AI narrated' : 'Deterministic'}
                     </Badge>
                     <Badge variant="outline">{content.periodLabel}</Badge>
                     <span className="text-xs text-muted-foreground">generated {timeAgo(content.generatedAt)}</span>
+                    <ShareReportButton
+                      reportId={selected.id}
+                      brandName={shareBrandName}
+                      brandColor={shareBrandColor}
+                    />
                   </div>
                 </div>
 

@@ -60,6 +60,10 @@ export async function syncOrgPlatform(
 
   const campaigns = await createLiveAdapter(platform, live).listCampaigns();
   await mirrorCampaigns(ctx.db, ctx.orgId, platform, { campaigns }, 'live');
+  await ctx.db
+    .update(connectedAccounts)
+    .set({ status: 'connected', updatedAt: ctx.now ?? new Date() })
+    .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.platform, platform)));
 
   await ctx.audit.log({
     actorType: ctx.userId ? 'user' : 'system',

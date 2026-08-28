@@ -194,9 +194,10 @@ export function demoBurningCampaigns(): DemoCampaignSeed[] {
  * Pseudo campaigns_mirror rows (only the fields the weekly-report
  * aggregation reads) so the email-path aggregation runs unchanged.
  */
-export function demoCampaignRows(now: Date): { platform: string; metrics: Record<string, unknown> }[] {
+export function demoCampaignRows(now: Date): { platform: string; mode: 'sandbox'; metrics: Record<string, unknown> }[] {
   return DEMO_CAMPAIGNS.map((c) => ({
     platform: c.platform,
+    mode: 'sandbox' as const,
     metrics: {
       history: demoCampaignHistory(c, now),
       spendCents: c.spendCents,

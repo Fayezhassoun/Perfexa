@@ -51,6 +51,15 @@ export interface OverviewResult {
   campaigns: number;
   /** True when the numbers are simulated (demo-data mode) and must be labeled as such. */
   demoData: boolean;
+  /** Provenance of rows in campaigns_mirror; never infer live data from non-empty numbers alone. */
+  dataSource: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
+}
+
+function dataSourceForRows(rows: Array<{ mode: string | null }>): OverviewResult['dataSource'] {
+  const modes = new Set(rows.map((row) => (row.mode === 'live' ? 'live' : 'sandbox')));
+  if (modes.size === 0) return 'none';
+  if (modes.size > 1) return 'mixed';
+  return modes.has('live') ? 'live' : 'sandbox';
 }
 
 /** Deterministic simulated KPIs for demo-data orgs (see ./demo-data.ts). */
@@ -77,7 +86,14 @@ function demoOverview(now: Date, range: { from?: string; to?: string } | undefin
     .map((p) => ({ date: p.date, spendCents: p.spendCents, clicks: p.clicks, conversions: p.conversions }));
   const byPlatformDerived: Record<string, OverviewTotals> = {};
   for (const [p, t] of Object.entries(byPlatform)) byPlatformDerived[p] = derive(t, avgValue);
-  return { totals: derive(totals, avgValue), byPlatform: byPlatformDerived, series, campaigns: DEMO_CAMPAIGNS.length, demoData: true };
+  return {
+    totals: derive(totals, avgValue),
+    byPlatform: byPlatformDerived,
+    series,
+    campaigns: DEMO_CAMPAIGNS.length,
+    demoData: true,
+    dataSource: 'demo',
+  };
 }
 
 export async function overview(ctx: AgentContext, range?: { from?: string; to?: string }): Promise<OverviewResult> {
@@ -137,7 +153,14 @@ export async function overview(ctx: AgentContext, range?: { from?: string; to?: 
   const byPlatformDerived: Record<string, OverviewTotals> = {};
   for (const [p, t] of Object.entries(byPlatform)) byPlatformDerived[p] = derive(t, avgValue);
 
-  return { totals: derive(totals, avgValue), byPlatform: byPlatformDerived, series, campaigns: rows.length, demoData: false };
+  return {
+    totals: derive(totals, avgValue),
+    byPlatform: byPlatformDerived,
+    series,
+    campaigns: rows.length,
+    demoData: false,
+    dataSource: dataSourceForRows(rows),
+  };
 }
 
 export interface ActivityItem {

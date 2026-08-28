@@ -77,7 +77,9 @@ describe('buildWeeklyReport', () => {
   it('handles an org with no campaigns', async () => {
     const { ctx } = await freshOrg();
     const { content } = await buildWeeklyReport(ctx, NOW);
-    expect(content.summary).toBe('No ad spend this week.');
+    expect(content.summary).toContain('No campaign data is available yet');
+    expect(content.summary).toContain('Connect a read-only ad account');
+    expect(content.dataSource).toBe('none');
     expect(content.highlights).toEqual(['A quiet week — nothing needed your attention.']);
   });
 

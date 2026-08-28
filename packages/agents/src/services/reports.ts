@@ -145,7 +145,9 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
 
   const content = {
     summary:
-      totals.spendCents > 0
+      !demo && campaigns.length === 0
+        ? 'No campaign data is available yet. Connect a read-only ad account and run a live sync before treating this report as customer evidence.'
+        : totals.spendCents > 0
         ? `This week you spent $${(totals.spendCents / 100).toFixed(2)} for ${totals.conversions} conversion${totals.conversions === 1 ? '' : 's'}.`
         : 'No ad spend this week.',
     highlights,
@@ -154,6 +156,7 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
     periodLabel: `${periodStart} → ${periodEnd}`,
     // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
     demoData: demo ? true : undefined,
+    dataSource: demo ? 'demo' : dataSourceForCampaigns(campaigns),
   };
 
   // LLM narrative (publication-grade): live providers rewrite the summary in
@@ -309,6 +312,14 @@ export interface WeekAggregation {
   alerts: { total: number; critical: number; warning: number; notable: string[] };
   fatiguedCreatives: number;
   fatigueExamples: string[];
+  dataSource: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
+}
+
+function dataSourceForCampaigns(campaigns: Array<{ mode?: string | null }>): WeekAggregation['dataSource'] {
+  const modes = new Set(campaigns.map((campaign) => (campaign.mode === 'live' ? 'live' : 'sandbox')));
+  if (modes.size === 0) return 'none';
+  if (modes.size > 1) return 'mixed';
+  return modes.has('live') ? 'live' : 'sandbox';
 }
 
 /**
@@ -342,6 +353,7 @@ function demoWeekAggregation(weekStart: Date, now: Date): WeekAggregation {
     },
     fatiguedCreatives: 0,
     fatigueExamples: [],
+    dataSource: 'demo',
   };
 }
 
@@ -439,6 +451,7 @@ async function aggregateWeek(ctx: AgentContext, weekStart: Date, now: Date): Pro
     alerts: alertSummary,
     fatiguedCreatives,
     fatigueExamples,
+    dataSource: dataSourceForCampaigns(campaigns),
   };
 }
 
@@ -763,6 +776,7 @@ export async function generateWeeklyReport(
     generatedAt: now.toISOString(),
     // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
     demoData: demo ? true : undefined,
+    dataSource: agg.dataSource,
   };
 
   // Upsert keyed to (org, weekStart) so regenerating refreshes rather than
@@ -819,4 +833,3 @@ export async function getReport(ctx: AgentContext, id: string) {
   if (!report) throw new Error('Report not found');
   return report;
 }
-

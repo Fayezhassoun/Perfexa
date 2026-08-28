@@ -60,6 +60,8 @@ export interface WeeklyReportContent {
   periodLabel?: string;
   /** True when the numbers are simulated — the email must carry the demo label. */
   demoData?: boolean;
+  /** Provenance of the source rows used to build the report. */
+  dataSource?: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
 }
 
 function dollars(cents: number): string {
@@ -78,10 +80,17 @@ export function renderWeeklyReportEmail(orgName: string, content: WeeklyReportCo
   const demoBanner = content.demoData
     ? `<p style="background:#fff7ed;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;color:#92400e;font-size:13px;margin:12px 0"><strong>${DEMO_DATA_LABEL}</strong></p>`
     : '';
+  const sourceNotice =
+    !content.demoData && content.dataSource === 'none'
+      ? '<p style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;color:#334155;font-size:13px;margin:12px 0"><strong>Setup needed:</strong> no campaign data has been synced yet. Connect a read-only ad account and run a live sync before treating this report as customer evidence.</p>'
+      : !content.demoData && (content.dataSource === 'sandbox' || content.dataSource === 'mixed')
+        ? '<p style="background:#fff7ed;border:1px solid #f59e0b;border-radius:8px;padding:10px 12px;color:#92400e;font-size:13px;margin:12px 0"><strong>Sandbox data:</strong> this report is for testing and is not customer evidence.</p>'
+        : '';
   return `<!doctype html>
 <html><body style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
   <h1 style="font-size:20px">Your week at ${orgName}</h1>
   ${demoBanner}
+  ${sourceNotice}
   <p style="color:#444">${content.summary}</p>
   ${t ? `<table style="border-collapse:collapse;margin:12px 0">${rows}</table>` : ''}
   ${content.highlights.length ? `<h2 style="font-size:15px;margin-top:20px">Highlights</h2><ul style="padding-left:18px">${highlights}</ul>` : ''}

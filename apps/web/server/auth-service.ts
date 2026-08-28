@@ -10,6 +10,7 @@ export interface RegisterInput {
   name: string;
   email: string;
   password: string;
+  plan?: 'starter' | 'growth' | 'agency';
 }
 
 export async function registerUser(input: RegisterInput): Promise<{ id: string; email: string | null; name: string | null }> {
@@ -32,7 +33,7 @@ export async function registerUser(input: RegisterInput): Promise<{ id: string; 
       name: `${input.name}'s business`,
       onboardingStep: 'welcome',
       monthlyBudgetCeilingCents: 50000,
-      settings: {},
+      settings: { plan: input.plan ?? 'starter' },
     })
     .returning({ id: organizations.id });
 

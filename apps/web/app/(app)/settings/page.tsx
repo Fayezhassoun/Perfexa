@@ -5,6 +5,7 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { RefreshCw } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -318,12 +319,31 @@ function IntegrationsTab() {
   });
   const [confirming, setConfirming] = useState<IntegrationPlatform | null>(null);
   const [confirmText, setConfirmText] = useState('');
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const syncNow = trpc.settings.syncNow.useMutation({
+    onSuccess: (result) => {
+      void utils.settings.invalidate();
+      void utils.dashboard.invalidate();
+      void utils.reports.invalidate();
+      const failed = result.filter((row) => row.error);
+      const synced = result.reduce((total, row) => total + row.synced, 0);
+      setSyncMessage(
+        failed.length
+          ? `${synced} campaign${synced === 1 ? '' : 's'} refreshed. ${failed.length} platform${failed.length === 1 ? '' : 's'} need attention.`
+          : `${synced} campaign${synced === 1 ? '' : 's'} refreshed from live accounts.`,
+      );
+    },
+    onError: (error) => setSyncMessage(error.message),
+  });
 
   const rows = (integrations.data ?? []) as IntegrationRecord[];
   const healthByPlatform = new Map(
     ((connectionHealth.data ?? []) as ConnectionHealthRecord[]).map((health) => [health.platform, health]),
   );
   const connectedCount = rows.filter((integration) => integration.connected).length;
+  const liveConnected = rows.some(
+    (integration) => integration.connected && integration.status === 'connected' && integration.mode === 'live',
+  );
 
   if (integrations.isLoading) {
     return (
@@ -358,10 +378,24 @@ function IntegrationsTab() {
             Start safely in sandbox mode, then move an account live only when you&apos;re ready. Each connection keeps your reporting and decisions grounded in the data that matters.
           </p>
         </div>
-        <Badge variant="outline" className="w-fit shrink-0 px-3 py-1.5">
-          {connectedCount} of {rows.length} connected
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="w-fit shrink-0 px-3 py-1.5">
+            {connectedCount} of {rows.length} connected
+          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!liveConnected || syncNow.isPending}
+            title={liveConnected ? 'Refresh campaigns from connected live accounts' : 'Connect and switch an account to live first'}
+            onClick={() => syncNow.mutate({})}
+          >
+            <RefreshCw className={syncNow.isPending ? 'animate-spin' : ''} />
+            {syncNow.isPending ? 'Syncing…' : 'Sync now'}
+          </Button>
+        </div>
       </div>
+
+      {syncMessage && <p className="text-sm text-muted-foreground" role="status">{syncMessage}</p>}
 
       {connect.error && (
         <p className="rounded-xl border border-destructive/35 bg-destructive/5 p-3 text-sm text-destructive" role="alert">

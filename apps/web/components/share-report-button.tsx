@@ -19,15 +19,15 @@ export function ShareReportButton({
   onUrlCreated,
 }: ShareReportButtonProps) {
   const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   const share = trpc.share.create.useMutation({
     onSuccess: ({ url }) => {
       onUrlCreated?.(url);
       void copyUrl(url);
     },
-    onError: () => {
-      setCopyError(true);
+    onError: (error) => {
+      setCopyError(error.message || 'Couldn’t create a share link. Try again.');
     },
   });
 
@@ -38,12 +38,12 @@ export function ShareReportButton({
   }, [copied]);
 
   async function copyUrl(url: string) {
-    setCopyError(false);
+    setCopyError(null);
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
     } catch {
-      setCopyError(true);
+      setCopyError('The link was created, but could not be copied. Copy it from your browser address bar.');
     }
   }
 
@@ -61,7 +61,7 @@ export function ShareReportButton({
       </Button>
       {copyError && (
         <p className="text-xs text-destructive" role="status">
-          Couldn&apos;t create or copy the share link. Try again.
+          {copyError}
         </p>
       )}
     </div>

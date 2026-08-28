@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -15,7 +15,13 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [plan, setPlan] = useState<'starter' | 'growth' | 'agency'>('starter');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('plan');
+    if (requested === 'starter' || requested === 'growth' || requested === 'agency') setPlan(requested);
+  }, []);
 
   const register = trpc.auth.register.useMutation({
     onError: (err) => setError(err.message),
@@ -33,7 +39,7 @@ export default function RegisterPage() {
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    register.mutate({ name, email, password });
+    register.mutate({ name, email, password, plan });
   }
 
   return (
