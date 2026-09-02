@@ -56,9 +56,11 @@ export {
   getVideoAdapter,
   createMockVideoAdapter,
   createFalVideoAdapter,
+  getVideoProviderStatus,
   type VideoAdapter,
   type GenerateVideoInput,
   type VideoJobResult,
+  type VideoProviderStatus,
 } from './video.js';
 
 export {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMockVideoAdapter, createFalVideoAdapter, getVideoAdapter } from '../src/video.js';
+import { createMockVideoAdapter, createFalVideoAdapter, getVideoAdapter, getVideoProviderStatus } from '../src/video.js';
 
 describe('video adapter', () => {
   describe('mock video adapter', () => {
@@ -22,9 +22,36 @@ describe('video adapter', () => {
       const adapter = getVideoAdapter();
       expect(adapter.provider).toBe('mock');
     });
+
+    it('reports demo/offline provider status by default', () => {
+      const status = getVideoProviderStatus({ provider: 'mock' });
+
+      expect(status.state).toBe('demo');
+      expect(status.generation.supported).toBe(true);
+      expect(status.editing.supported).toBe(false);
+      expect(status.editing.reason).toContain('not supported');
+    });
   });
 
   describe('fal video adapter', () => {
+    it('reports missing fal credentials without exposing secrets', () => {
+      const status = getVideoProviderStatus({ provider: 'fal' });
+
+      expect(status.state).toBe('provider_not_configured');
+      expect(status.configured).toBe(false);
+      expect(status.generation.supported).toBe(false);
+      expect(status.editing.supported).toBe(false);
+    });
+
+    it('reports live fal generation when a key is configured', () => {
+      const status = getVideoProviderStatus({ provider: 'fal', apiKey: 'test-fal-key' });
+
+      expect(status.state).toBe('live');
+      expect(status.configured).toBe(true);
+      expect(status.generation.approvalRequired).toBe(true);
+      expect(status.editing.reason).toContain('verified provider edit API');
+    });
+
     it('hits fal.ai endpoint with correct headers/body and maps response', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,

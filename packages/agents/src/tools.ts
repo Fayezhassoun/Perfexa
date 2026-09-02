@@ -704,6 +704,7 @@ export const TOOLS: ToolDef[] = [
     schema: z
       .object({
         prompt: z.string().min(4).max(1000),
+        ctaBrief: z.string().max(500).optional(),
         style: z.enum(['ugc', 'product_demo', 'cinematic', 'slideshow']).optional(),
         aspectRatio: z.enum(['9:16', '1:1', '16:9']).optional(),
         durationSec: z.number().int().min(3).max(120).optional(),
@@ -713,10 +714,21 @@ export const TOOLS: ToolDef[] = [
     async execute(ctx, args) {
       return createVideoJob(ctx, {
         prompt: args.prompt as string,
-        style: args.style as string | undefined,
-        aspectRatio: args.aspectRatio as string | undefined,
+        ctaBrief: args.ctaBrief as string | undefined,
+        style: args.style as 'ugc' | 'product_demo' | 'cinematic' | 'slideshow' | undefined,
+        aspectRatio: args.aspectRatio as '9:16' | '1:1' | '16:9' | undefined,
         durationSec: args.durationSec as number | undefined,
       });
+    },
+  },
+  {
+    name: 'video.dispatch',
+    description: 'Dispatch an approved Video Studio render job. SPEND action — requires approval.',
+    schema: z.object({ jobId: z.string().uuid() }).strict(),
+    gated: true,
+    async execute(ctx, args) {
+      const { dispatchApproved } = await import('./services/video.js');
+      return dispatchApproved(ctx, args.jobId as string);
     },
   },
   {

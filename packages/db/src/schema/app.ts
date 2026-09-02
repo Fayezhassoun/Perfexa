@@ -497,30 +497,42 @@ export const competitorAdScans = pgTable('competitor_ad_scans', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-// Video generation studio jobs. Mock-first; live renders gated behind approval.
-export const videoJobs = pgTable('video_jobs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  orgId: uuid('org_id')
-    .notNull()
-    .references(() => organizations.id),
-  prompt: text('prompt').notNull(),
-  style: text('style').default('ugc'), // ugc|product_demo|cinematic|slideshow
-  aspectRatio: text('aspect_ratio').default('9:16'), // 9:16|1:1|16:9
-  durationSec: integer('duration_sec').default(15),
-  status: text('status').default('queued'), // queued|processing|completed|failed|needs_approval
-  provider: text('provider').default('mock'), // mock|fal|replicate
-  resultUrl: text('result_url'),
-  thumbnailUrl: text('thumbnail_url'),
-  costCents: integer('cost_cents').default(0),
-  error: text('error'),
-  approvalId: uuid('approval_id'),
-  createdByAgentId: uuid('created_by_agent_id'),
-  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { mode: 'date' })
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
+// Video Studio jobs. Mock-first generation; live renders remain approval-gated.
+export const videoJobs = pgTable(
+  'video_jobs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => organizations.id),
+    mode: text('mode').default('generate').notNull(), // generate|edit
+    prompt: text('prompt').notNull(),
+    ctaBrief: text('cta_brief'),
+    style: text('style').default('ugc'), // ugc|product_demo|cinematic|slideshow
+    aspectRatio: text('aspect_ratio').default('9:16'), // 9:16|1:1|16:9
+    durationSec: integer('duration_sec').default(15),
+    sourceUrl: text('source_url'),
+    editInstructions: text('edit_instructions'),
+    trimStartSec: integer('trim_start_sec'),
+    trimEndSec: integer('trim_end_sec'),
+    overlayText: text('overlay_text'),
+    status: text('status').default('queued'), // queued|processing|completed|failed|needs_approval|provider_not_configured
+    provider: text('provider').default('mock'), // mock|fal|replicate
+    resultUrl: text('result_url'),
+    thumbnailUrl: text('thumbnail_url'),
+    costCents: integer('cost_cents').default(0),
+    error: text('error'),
+    approvalId: uuid('approval_id'),
+    idempotencyKey: text('idempotency_key'),
+    createdByAgentId: uuid('created_by_agent_id'),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date' })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [unique('video_jobs_org_idempotency_unique').on(t.orgId, t.idempotencyKey)],
+);
 
 export const reviews = pgTable('reviews', {
   id: uuid('id').defaultRandom().primaryKey(),

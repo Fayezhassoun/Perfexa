@@ -12,7 +12,7 @@ export interface GenerateVideoInput {
 
 export interface VideoJobResult {
   jobId: string;
-  status: 'completed' | 'failed' | 'processing' | 'queued' | 'needs_approval';
+  status: 'completed' | 'failed' | 'processing' | 'queued' | 'needs_approval' | 'provider_not_configured';
   resultUrl?: string;
   thumbnailUrl?: string;
   costCents: number;
@@ -23,6 +23,66 @@ export interface VideoJobResult {
 export interface VideoAdapter {
   provider: 'mock' | 'fal' | 'replicate';
   generate(input: GenerateVideoInput): Promise<VideoJobResult>;
+}
+
+export interface VideoProviderStatus {
+  provider: 'mock' | 'fal' | 'replicate';
+  label: string;
+  state: 'demo' | 'live' | 'provider_not_configured';
+  configured: boolean;
+  generation: {
+    supported: boolean;
+    approvalRequired: boolean;
+  };
+  editing: {
+    supported: boolean;
+    approvalRequired: boolean;
+    reason: string;
+  };
+}
+
+function configuredProvider(options?: { provider?: string }): 'mock' | 'fal' | 'replicate' {
+  const provider = options?.provider ?? process.env.VIDEO_PROVIDER ?? 'mock';
+  return provider === 'fal' ? 'fal' : 'mock';
+}
+
+export function getVideoProviderStatus(options?: { provider?: string; apiKey?: string }): VideoProviderStatus {
+  const provider = configuredProvider(options);
+
+  if (provider === 'fal') {
+    const hasKey = Boolean(options?.apiKey ?? process.env.FAL_KEY ?? process.env.FAL_API_KEY);
+    return {
+      provider: 'fal',
+      label: 'fal.ai',
+      state: hasKey ? 'live' : 'provider_not_configured',
+      configured: hasKey,
+      generation: {
+        supported: hasKey,
+        approvalRequired: true,
+      },
+      editing: {
+        supported: false,
+        approvalRequired: true,
+        reason: 'Video editing is not enabled because no verified provider edit API is configured.',
+      },
+    };
+  }
+
+  return {
+    provider: 'mock',
+    label: 'Demo/offline',
+    state: 'demo',
+    configured: true,
+    generation: {
+      supported: true,
+      approvalRequired: false,
+    },
+    editing: {
+      supported: false,
+      approvalRequired: false,
+      reason: 'Offline demo editing is not supported; source URL upload/storage is not available yet.',
+    },
+  };
 }
 
 export function createMockVideoAdapter(): VideoAdapter {
@@ -122,7 +182,7 @@ export function createFalVideoAdapter(options?: { apiKey?: string; fetch?: typeo
 }
 
 export function getVideoAdapter(options?: { provider?: string; apiKey?: string; fetch?: typeof fetch }): VideoAdapter {
-  const provider = options?.provider ?? process.env.VIDEO_PROVIDER ?? 'mock';
+  const provider = configuredProvider(options);
   if (provider === 'fal') {
     return createFalVideoAdapter(options);
   }
