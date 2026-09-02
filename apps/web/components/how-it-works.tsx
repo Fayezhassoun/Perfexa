@@ -48,7 +48,7 @@ export function HowItWorks() {
         </span>
       </div>
 
-      <ol className="grid gap-4 md:grid-cols-3" aria-label="How GrowthCrew works">
+      <ol className="grid gap-4 md:grid-cols-3" aria-label="How Perfexa works">
         {STEPS.map(({ icon: Icon, tone, step, label, title, body, chip }, index) => (
           <li
             key={step}

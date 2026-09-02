@@ -29,9 +29,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="liquid-shell flex min-h-screen">
-      <aside className="liquid-sidebar fixed inset-y-0 left-0 z-40 hidden w-56 flex-col rounded-none border-y-0 border-l-0 md:flex">
+      <aside className="liquid-sidebar fixed inset-y-0 left-0 z-40 hidden w-60 flex-col rounded-none border-y-0 border-l-0 md:flex">
         <div className="glass-divider-b flex h-16 items-center px-5">
-          <BrandMark href="/console" size="md" />
+          <BrandMark href="/console" size="md" descriptor="Operator system" showDescriptor />
         </div>
         <AppNav geoEnabled={env.GEO_ENABLED} />
         <div className="glass-divider-t p-4">
@@ -60,7 +60,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Content column with blur top bar */}
-      <div className="flex min-w-0 flex-1 flex-col md:pl-56">
+      <div className="flex min-w-0 flex-1 flex-col md:pl-60">
         <header className="liquid-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-6">
           <div className="md:hidden">
             <BrandMark href="/console" size="sm" />

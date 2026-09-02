@@ -71,7 +71,7 @@ export default function BusinessBrainPage() {
   const update = trpc.onboarding.update.useMutation({
     onSuccess: async () => {
       await utils.onboarding.invalidate();
-      setMessage('Business Brain saved. GrowthCrew will use this context in your plan and console.');
+      setMessage('Business Brain saved. Perfexa will use this context in your plan and console.');
     },
     onError: (error) => setMessage(error.message),
   });
@@ -125,7 +125,7 @@ export default function BusinessBrainPage() {
       <PageHeader
         eyebrow="Persistent business context"
         title="Business Brain"
-        description="The context GrowthCrew uses before it drafts plans, proposals, and campaigns."
+        description="The context Perfexa uses before it drafts plans, proposals, and campaigns."
         actions={
           <Button asChild variant="outline">
             <Link href="/growth-plan"><ArrowLeft /> Back to Growth Plan</Link>
@@ -141,7 +141,7 @@ export default function BusinessBrainPage() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-base">What GrowthCrew already knows</CardTitle>
+                <CardTitle className="text-base">What Perfexa already knows</CardTitle>
                 <span className="live-status text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   <span className="live-dot" aria-hidden /> Context active
                 </span>
@@ -247,12 +247,12 @@ export default function BusinessBrainPage() {
             {channels.length === 0 && (
               <div className="empty-state flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" />
-                Choose the channels GrowthCrew should prioritize in drafts.
+                Choose the channels Perfexa should prioritize in drafts.
               </div>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="business-brain-constraints">Constraints / things GrowthCrew should avoid</Label>
+            <Label htmlFor="business-brain-constraints">Constraints / things Perfexa should avoid</Label>
             <Textarea
               id="business-brain-constraints"
               maxLength={600}
@@ -294,7 +294,7 @@ export default function BusinessBrainPage() {
           <div>
             <p className="font-medium">Drafts and sandbox by default</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              GrowthCrew can prepare plans, proposals, and campaign drafts. Public or spend actions remain approval-gated.
+              Perfexa can prepare plans, proposals, and campaign drafts. Public or spend actions remain approval-gated.
             </p>
             <Badge variant="secondary" className="mt-3"><LockKeyhole className="mr-1 h-3 w-3" /> Approval safety on</Badge>
           </div>

@@ -46,9 +46,9 @@ export default function RegisterPage() {
     <div className="public-shell flex min-h-screen items-center justify-center p-4">
       <div className="public-card animate-fade-up w-full max-w-sm rounded-[var(--public-radius-lg)] p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <BrandMark layout="mark" size="lg" ariaLabel="GrowthCrew logo" />
-          <h1 className="mt-5 font-sans text-xl font-semibold tracking-tight">Create your account</h1>
-          <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Your AI marketing team is a minute away</p>
+          <BrandMark layout="mark" size="lg" ariaLabel="Perfexa logo" />
+          <h1 className="mt-5 font-display text-xl font-semibold tracking-normal">Create your account</h1>
+          <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Start the pilot with a guarded marketing workspace</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">

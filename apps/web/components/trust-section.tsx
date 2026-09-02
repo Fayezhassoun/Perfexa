@@ -60,7 +60,7 @@ export function TrustSection() {
             No black box. No write access. No fine print.
           </h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            GrowthCrew is built to be handed the keys to your ad accounts — and to never be able to turn them.
+            Perfexa is built to be handed the keys to your ad accounts — and to never be able to turn them.
           </p>
         </div>
       </div>

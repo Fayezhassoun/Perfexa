@@ -62,7 +62,7 @@ function PricingTierCard({ tier }: { tier: PricingTier }) {
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ink-soft))]">{tier.name}</p>
         <div className="mt-4 flex items-end gap-2">
-          <span className="font-sans text-5xl font-semibold tracking-[-0.06em]">{tier.price}</span>
+          <span className="font-display text-5xl font-semibold tracking-normal">{tier.price}</span>
           <span className="mb-2 text-sm text-[hsl(var(--ink-soft))]">/ month</span>
         </div>
         <p className="mt-4 min-h-[3.5rem] text-sm leading-relaxed text-[hsl(var(--ink-soft))]">{tier.description}</p>

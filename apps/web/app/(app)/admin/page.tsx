@@ -10,9 +10,9 @@ import { MetricCard, PageHeader, PageShell } from '@/components/page-shell';
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const PLAN_STYLES = {
-  starter: 'border-slate-400/30 bg-slate-400/10 text-slate-600 dark:text-slate-300',
-  growth: 'border-cyan-400/30 bg-cyan-400/10 text-cyan-700 dark:text-cyan-300',
-  agency: 'border-violet-400/30 bg-violet-400/10 text-violet-700 dark:text-violet-300',
+  starter: 'border-[color:var(--glass-border-strong)] bg-[color:var(--glass-bg-subtle)] text-muted-foreground',
+  growth: 'border-primary/30 bg-primary/10 text-primary',
+  agency: 'border-accent/30 bg-accent/10 text-accent',
 } as const;
 
 const STATUS_STYLES = {
@@ -62,8 +62,8 @@ export default function AdminPage() {
         title="Organization health"
         description="A live read on every design-partner org, its connections, and weekly reporting rhythm."
         actions={
-          <Badge variant="outline" className="gap-2 border-cyan-400/25 bg-cyan-400/10 text-cyan-700 dark:text-cyan-300">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" aria-hidden="true" />
+          <Badge variant="outline" className="gap-2 border-primary/25 bg-primary/10 text-primary">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />
             Operator view
           </Badge>
         }

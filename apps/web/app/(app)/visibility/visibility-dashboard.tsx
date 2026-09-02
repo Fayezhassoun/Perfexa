@@ -407,7 +407,7 @@ export function VisibilityDashboard() {
                 </div>
                 <p className="font-medium">Ready for your first scan</p>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  GrowthCrew will ask Perplexity, Gemini, and ChatGPT your {activePrompts.length}{' '}
+                  Perfexa will ask Perplexity, Gemini, and ChatGPT your {activePrompts.length}{' '}
                   tracked {activePrompts.length === 1 ? 'question' : 'questions'} and record where
                   your brand shows up. Only real engine answers are stored.
                 </p>
@@ -439,7 +439,7 @@ export function VisibilityDashboard() {
                             <div
                               key={i}
                               className={cn(
-                                i % 2 === 0 ? 'bg-amber-500/70' : 'bg-slate-400/70',
+                                i % 2 === 0 ? 'bg-amber-500/70' : 'bg-accent/65',
                               )}
                               style={{
                                 width: `${(count / (run.brandMentions + run.competitorMentions)) * 100}%`,
@@ -498,7 +498,7 @@ export function VisibilityDashboard() {
                           <Line
                             type="monotone"
                             dataKey="visibility"
-                            stroke="hsl(224 88% 56%)"
+                            stroke="hsl(var(--primary))"
                             strokeWidth={2}
                             dot
                           />
@@ -898,7 +898,7 @@ function PromptManager({
       <CardContent className="space-y-4">
         {prompts.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            Add the questions your customers ask AI engines. GrowthCrew scans them weekly on
+            Add the questions your customers ask AI engines. Perfexa scans them weekly on
             Perplexity, Gemini, and ChatGPT — only real engine answers are stored.
           </p>
         )}

@@ -53,8 +53,8 @@ export const PLATFORM_CONFIG: Record<IntegrationPlatform, PlatformConfig> = {
     description: 'Bring paid search performance into your growth workspace.',
     dataProvided: 'Campaign performance, CPC/CPA, keyword data',
     connectOutcome: 'Campaign reporting stays current without moving your ad spend.',
-    accent: 'bg-blue-500',
-    iconBackground: 'bg-blue-500/12 text-blue-600 dark:text-blue-300',
+    accent: 'bg-[hsl(var(--primary))]',
+    iconBackground: 'bg-primary/12 text-primary',
     icon: Megaphone,
   },
   meta: {
@@ -63,8 +63,8 @@ export const PLATFORM_CONFIG: Record<IntegrationPlatform, PlatformConfig> = {
     description: 'Unify Facebook and Instagram performance with the rest of your funnel.',
     dataProvided: 'Ad set metrics, audience reach, creative performance',
     connectOutcome: 'See what is resonating across Facebook and Instagram in one view.',
-    accent: 'bg-indigo-500',
-    iconBackground: 'bg-indigo-500/12 text-indigo-600 dark:text-indigo-300',
+    accent: 'bg-[hsl(var(--accent))]',
+    iconBackground: 'bg-accent/12 text-accent dark:text-accent',
     icon: Share2,
   },
   tiktok: {
@@ -73,8 +73,8 @@ export const PLATFORM_CONFIG: Record<IntegrationPlatform, PlatformConfig> = {
     description: 'Track the creative signals behind short-form campaign growth.',
     dataProvided: 'Video ad metrics, engagement rates, trend data',
     connectOutcome: 'Creative and engagement signals feed into your weekly decisions.',
-    accent: 'bg-fuchsia-500',
-    iconBackground: 'bg-fuchsia-500/12 text-fuchsia-600 dark:text-fuchsia-300',
+    accent: 'bg-[hsl(var(--foreground))]',
+    iconBackground: 'bg-foreground/8 text-foreground',
     icon: Clapperboard,
   },
   ga4: {
@@ -147,7 +147,7 @@ export function integrationNextStep(integration: IntegrationRecord): string {
         ? 'Next step: review the sandbox data, then Go Live when you are ready — you will type LIVE to confirm.'
         : `Sandbox mode works now. Going live needs an operator to add the ${config.name} OAuth app credentials to this deployment first.`;
     case 'connected_live':
-      return 'Live mode is on — GrowthCrew reads real account data. Campaign changes still need your explicit approval.';
+      return 'Live mode is on — Perfexa reads real account data. Campaign changes still need your explicit approval.';
     case 'connection_error':
       return integration.connectUrl
         ? 'This connection needs attention — reconnect to restore syncing.'
@@ -367,7 +367,7 @@ export function GoLiveDialog({
         </div>
 
         <p id="go-live-description" className="mt-5 text-sm leading-6 text-muted-foreground">
-          Live mode enables real API calls for this account. GrowthCrew will still require approval for campaign changes and keep every action under your Budget Guardian caps.
+          Live mode enables real API calls for this account. Perfexa will still require approval for campaign changes and keep every action under your Budget Guardian caps.
         </p>
 
         <div className="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/8 p-4">

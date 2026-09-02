@@ -76,9 +76,9 @@ export function AppNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) {
             aria-current={active ? 'page' : undefined}
             style={{ animationDelay: `${i * 50}ms` }}
             className={cn(
-              'animate-nav-in group relative flex items-center gap-3 rounded-xl border px-3 py-2 text-[0.82rem] transition-all duration-200',
+              'animate-nav-in group relative flex items-center gap-3 rounded-lg border px-3 py-2 text-[0.82rem] transition-all duration-200',
               active
-                ? 'border-primary/20 bg-primary/12 font-medium text-foreground shadow-sm backdrop-blur-md'
+                ? 'border-primary/25 bg-primary/10 font-semibold text-foreground shadow-sm backdrop-blur-md'
                 : 'border-transparent text-muted-foreground hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)] hover:text-foreground',
             )}
           >
@@ -104,7 +104,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="btn-glass flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-all duration-300 hover:text-foreground active:scale-95"
+      className="btn-glass flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-all duration-300 hover:text-foreground active:scale-95"
     >
       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>

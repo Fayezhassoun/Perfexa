@@ -32,57 +32,51 @@ export function BrandMarkIcon({
     >
       <defs>
         <linearGradient id={bgGradId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1E5A47" />
-          <stop offset="52%" stopColor="#14402F" />
+          <stop offset="0%" stopColor="#243F34" />
+          <stop offset="52%" stopColor="#18342B" />
           <stop offset="100%" stopColor="#0F2E26" />
         </linearGradient>
         <linearGradient id={waveGradId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#7FD1C0" />
-          <stop offset="100%" stopColor="#F2F1EC" />
+          <stop offset="0%" stopColor="#F2664A" />
+          <stop offset="100%" stopColor="#A2A969" />
         </linearGradient>
       </defs>
 
-      {/* Voice Orb Base Container */}
-      <rect x="2" y="2" width="28" height="28" rx="8.5" fill={`url(#${bgGradId})`} />
+      <rect x="2" y="2" width="28" height="28" rx="7.5" fill={`url(#${bgGradId})`} />
 
-      {/* Glass Inner Rim */}
       <rect
         x="2.5"
         y="2.5"
         width="27"
         height="27"
-        rx="8"
+        rx="7"
         fill="none"
         stroke="#FFFFFF"
-        strokeOpacity="0.28"
+        strokeOpacity="0.24"
         strokeWidth="1"
       />
 
-      {/* Conversational Waveform Aperture Arc Top */}
       <path
-        d="M 8 12.5 C 12 9.5, 20 9.5, 24 12.5"
+        d="M 8 12.6 C 12.2 9.7, 19.8 9.7, 24 12.6"
         fill="none"
         stroke="#FFFFFF"
-        strokeOpacity="0.7"
+        strokeOpacity="0.62"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
 
-      {/* Conversational Waveform Aperture Arc Bottom */}
       <path
-        d="M 8 19.5 C 12 22.5, 20 22.5, 24 19.5"
+        d="M 8 19.4 C 12.2 22.3, 19.8 22.3, 24 19.4"
         fill="none"
         stroke="#FFFFFF"
-        strokeOpacity="0.7"
+        strokeOpacity="0.62"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
 
-      {/* Team Orbit Nodes */}
       <circle cx="6.5" cy="16" r="1.25" fill="#FFFFFF" fillOpacity="0.9" />
       <circle cx="25.5" cy="16" r="1.25" fill="#FFFFFF" fillOpacity="0.9" />
 
-      {/* Soundwave Bars */}
       <rect x="10.5" y="11.5" width="2.25" height="9" rx="1.125" fill={`url(#${waveGradId})`} />
       <rect x="14.875" y="8.5" width="2.25" height="15" rx="1.125" fill={`url(#${waveGradId})`} />
       <rect x="19.25" y="11.5" width="2.25" height="9" rx="1.125" fill={`url(#${waveGradId})`} />
@@ -106,7 +100,7 @@ export interface BrandMarkProps {
 export function BrandMark({
   layout = 'full',
   size = 'md',
-  wordmark = 'GrowthCrew',
+  wordmark = 'Perfexa',
   descriptor,
   showDescriptor = false,
   href,
@@ -116,34 +110,34 @@ export function BrandMark({
   textClassName,
 }: BrandMarkProps) {
   let iconSize = 32;
-  let wordmarkClass = 'text-lg font-semibold tracking-tight';
+  let wordmarkClass = 'text-lg font-semibold tracking-normal';
   let descriptorClass = 'text-xs text-muted-foreground';
 
   if (typeof size === 'number') {
     iconSize = size;
     if (size <= 24) {
-      wordmarkClass = 'text-sm font-semibold tracking-tight';
+      wordmarkClass = 'text-sm font-semibold tracking-normal';
       descriptorClass = 'text-[10px] text-muted-foreground';
     } else if (size >= 40) {
-      wordmarkClass = 'text-xl font-bold tracking-tight';
+      wordmarkClass = 'text-xl font-bold tracking-normal';
       descriptorClass = 'text-xs text-muted-foreground';
     }
   } else {
     switch (size) {
       case 'sm':
         iconSize = 24;
-        wordmarkClass = 'text-sm font-semibold tracking-tight';
+        wordmarkClass = 'text-sm font-semibold tracking-normal';
         descriptorClass = 'text-[10px] text-muted-foreground';
         break;
       case 'lg':
         iconSize = 40;
-        wordmarkClass = 'text-xl font-bold tracking-tight';
+        wordmarkClass = 'text-xl font-bold tracking-normal';
         descriptorClass = 'text-xs text-muted-foreground';
         break;
       case 'md':
       default:
         iconSize = 32;
-        wordmarkClass = 'text-lg font-semibold tracking-tight';
+        wordmarkClass = 'text-lg font-semibold tracking-normal';
         descriptorClass = 'text-xs text-muted-foreground';
         break;
     }

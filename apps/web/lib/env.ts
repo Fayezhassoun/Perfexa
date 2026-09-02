@@ -40,7 +40,7 @@ const envSchema = z.object({
   SEO_AUDIT_MODE: z.enum(['live', 'mock']).default('live'),
   PAGESPEED_API_KEY: z.string().default(''),
   RESEND_API_KEY: z.string().default(''),
-  EMAIL_FROM: z.string().default('GrowthCrew <reports@growthcrew.dev>'),
+  EMAIL_FROM: z.string().default('Perfexa <reports@growthcrew.dev>'),
   DEMO_SEED: z
     .enum(['true', 'false'])
     .default('true')

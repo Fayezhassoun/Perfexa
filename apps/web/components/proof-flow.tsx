@@ -310,7 +310,7 @@ export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, 
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium">See what GrowthCrew just found</p>
+                <p className="font-medium">See what Perfexa just found</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   A 30-second walkthrough of a real anomaly we detected in your campaigns — and the
                   action we recommend.
@@ -319,7 +319,7 @@ export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, 
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Button onClick={openFlow} data-testid="proof-open">
-                See GrowthCrew in action <ArrowRight />
+                See Perfexa in action <ArrowRight />
               </Button>
               <Button variant="ghost" size="icon" onClick={dismiss} aria-label="Dismiss proof walkthrough">
                 <X />
@@ -331,7 +331,7 @@ export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, 
 
       {/* Full-screen proof sheet */}
       {open && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="GrowthCrew proof walkthrough">
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Perfexa proof walkthrough">
           <div className="animate-fade-in absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={dismiss} />
           <div className="relative flex h-full w-full sm:items-center sm:justify-center sm:p-6">
             <div className="glass-strong animate-fade-up relative flex h-full w-full flex-col overflow-hidden rounded-none sm:h-auto sm:max-h-[88vh] sm:max-w-xl sm:rounded-3xl">
@@ -436,7 +436,7 @@ export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, 
                       </span>
                       <div>
                         <h2 className="font-display text-xl font-semibold sm:text-2xl">Recommended action</h2>
-                        <p className="text-sm text-muted-foreground">What GrowthCrew suggests — you stay in control.</p>
+                        <p className="text-sm text-muted-foreground">What Perfexa suggests — you stay in control.</p>
                       </div>
                     </div>
                     {featured ? (
@@ -499,7 +499,7 @@ export const ProofFlow = forwardRef<ProofFlowHandle>(function ProofFlow(_props, 
                         This runs 24/7 for every campaign.
                       </h2>
                       <p className="mx-auto max-w-md text-base text-muted-foreground">
-                        Welcome to your AI marketing team. GrowthCrew watches your spend around the
+                        Welcome to your AI marketing team. Perfexa watches your spend around the
                         clock and brings you approved-ready actions — never a surprise charge.
                       </p>
                     </div>

@@ -77,7 +77,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="text-base">Billing</CardTitle>
               <CardDescription>
-                Billing is coming soon. During the beta, GrowthCrew is free — ad spend goes directly
+                Billing is coming soon. During the beta, Perfexa is free — ad spend goes directly
                 to the ad platforms, never through us.
               </CardDescription>
             </CardHeader>

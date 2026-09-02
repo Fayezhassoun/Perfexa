@@ -87,7 +87,7 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
                 active ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <Icon className={cn('h-5 w-5', active && 'drop-shadow-[0_0_6px_var(--primary)]')} />
+              <Icon className={cn('h-5 w-5', active && 'drop-shadow-[0_0_6px_hsl(var(--primary)/0.35)]')} />
               {label}
             </Link>
           );
@@ -116,14 +116,14 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
             onClick={() => setSheetOpen(false)}
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           />
-          <div className="liquid-shell absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] animate-fade-up">
+          <div className="liquid-shell absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] animate-fade-up">
             <div className="mb-4 flex items-center justify-between">
               <span className="font-display text-sm font-semibold">All sections</span>
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
                 aria-label="Close"
-                className="btn-glass flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground"
+                className="btn-glass flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -145,7 +145,7 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
                           key={href}
                           href={href}
                           className={cn(
-                            'glass-tile flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-center text-[0.68rem] font-medium transition-all',
+                            'glass-tile flex flex-col items-center gap-1.5 rounded-lg px-2 py-3 text-center text-[0.68rem] font-medium transition-all',
                             active
                               ? 'border-primary/25 bg-primary/12 text-foreground'
                               : 'text-muted-foreground',

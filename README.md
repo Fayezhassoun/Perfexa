@@ -1,6 +1,6 @@
-# GrowthCrew
+# Perfexa
 
-**Talk to your marketing team.** GrowthCrew is a voice-first SaaS where small-business
+**Talk to your marketing team.** Perfexa is a voice-first SaaS where small-business
 owners direct a team of AI marketing specialists by speaking: *"I need an SEO specialist.
 I need my website to be top visible. I need to get leads."* The orchestrator understands
 the intent, audits your site, proposes a concrete plan with budgets — and only after your

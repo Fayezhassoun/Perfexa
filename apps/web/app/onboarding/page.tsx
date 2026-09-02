@@ -223,7 +223,7 @@ export default function OnboardingPage() {
     <div className="liquid-shell flex min-h-screen items-center justify-center p-4">
       <div className="animate-fade-up w-full max-w-lg">
         <div className="mb-6 flex justify-center">
-          <BrandMark size="md" href="/" ariaLabel="GrowthCrew home" />
+          <BrandMark size="md" href="/" ariaLabel="Perfexa home" />
         </div>
 
         {/* Progress: "Step X of 5" + a fluid bar that never overflows on mobile */}
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
                 <Mic className="mb-1 h-5 w-5 text-primary" />
                 <CardTitle>Set your brand voice</CardTitle>
                 <CardDescription>
-                  GrowthCrew writes in your voice. Pick a starting point — refine it any time in
+                  Perfexa writes in your voice. Pick a starting point — refine it any time in
                   Brand DNA.
                 </CardDescription>
               </CardHeader>
@@ -407,7 +407,7 @@ export default function OnboardingPage() {
                 <Sparkles className="mb-1 h-5 w-5 text-primary" />
                 <CardTitle>Your first insight</CardTitle>
                 <CardDescription>
-                  GrowthCrew just scanned your campaigns for anomalies. Here&apos;s what it found.
+                  Perfexa just scanned your campaigns for anomalies. Here&apos;s what it found.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -468,7 +468,7 @@ export default function OnboardingPage() {
         <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
           <div className="glass-panel animate-fade-up flex items-center gap-2 rounded-full px-5 py-3 text-sm font-medium shadow-lg">
             <PartyPopper className="h-4 w-4 text-primary" />
-            Welcome to GrowthCrew!
+            Welcome to Perfexa!
           </div>
         </div>
       )}

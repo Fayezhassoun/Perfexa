@@ -30,7 +30,7 @@ export function ActivationCard({ onShowDemo }: { onShowDemo: () => void }) {
           <div>
             <p className="font-medium">Connect your first ad account to see live insights</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Link Google Ads, Meta, or TikTok and GrowthCrew starts monitoring spend, CTR, and
+              Link Google Ads, Meta, or TikTok and Perfexa starts monitoring spend, CTR, and
               conversions immediately — in a safe sandbox.
             </p>
           </div>

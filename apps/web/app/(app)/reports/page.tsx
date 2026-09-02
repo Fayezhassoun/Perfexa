@@ -93,7 +93,7 @@ export default function ReportsPage() {
   const selected = rows.find((r) => r.id === selectedId) ?? rows[0] ?? null;
   const content = selected?.content;
   const brandProfile = (brand.data ?? {}) as { companyName?: unknown; brandColors?: unknown };
-  const shareBrandName = typeof brandProfile.companyName === 'string' ? brandProfile.companyName : me.data?.org?.name ?? 'GrowthCrew';
+  const shareBrandName = typeof brandProfile.companyName === 'string' ? brandProfile.companyName : me.data?.org?.name ?? 'Perfexa';
   const candidateBrandColor = Array.isArray(brandProfile.brandColors) && typeof brandProfile.brandColors[0] === 'string'
     ? brandProfile.brandColors[0]
     : undefined;

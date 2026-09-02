@@ -5,7 +5,7 @@ import { BrandMark } from '@/components/brand-mark';
 const PRODUCT_CARDS = [
   {
     icon: FileText,
-    tile: 'bg-[linear-gradient(135deg,hsl(160_52%_62%),hsl(var(--mint))_52%,hsl(178_48%_42%))]',
+    tile: 'bg-[linear-gradient(135deg,hsl(88_25%_60%),hsl(var(--mint))_52%,hsl(96_24%_34%))]',
     name: 'Weekly Report',
     fact: 'A client-ready weekly readout of your ad accounts, under your brand.',
     quip: 'Your name on it. Not ours.',
@@ -62,7 +62,7 @@ export default function Home() {
       {/* Nav */}
       <header className="public-nav sticky top-0 z-50">
         <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8">
-          <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
+          <BrandMark href="/" size="md" ariaLabel="Perfexa home" />
           <nav className="flex items-center gap-2 sm:gap-3" aria-label="Main navigation">
             <Link
               href="/login"
@@ -83,19 +83,19 @@ export default function Home() {
           <span className="public-dot bg-[hsl(var(--coral))]" />
           Gate-1 pilot · free during beta · no card
         </div>
-        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-4xl text-balance font-sans text-[clamp(3rem,6.5vw,5.5rem)] font-medium leading-[1.04] tracking-[-0.045em]">
-          Your marketing week,
+        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-4xl text-balance font-display text-[clamp(2.8rem,6vw,5.25rem)] font-semibold leading-[1.06] tracking-normal">
+          AI operating support for
           <span className="headline-chip headline-chip-coral" aria-hidden="true">
             <Zap strokeWidth={2.5} />
           </span>
-          run by a crew
+          performance marketers
           <span className="headline-chip headline-chip-mint" aria-hidden="true">
             <Sparkles strokeWidth={2.5} />
           </span>
-          that never sleeps.
+          with approval built in.
         </h1>
         <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
-          GrowthCrew plugs into your ad accounts read-only, watches performance, and writes a client-ready weekly
+          Perfexa plugs into your ad accounts read-only, watches performance, and writes a client-ready weekly
           report under your brand.
         </p>
         <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -120,7 +120,7 @@ export default function Home() {
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
             What the crew ships
           </p>
-          <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">Work, not another dashboard.</h2>
+          <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">Work, not another dashboard.</h2>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {PRODUCT_CARDS.map(({ icon: Icon, tile, name, fact, quip }) => (
@@ -130,12 +130,12 @@ export default function Home() {
               className="public-card public-lift group flex flex-col overflow-hidden rounded-[var(--public-radius)]"
             >
               <div className={`relative flex h-32 items-center justify-center ${tile}`} aria-hidden="true">
-                <span className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-white/10" />
-                <span className="absolute -bottom-12 -left-6 h-28 w-28 rounded-full bg-white/10" />
+                <span className="absolute inset-x-8 top-0 h-px bg-white/35" />
+                <span className="absolute inset-x-10 bottom-0 h-px bg-black/10" />
                 <Icon className="relative h-9 w-9 text-white transition-transform duration-300 group-hover:scale-110" />
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-sans text-lg font-semibold tracking-tight">{name}</h3>
+                <h3 className="font-display text-lg font-semibold tracking-normal">{name}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-[hsl(var(--ink-soft))]">{fact}</p>
                 <p className="mt-5 text-xs font-medium text-[hsl(var(--ink-soft))]">{quip}</p>
               </div>
@@ -151,9 +151,9 @@ export default function Home() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
               How the crew works
             </p>
-            <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">Connect. Watch. Report.</h2>
+            <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">Connect. Watch. Report.</h2>
           </div>
-          <ol className="grid gap-5 md:grid-cols-3" aria-label="How GrowthCrew works">
+          <ol className="grid gap-5 md:grid-cols-3" aria-label="How Perfexa works">
             {STEPS.map(({ icon: Icon, step, label, body, chip }, index) => (
               <li key={step} className="public-card relative rounded-[var(--public-radius)] p-6">
                 <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ export default function Home() {
                   </span>
                   <span className="font-sans text-sm font-semibold text-[hsl(var(--ink)/0.35)]">{step}</span>
                 </div>
-                <h3 className="mt-5 font-sans text-lg font-semibold tracking-tight">{label}</h3>
+                <h3 className="mt-5 font-display text-lg font-semibold tracking-normal">{label}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--ink-soft))]">{body}</p>
                 <span className="mt-5 inline-flex rounded-full border border-[hsl(var(--ink)/0.12)] bg-[hsl(var(--cream))] px-2.5 py-1 text-[0.68rem] font-medium text-[hsl(var(--ink-soft))]">
                   {chip}
@@ -182,13 +182,12 @@ export default function Home() {
       {/* AI visibility */}
       <section className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-28">
         <div className="public-panel-ink relative overflow-hidden p-7 sm:p-10 lg:p-14">
-          <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[hsl(var(--mint)/0.14)] blur-3xl" aria-hidden="true" />
-          <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-[hsl(var(--coral)/0.14)] blur-3xl" aria-hidden="true" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[hsl(var(--cream)/0.3)]" aria-hidden="true" />
           <div className="relative max-w-2xl">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--mint))]">
               AI visibility
             </p>
-            <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">
               Your buyers ask AI about you. Know what it says.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[hsl(var(--cream)/0.75)]">
@@ -210,14 +209,13 @@ export default function Home() {
       {/* Design partner pilot + final CTA */}
       <section className="mx-auto max-w-4xl px-5 pb-28 sm:px-8">
         <div className="public-card relative overflow-hidden px-7 py-12 text-center sm:px-12 sm:py-16">
-          <div className="absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[hsl(var(--mint)/0.16)] blur-3xl" aria-hidden="true" />
-          <div className="absolute -bottom-32 -right-24 h-64 w-64 rounded-full bg-[hsl(var(--coral)/0.14)] blur-3xl" aria-hidden="true" />
+          <div className="absolute inset-x-8 top-0 h-px bg-[hsl(var(--ink)/0.12)]" aria-hidden="true" />
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--ink)/0.1)] bg-[hsl(var(--cream))] px-3.5 py-2 text-xs font-medium text-[hsl(var(--ink-soft))]">
               <Sparkles className="h-3.5 w-3.5 text-[hsl(var(--coral))]" />
               Design Partner Program · Gate-1 pilot
             </div>
-            <h2 className="mx-auto mt-6 max-w-xl text-balance font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="mx-auto mt-6 max-w-xl text-balance font-display text-3xl font-semibold tracking-normal sm:text-4xl">
               The pilot is small. The work is real.
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-balance leading-relaxed text-[hsl(var(--ink-soft))]">

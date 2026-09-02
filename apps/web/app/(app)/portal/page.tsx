@@ -208,10 +208,10 @@ export default function PortalPage() {
 
             <div className="flex items-center justify-between rounded-lg border border-[color:var(--glass-border)] bg-[color:var(--glass-bg-subtle)] px-3 py-2.5">
               <div>
-                <p className="text-sm font-medium">Show GrowthCrew branding</p>
-                <p className="text-xs text-muted-foreground">Adds a "Powered by GrowthCrew" badge</p>
+                <p className="text-sm font-medium">Show Perfexa branding</p>
+                <p className="text-xs text-muted-foreground">Adds a "Powered by Perfexa" badge</p>
               </div>
-              <Switch checked={showBranding} onCheckedChange={setShowBranding} aria-label="Show GrowthCrew branding" />
+              <Switch checked={showBranding} onCheckedChange={setShowBranding} aria-label="Show Perfexa branding" />
             </div>
           </div>
 
@@ -315,7 +315,7 @@ export default function PortalPage() {
                 </div>
                 {showBranding && (
                   <span className="rounded-full bg-white/15 px-2.5 py-1 text-[0.62rem] font-medium text-white/80 backdrop-blur">
-                    Powered by GrowthCrew
+                    Powered by Perfexa
                   </span>
                 )}
               </div>
@@ -367,7 +367,7 @@ export default function PortalPage() {
                 </div>
 
                 <p className="pt-1 text-center text-[0.62rem] text-muted-foreground">
-                  {footerText || (showBranding ? 'Powered by GrowthCrew' : 'Prepared for you')}
+                  {footerText || (showBranding ? 'Powered by Perfexa' : 'Prepared for you')}
                 </p>
               </div>
             </div>

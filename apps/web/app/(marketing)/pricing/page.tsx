@@ -7,12 +7,12 @@ const FAQS = [
   {
     question: 'What can I connect?',
     answer:
-      'GrowthCrew currently connects to Google Ads, Meta, TikTok, GA4, and Google Search Console. The Growth pilot focuses on the live ad-account connections; analytics connections add context to the weekly readout.',
+      'Perfexa currently connects to Google Ads, Meta, TikTok, GA4, and Google Search Console. The Growth pilot focuses on the live ad-account connections; analytics connections add context to the weekly readout.',
   },
   {
     question: 'Is my data safe?',
     answer:
-      'Connections use read-only OAuth permissions where supported, and tokens are encrypted. GrowthCrew watches and explains what is happening; it does not change live ads or spend money without your approval.',
+      'Connections use read-only OAuth permissions where supported, and tokens are encrypted. Perfexa watches and explains what is happening; it does not change live ads or spend money without your approval.',
   },
   {
     question: 'What is the catch with the design-partner pricing?',
@@ -35,7 +35,7 @@ export default function PricingPage() {
     <main className="public-shell min-h-screen overflow-x-hidden">
       <header className="public-nav sticky top-0 z-50">
         <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between px-5 sm:px-8">
-          <BrandMark href="/" size="md" ariaLabel="GrowthCrew home" />
+          <BrandMark href="/" size="md" ariaLabel="Perfexa home" />
           <nav className="flex items-center gap-2 sm:gap-3" aria-label="Main navigation">
             <Link
               href="/"
@@ -61,7 +61,7 @@ export default function PricingPage() {
           <span className="public-dot bg-[hsl(var(--coral))]" />
           Design partner pricing · Gate-1 pilot
         </div>
-        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-3xl text-balance font-sans text-[clamp(2.75rem,5.5vw,4.25rem)] font-medium leading-[1.05] tracking-[-0.045em]">
+        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-3xl text-balance font-display text-[clamp(2.75rem,5.5vw,4.25rem)] font-semibold leading-[1.06] tracking-normal">
           A sharper marketing week,
           <span className="block text-[hsl(var(--coral))]">without another dashboard to babysit.</span>
         </h1>
@@ -84,12 +84,12 @@ export default function PricingPage() {
 
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
         <div className="public-card relative overflow-hidden p-7 sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-12 lg:p-12">
-          <div className="absolute -right-24 -top-28 h-64 w-64 rounded-full bg-[hsl(var(--mint)/0.18)] blur-3xl" aria-hidden="true" />
+          <div className="absolute inset-x-8 top-0 h-px bg-[hsl(var(--ink)/0.12)]" aria-hidden="true" />
           <div className="relative max-w-2xl">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
               <span className="h-px w-6 bg-[hsl(var(--coral))]" /> Design Partner Program
             </div>
-            <h2 className="mt-4 font-sans text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="mt-4 font-display text-2xl font-semibold tracking-normal sm:text-3xl">
               Founding pricing, direct founder access.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
@@ -114,7 +114,7 @@ export default function PricingPage() {
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
               The useful details
             </p>
-            <h2 className="font-sans text-3xl font-semibold tracking-tight sm:text-4xl">Questions worth asking.</h2>
+            <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">Questions worth asking.</h2>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
               A clear pilot is better than a polished promise. Here is what the first version actually includes.
             </p>
@@ -140,7 +140,7 @@ export default function PricingPage() {
                 key={faq.question}
                 className="public-card group rounded-[20px] px-5 py-4 open:bg-[hsl(var(--cream))]"
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-sans text-base font-semibold tracking-tight [&::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-base font-semibold tracking-normal [&::-webkit-details-marker]:hidden">
                   <span>
                     <span className="mr-3 text-xs font-semibold text-[hsl(var(--coral))]">0{index + 1}</span>
                     {faq.question}
@@ -165,11 +165,11 @@ export default function PricingPage() {
         <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--ink))] text-[hsl(var(--mint))]">
           <Check className="h-6 w-6" strokeWidth={2.5} />
         </span>
-        <h2 className="mt-5 font-sans text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h2 className="mt-5 font-display text-3xl font-semibold tracking-normal sm:text-4xl">
           Start with the signal, not the software.
         </h2>
         <p className="mx-auto mt-3 max-w-md text-[hsl(var(--ink-soft))]">
-          Choose a plan, connect what you need, and let the first weekly report show you where GrowthCrew is useful.
+          Choose a plan, connect what you need, and let the first weekly report show you where Perfexa is useful.
         </p>
         <Link href="/register?plan=growth" className="btn-pill btn-pill-ink mx-auto mt-8 h-12 px-7 text-base">
           Start the pilot <ArrowRight className="h-4 w-4" />

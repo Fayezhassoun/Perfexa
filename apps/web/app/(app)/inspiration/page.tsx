@@ -66,7 +66,7 @@ const PATTERNS = [
     value: 'The message meets urgent intent and lowers risk before the visitor calls.',
   },
   {
-    label: 'GrowthCrew adaptation',
+    label: 'Perfexa adaptation',
     value: 'Original ad concept: “A trusted local expert at your door today” with proof, service area, and call CTA.',
   },
   {
@@ -116,7 +116,7 @@ export default function InspirationPage() {
               <Badge variant="outline"><MousePointerClick className="mr-1 h-3 w-3" /> No live spend</Badge>
             </div>
             <div>
-              <h2 className="font-display text-2xl font-semibold tracking-tight">GrowthCrew’s version: research → adapt → approve.</h2>
+              <h2 className="font-display text-2xl font-semibold tracking-tight">Perfexa’s version: research → adapt → approve.</h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 The goal is not to steal a competitor’s ad. The goal is to understand public market signals, translate the working pattern into your Business Brain, and create a campaign draft you can review before anything goes public.
               </p>
@@ -182,7 +182,7 @@ export default function InspirationPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Example pattern card</CardTitle>
-            <CardDescription>How GrowthCrew turns competitor research into an original campaign direction.</CardDescription>
+            <CardDescription>How Perfexa turns competitor research into an original campaign direction.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {PATTERNS.map((item) => (
@@ -219,7 +219,7 @@ export default function InspirationPage() {
             <div>
               <p className="font-medium">Safety boundary</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                GrowthCrew may draft, compare, and recommend. It must not publish ads, use competitor assets, or activate budget without explicit approval.
+                Perfexa may draft, compare, and recommend. It must not publish ads, use competitor assets, or activate budget without explicit approval.
               </p>
             </div>
           </div>

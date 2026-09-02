@@ -280,8 +280,8 @@ export default function DashboardPage() {
                       color: 'hsl(var(--foreground))',
                     }}
                   />
-                  <Line type="monotone" dataKey="spend" stroke="hsl(224 88% 56%)" strokeWidth={2} name="Spend ($)" dot={false} />
-                  <Line type="monotone" dataKey="clicks" stroke="hsl(190 82% 46%)" strokeWidth={2} name="Clicks" dot={false} />
+                  <Line type="monotone" dataKey="spend" stroke="hsl(var(--primary))" strokeWidth={2} name="Spend ($)" dot={false} />
+                  <Line type="monotone" dataKey="clicks" stroke="hsl(var(--accent))" strokeWidth={2} name="Clicks" dot={false} />
                   <Line type="monotone" dataKey="conversions" stroke="hsl(158 64% 40%)" strokeWidth={2} name="Conversions" dot={false} />
                 </LineChart>
               </ResponsiveContainer>

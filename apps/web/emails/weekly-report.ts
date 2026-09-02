@@ -1,6 +1,6 @@
 // Weekly report email template (Phase 3). Pure renderer: takes the stored
 // WeeklyReportPayload and produces a clean, mobile-friendly HTML email with
-// GrowthCrew branding. Inline styles only (email-client safe). All dynamic
+// Perfexa branding. Inline styles only (email-client safe). All dynamic
 // text is HTML-escaped — the narrative may come from the LLM.
 
 import type { WeeklyReportPayload } from '@growthcrew/db';
@@ -137,7 +137,7 @@ export function renderWeeklyReportEmail(input: WeeklyReportEmailInput): Rendered
             <!-- Brand header -->
             <tr>
               <td style="background:${BRAND_DARK};padding:22px 28px">
-                <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${BRAND_BLUE}">GrowthCrew</div>
+                <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:${BRAND_BLUE}">Perfexa</div>
                 <div style="font-size:12px;color:#94a3b8;margin-top:2px">Weekly marketing report</div>
               </td>
             </tr>
@@ -187,10 +187,10 @@ export function renderWeeklyReportEmail(input: WeeklyReportEmailInput): Rendered
             <tr>
               <td style="background:#f8fafc;padding:20px 28px;border-top:1px solid #eef2f7">
                 <p style="margin:0 0 6px;color:#94a3b8;font-size:12px;line-height:1.5">
-                  You're receiving this because you own ${escapeHtml(orgName)} on GrowthCrew.
+                  You're receiving this because you own ${escapeHtml(orgName)} on Perfexa.
                   Nothing spends without your approval.
                 </p>
-                <p style="margin:0;color:#cbd5e1;font-size:11px">Powered by GrowthCrew — talk to your marketing team.</p>
+                <p style="margin:0;color:#cbd5e1;font-size:11px">Powered by Perfexa — talk to your marketing team.</p>
               </td>
             </tr>
           </table>
@@ -201,7 +201,7 @@ export function renderWeeklyReportEmail(input: WeeklyReportEmailInput): Rendered
 </html>`;
 
   return {
-    subject: `Your week at ${orgName} — GrowthCrew report`,
+    subject: `Your week at ${orgName} — Perfexa report`,
     html,
   };
 }

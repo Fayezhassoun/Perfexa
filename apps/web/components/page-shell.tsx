@@ -22,7 +22,7 @@ export function PageHeader({
     <header className={cn('page-header', className)}>
       <div>
         {eyebrow && <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-primary">{eyebrow}</p>}
-        <h1 className="font-display font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display font-semibold tracking-normal">{title}</h1>
         {description && <p>{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

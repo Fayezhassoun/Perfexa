@@ -44,17 +44,17 @@ export function PublicLeadForm({
 
   if (state === 'done') {
     return (
-      <Card className="glass-panel animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)] text-center">
+      <Card className="public-card animate-page-in w-full max-w-md rounded-[var(--public-radius-lg)] text-center">
         <CardContent className="p-8">
-          <p className="text-lg font-medium">Thanks — we got it!</p>
-          <p className="mt-1 text-sm text-muted-foreground">Someone will be in touch shortly.</p>
+          <p className="font-display text-lg font-semibold">Thanks, we got it.</p>
+          <p className="mt-1 text-sm text-[hsl(var(--ink-soft))]">Someone will be in touch shortly.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="glass-panel animate-page-in w-full max-w-md rounded-[var(--glass-radius-lg)]">
+    <Card className="public-card animate-page-in w-full max-w-md rounded-[var(--public-radius-lg)]">
       <CardHeader>
         <CardTitle>{name}</CardTitle>
       </CardHeader>
@@ -72,6 +72,7 @@ export function PublicLeadForm({
                   required={field.required}
                   value={values[field.key] ?? ''}
                   onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                  className="public-input"
                 />
               ) : (
                 <Input
@@ -80,6 +81,7 @@ export function PublicLeadForm({
                   required={field.required}
                   value={values[field.key] ?? ''}
                   onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                  className="public-input"
                 />
               )}
               {errors[field.key] && <p className="text-sm text-destructive">{errors[field.key]}</p>}
@@ -89,7 +91,7 @@ export function PublicLeadForm({
             {state === 'busy' ? 'Sending…' : 'Send'}
           </Button>
           {state === 'failed' && !Object.keys(errors).length && (
-            <p className="text-sm text-destructive">Something went wrong — please try again.</p>
+            <p className="text-sm text-destructive">Something went wrong. Please try again.</p>
           )}
         </form>
       </CardContent>

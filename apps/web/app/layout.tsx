@@ -5,8 +5,8 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'GrowthCrew',
-  description: 'Your voice-first AI marketing team',
+  title: 'Perfexa',
+  description: 'An AI marketing team for performance operators',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,4 @@
-# GrowthCrew customer readiness
+# Perfexa customer readiness
 
 Status: code and local verification complete; production deployment intentionally not run.
 

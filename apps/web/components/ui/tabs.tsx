@@ -41,7 +41,7 @@ function TabsList({ className, children }: { className?: string; children: React
   return (
     <div
       className={cn(
-        'glass-subtle inline-flex h-10 items-center justify-center rounded-full p-1 text-muted-foreground',
+        'glass-subtle inline-flex min-h-10 flex-wrap items-center justify-center rounded-lg p-1 text-muted-foreground',
         className,
       )}
       role="tablist"
@@ -69,7 +69,7 @@ function TabsTrigger({
       aria-selected={active}
       onClick={() => ctx.setValue(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-full border border-transparent px-3.5 py-1.5 text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3.5 py-1.5 text-sm font-semibold transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
         active ? 'tab-active' : 'hover:text-foreground',
         className,
       )}
