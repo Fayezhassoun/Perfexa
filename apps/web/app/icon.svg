@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
-    <linearGradient id="growthcrew-icon-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="perfexa-icon-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#2563EB" />
       <stop offset="50%" stop-color="#0284C7" />
       <stop offset="100%" stop-color="#06B6D4" />
     </linearGradient>
-    <linearGradient id="growthcrew-icon-wave" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="perfexa-icon-wave" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
       <stop offset="100%" stop-color="#E0F2FE" />
     </linearGradient>
   </defs>
-  <rect x="2" y="2" width="28" height="28" rx="8.5" fill="url(#growthcrew-icon-bg)" />
+  <rect x="2" y="2" width="28" height="28" rx="8.5" fill="url(#perfexa-icon-bg)" />
   <rect x="2.5" y="2.5" width="27" height="27" rx="8" fill="none" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1" />
   <path d="M 8 12.5 C 12 9.5, 20 9.5, 24 12.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" />
   <path d="M 8 19.5 C 12 22.5, 20 22.5, 24 19.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="1.5" stroke-linecap="round" />
   <circle cx="6.5" cy="16" r="1.25" fill="#FFFFFF" fill-opacity="0.9" />
   <circle cx="25.5" cy="16" r="1.25" fill="#FFFFFF" fill-opacity="0.9" />
-  <rect x="10.5" y="11.5" width="2.25" height="9" rx="1.125" fill="url(#growthcrew-icon-wave)" />
-  <rect x="14.875" y="8.5" width="2.25" height="15" rx="1.125" fill="url(#growthcrew-icon-wave)" />
-  <rect x="19.25" y="11.5" width="2.25" height="9" rx="1.125" fill="url(#growthcrew-icon-wave)" />
+  <rect x="10.5" y="11.5" width="2.25" height="9" rx="1.125" fill="url(#perfexa-icon-wave)" />
+  <rect x="14.875" y="8.5" width="2.25" height="15" rx="1.125" fill="url(#perfexa-icon-wave)" />
+  <rect x="19.25" y="11.5" width="2.25" height="9" rx="1.125" fill="url(#perfexa-icon-wave)" />
 </svg>

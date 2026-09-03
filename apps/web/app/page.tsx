@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Bell, FileText, Plug, Radar, ScanEye, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { ArrowRight, Bell, CheckCircle2, FileText, Plug, Radar, ScanEye, ShieldCheck, Sparkles } from 'lucide-react';
 import { BrandMark } from '@/components/brand-mark';
 
 const PRODUCT_CARDS = [
@@ -14,8 +14,8 @@ const PRODUCT_CARDS = [
     icon: Radar,
     tile: 'bg-[linear-gradient(135deg,hsl(18_92%_64%),hsl(var(--coral))_55%,hsl(2_74%_54%))]',
     name: 'AI Visibility',
-    fact: 'Track how Perplexity, Gemini, and ChatGPT cite your brand. Real engines, live.',
-    quip: 'Three engines, zero guessing.',
+    fact: 'Track how configured AI search engines cite your brand, with missing providers shown honestly.',
+    quip: 'Provider state stays visible.',
   },
   {
     icon: Bell,
@@ -56,6 +56,21 @@ const GEO_ENGINES = [
   { name: 'ChatGPT', dot: 'bg-[hsl(var(--cream))]' },
 ];
 
+const SAMPLE_REPORT_ROWS = [
+  {
+    label: 'Truth state',
+    value: 'Sample ad account rows, sandbox mode',
+  },
+  {
+    label: 'Top signal',
+    value: 'One campaign is spending without conversions',
+  },
+  {
+    label: 'Decision',
+    value: 'Draft a budget shift for human approval',
+  },
+];
+
 export default function Home() {
   return (
     <main className="public-shell min-h-screen overflow-x-hidden">
@@ -78,27 +93,18 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-5 pb-24 pt-16 text-center sm:px-8 lg:pb-32 lg:pt-24">
+      <section className="mx-auto max-w-6xl px-5 pb-20 pt-14 sm:px-8 lg:pb-24 lg:pt-20">
         <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[hsl(var(--ink)/0.1)] bg-white px-3.5 py-2 text-xs font-medium text-[hsl(var(--ink-soft))]">
           <span className="public-dot bg-[hsl(var(--coral))]" />
           Gate-1 pilot · free during beta · no card
         </div>
-        <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-4xl text-balance font-display text-[clamp(2.8rem,6vw,5.25rem)] font-semibold leading-[1.06] tracking-normal">
-          AI operating support for
-          <span className="headline-chip headline-chip-coral" aria-hidden="true">
-            <Zap strokeWidth={2.5} />
-          </span>
-          performance marketers
-          <span className="headline-chip headline-chip-mint" aria-hidden="true">
-            <Sparkles strokeWidth={2.5} />
-          </span>
-          with approval built in.
+        <h1 className="animate-fade-up animation-delay-100 mt-8 max-w-4xl text-balance font-display text-[clamp(2.75rem,6vw,5rem)] font-semibold leading-[1.06] tracking-normal">
+          Weekly performance reports, approval-ready.
         </h1>
-        <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
-          Perfexa plugs into your ad accounts read-only, watches performance, and writes a client-ready weekly
-          report under your brand.
+        <p className="animate-fade-up animation-delay-200 mt-7 max-w-xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
+          Connect read-only ad accounts. Get an approval-ready performance report every week.
         </p>
-        <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="animate-fade-up animation-delay-300 mt-9 flex flex-col gap-4 sm:flex-row">
           <Link href="/register?plan=growth" className="btn-pill btn-pill-ink h-12 px-7 text-base">
             Start the pilot <ArrowRight className="h-4 w-4" />
           </Link>
@@ -112,13 +118,61 @@ export default function Home() {
         <p className="animate-fade-up animation-delay-300 mt-5 text-sm text-[hsl(var(--ink-soft))]">
           No card required during beta · read-only connections
         </p>
+
+        <div className="animate-fade-up animation-delay-300 mt-12 grid gap-4 text-left lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
+          <article className="public-card p-5 sm:p-6" aria-label="Sample weekly report excerpt">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--coral))]">
+                  Sample weekly report excerpt
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-semibold tracking-normal">What changed, what to do next.</h2>
+              </div>
+              <span className="rounded-full border border-[hsl(var(--ink)/0.12)] bg-[hsl(var(--cream))] px-3 py-1 text-xs font-medium text-[hsl(var(--ink-soft))]">
+                Sample data · not customer evidence
+              </span>
+            </div>
+            <p className="mt-5 text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
+              This week&apos;s report would call out the strongest signal, the risky spend pattern, and the next move
+              that needs approval before anything changes in an ad account.
+            </p>
+            <div className="mt-5 space-y-2">
+              {SAMPLE_REPORT_ROWS.map((row) => (
+                <div key={row.label} className="public-tile flex items-start gap-3 p-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--mint))]" />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[hsl(var(--ink-soft))]">{row.label}</p>
+                    <p className="mt-0.5 text-sm">{row.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="public-panel-ink p-5 sm:p-6" aria-label="Approval row example">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--mint))]">Approval row</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold tracking-normal">Diagnosis does not become action by itself.</h2>
+            <div className="mt-6 rounded-[10px] border border-[hsl(var(--cream)/0.18)] bg-[hsl(var(--cream)/0.06)] p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-[hsl(var(--coral))] px-2.5 py-1 text-xs font-semibold text-white">Waiting for approval</span>
+                <span className="text-xs text-[hsl(var(--cream)/0.66)]">Review-only until approved</span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-[hsl(var(--cream)/0.8)]">
+                Draft: move budget from the weak campaign into the best-performing channel after a human review.
+              </p>
+              <Link href="/register?plan=growth" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--mint))]">
+                Start with your first report <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </article>
+        </div>
       </section>
 
       {/* Product card row */}
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8 lg:pb-28">
         <div className="mb-10 max-w-2xl">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
-            What the crew ships
+            What Perfexa ships
           </p>
           <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">Work, not another dashboard.</h2>
         </div>
@@ -144,12 +198,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How the crew works */}
+      {/* How Perfexa works */}
       <section className="border-y border-[hsl(var(--ink)/0.07)] bg-[hsl(var(--cream-deep))]">
         <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 lg:py-28">
           <div className="mb-10 max-w-2xl">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[hsl(var(--coral))]">
-              How the crew works
+              How Perfexa works
             </p>
             <h2 className="font-display text-3xl font-semibold tracking-normal sm:text-4xl">Connect. Watch. Report.</h2>
           </div>
@@ -191,8 +245,8 @@ export default function Home() {
               Your buyers ask AI about you. Know what it says.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[hsl(var(--cream)/0.75)]">
-              The visibility dashboard tracks how three real engines mention your brand. Live today, with no simulated
-              results.
+              The visibility dashboard tracks configured engines and labels missing providers clearly. It does not
+              fill gaps with simulated results.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {GEO_ENGINES.map(({ name, dot }) => (
@@ -238,7 +292,7 @@ export default function Home() {
       <footer className="border-t border-[hsl(var(--ink)/0.08)]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-sm text-[hsl(var(--ink-soft))] sm:flex-row sm:px-8">
           <BrandMark size="sm" />
-          <span>Built for people who&apos;d rather run their business than babysit their ads.</span>
+          <span>Built for people who would rather run their business than babysit their ads.</span>
         </div>
       </footer>
     </main>

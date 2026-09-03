@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Mic, Bell, Sparkles, Menu, X } from 'lucide-react';
+import { Bell, FileText, LayoutDashboard, Menu, PenLine, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { NAV } from './app-nav';
+import { NAV, NAV_GROUPS } from './app-nav';
 
 /**
  * Mobile navigation. Two layers:
@@ -19,30 +19,10 @@ import { NAV } from './app-nav';
  */
 
 const PRIMARY = [
-  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-  { href: '/console', label: 'Console', icon: Mic },
-  { href: '/alerts', label: 'Alerts', icon: Bell },
-  { href: '/business-brain', label: 'Brain', icon: Sparkles },
-];
-
-// Group the full surface list for the "More" sheet.
-const GROUPS: { title: string; hrefs: string[] }[] = [
-  {
-    title: 'Operate',
-    hrefs: ['/dashboard', '/console', '/alerts', '/creatives', '/reports', '/campaigns', '/growth-plan'],
-  },
-  {
-    title: 'Create',
-    hrefs: ['/business-brain', '/inspiration', '/content', '/video', '/social', '/proposals'],
-  },
-  {
-    title: 'Grow',
-    hrefs: ['/competitors', '/visibility', '/reviews', '/leads', '/knowledge', '/memory'],
-  },
-  {
-    title: 'Workspace',
-    hrefs: ['/agents', '/portal', '/audit', '/settings', '/admin'],
-  },
+  { href: '/dashboard', label: 'Command', icon: LayoutDashboard, hrefs: ['/dashboard', '/console', '/growth-plan'] },
+  { href: '/alerts', label: 'Signals', icon: Bell, hrefs: ['/alerts', '/creatives', '/campaigns', '/competitors', '/visibility', '/reviews'] },
+  { href: '/content', label: 'Studio', icon: PenLine, hrefs: ['/content', '/social', '/video', '/inspiration', '/proposals'] },
+  { href: '/reports', label: 'Evidence', icon: FileText, hrefs: ['/reports', '/portal', '/audit'] },
 ];
 
 export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) {
@@ -62,9 +42,13 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
   }, [pathname]);
 
   const byHref = new Map(NAV.filter((n) => !n.geo || geoEnabled).map((n) => [n.href, n]));
+  const groups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((href) => byHref.has(href)),
+  })).filter((group) => group.items.length > 0);
 
   const isOnPrimary = PRIMARY.some(
-    (p) => pathname === p.href || pathname.startsWith(`${p.href}/`),
+    (p) => p.hrefs.some((href) => pathname === href || pathname.startsWith(`${href}/`)),
   );
 
   return (
@@ -75,8 +59,8 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
         className="liquid-topbar fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t px-1 pb-[env(safe-area-inset-bottom)] md:hidden"
         data-testid="mobile-nav"
       >
-        {PRIMARY.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(`${href}/`);
+        {PRIMARY.map(({ href, hrefs, label, icon: Icon }) => {
+          const active = hrefs.some((itemHref) => pathname === itemHref || pathname.startsWith(`${itemHref}/`));
           return (
             <Link
               key={href}
@@ -87,7 +71,7 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
                 active ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <Icon className={cn('h-5 w-5', active && 'drop-shadow-[0_0_6px_hsl(var(--primary)/0.35)]')} />
+              <Icon className="h-5 w-5" />
               {label}
             </Link>
           );
@@ -129,13 +113,17 @@ export function MobileNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) 
               </button>
             </div>
             <div className="space-y-5">
-              {GROUPS.map((group) => (
+              {groups.map((group) => (
                 <div key={group.title}>
-                  <p className="mb-2 px-1 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Link
+                    href={group.href}
+                    className="mb-2 flex items-center gap-2 px-1 text-[0.76rem] font-semibold text-foreground"
+                  >
+                    <group.icon className="h-4 w-4 text-primary" />
                     {group.title}
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {group.hrefs.map((href) => {
+                  </Link>
+                  <div className="grid grid-cols-2 gap-2">
+                    {group.items.map((href) => {
                       const item = byHref.get(href);
                       if (!item) return null;
                       const Icon = item.icon;

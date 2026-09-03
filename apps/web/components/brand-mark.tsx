@@ -15,7 +15,7 @@ export function BrandMarkIcon({
   ...props
 }: BrandMarkIconProps) {
   const generatedId = useId();
-  const id = gradientId || `growthcrew-orb-${generatedId.replace(/:/g, '')}`;
+  const id = gradientId || `perfexa-mark-${generatedId.replace(/:/g, '')}`;
   const bgGradId = `${id}-bg`;
   const waveGradId = `${id}-wave`;
 
@@ -156,9 +156,9 @@ export function BrandMark({
       <BrandMarkIcon size={iconSize} className={markClassName} />
       {layout !== 'mark' && (
         <span className={cn('flex flex-col justify-center leading-none', textClassName)}>
-          <span className={cn('font-display growthcrew-wordmark', wordmarkClass)}>{wordmark}</span>
+          <span className={cn('font-display perfexa-wordmark', wordmarkClass)}>{wordmark}</span>
           {(showDescriptor || descriptor) && (
-            <span className={cn('mt-0.5 growthcrew-descriptor', descriptorClass)}>
+            <span className={cn('mt-0.5 perfexa-descriptor', descriptorClass)}>
               {descriptor || 'AI Marketing Team'}
             </span>
           )}

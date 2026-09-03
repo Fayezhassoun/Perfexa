@@ -6,7 +6,7 @@ import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Perfexa',
-  description: 'An AI marketing team for performance operators',
+  description: 'Connect read-only ad accounts and get an approval-ready performance report every week.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

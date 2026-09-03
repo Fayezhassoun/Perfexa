@@ -62,12 +62,12 @@ export default function PricingPage() {
           Design partner pricing · Gate-1 pilot
         </div>
         <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-3xl text-balance font-display text-[clamp(2.75rem,5.5vw,4.25rem)] font-semibold leading-[1.06] tracking-normal">
-          A sharper marketing week,
-          <span className="block text-[hsl(var(--coral))]">without another dashboard to babysit.</span>
+          Weekly performance reports,
+          <span className="block text-[hsl(var(--coral))]">with planned pricing shown upfront.</span>
         </h1>
         <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
-          Start small, connect the accounts that matter, and get a useful weekly readout under your brand. Pick the
-          level of support that fits how you work.
+          Start small, connect read-only ad accounts, and get an approval-ready weekly readout under your brand.
+          Gate-1 beta access is free while the first report workflow is being shaped.
         </p>
         <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
           Gate 1 is about the first report: connect an ad account, then decide whether the weekly readout is useful.
@@ -90,11 +90,11 @@ export default function PricingPage() {
               <span className="h-px w-6 bg-[hsl(var(--coral))]" /> Design Partner Program
             </div>
             <h2 className="mt-4 font-display text-2xl font-semibold tracking-normal sm:text-3xl">
-              Founding pricing, direct founder access.
+              Free beta access now, founding rates later.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
-              We are working with a small group so we can stay close to every team. In exchange for honest feedback,
-              design partners get the founding rates while the product gets sharper.
+              We are working with a small group so we can stay close to every team. During beta, the pilot is free
+              with no card required. The listed monthly rates are the planned founding rates after the beta period.
             </p>
           </div>
           <div className="relative mt-7 shrink-0 lg:mt-0">

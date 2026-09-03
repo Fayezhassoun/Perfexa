@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Activity,
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
   Flame,
   Gauge,
@@ -219,6 +221,14 @@ export default function CreativesPage() {
                     <div className="mt-2 flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/8 px-3 py-2">
                       <Zap className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
                       <p className="text-xs leading-relaxed text-foreground/90">{s.suggestedAction}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 pt-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href="/console">
+                          Draft next step <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                      <span className="text-[0.68rem] text-muted-foreground">Review-only until approved</span>
                     </div>
                   </div>
                 </div>

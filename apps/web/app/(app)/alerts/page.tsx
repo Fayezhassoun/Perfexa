@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   AlertTriangle,
   Activity,
+  ArrowRight,
   Bell,
   BellOff,
   Check,
@@ -290,14 +292,22 @@ export default function AlertsPage() {
                         <Check className="mr-1 h-3 w-3" /> Acknowledged
                       </Badge>
                     ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => acknowledge.mutate({ alertId: a.id })}
-                        disabled={acknowledge.isPending}
-                      >
-                        <BellOff className="h-3.5 w-3.5" /> Acknowledge
-                      </Button>
+                      <div className="flex flex-col gap-2 sm:items-end">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href="/console">
+                            Draft next step <ArrowRight className="h-3.5 w-3.5" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => acknowledge.mutate({ alertId: a.id })}
+                          disabled={acknowledge.isPending}
+                        >
+                          <BellOff className="h-3.5 w-3.5" /> Acknowledge
+                        </Button>
+                        <span className="text-[0.68rem] text-muted-foreground">Review-only until approved</span>
+                      </div>
                     )}
                   </div>
                 </div>

@@ -120,7 +120,7 @@ export function TrustSection() {
       </div>
 
       <p className="mt-5 text-xs text-muted-foreground">
-        No logo wall yet — we&apos;re earning it. Everything on this page is a product fact, not a projection.
+        No logo wall yet. We are earning it. Everything on this page is a product fact, not a projection.
       </p>
     </section>
   );

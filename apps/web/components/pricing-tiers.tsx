@@ -15,20 +15,21 @@ type PricingTier = {
 const TIERS: PricingTier[] = [
   {
     name: 'Starter',
-    price: '$19',
-    description: 'A low-friction way to put an AI strategist on your weekly rhythm.',
-    features: ['AI strategist', 'Weekly reports', 'Alerts', '1 brand'],
+    price: '$19 planned',
+    description: 'A low-friction way to put a weekly performance readout on your operating rhythm.',
+    features: ['Weekly report generation', 'Alerts', '1 brand', 'Free during Gate-1 beta'],
     cta: 'Start pilot',
     href: '/register?plan=starter',
   },
   {
     name: 'Growth',
-    price: '$49',
+    price: '$49 planned',
     description: 'The pilot fit: live ad signals and a client-ready report under your brand.',
     features: [
       'Everything in Starter',
       'Live Google Ads, Meta, and TikTok connections',
       'White-label client report portal',
+      'Free during Gate-1 beta',
     ],
     cta: 'Start pilot',
     href: '/register?plan=growth',
@@ -36,9 +37,9 @@ const TIERS: PricingTier[] = [
   },
   {
     name: 'Agency',
-    price: '$99',
+    price: '$99 planned',
     description: 'For small teams managing several brands and wanting room to grow.',
-    features: ['Everything in Growth', 'Team seats', 'Multi-brand workspace', 'Priority support'],
+    features: ['Everything in Growth', 'Team seats', 'Multi-brand workspace', 'Priority support', 'Free during Gate-1 beta'],
     cta: 'Start pilot',
     href: '/register?plan=agency',
   },
@@ -62,8 +63,8 @@ function PricingTierCard({ tier }: { tier: PricingTier }) {
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[hsl(var(--ink-soft))]">{tier.name}</p>
         <div className="mt-4 flex items-end gap-2">
-          <span className="font-display text-5xl font-semibold tracking-normal">{tier.price}</span>
-          <span className="mb-2 text-sm text-[hsl(var(--ink-soft))]">/ month</span>
+          <span className="font-display text-4xl font-semibold tracking-normal">{tier.price}</span>
+          <span className="mb-1 text-sm text-[hsl(var(--ink-soft))]">monthly</span>
         </div>
         <p className="mt-4 min-h-[3.5rem] text-sm leading-relaxed text-[hsl(var(--ink-soft))]">{tier.description}</p>
       </div>
