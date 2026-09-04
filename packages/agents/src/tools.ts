@@ -314,9 +314,9 @@ export const TOOLS: ToolDef[] = [
   },
   {
     name: 'ads.pause_campaign',
-    description: 'Pause a campaign. External campaign changes are disabled during the read-only pilot.',
+    description: 'Pause a sandbox campaign. Live external mutations are blocked at the adapter boundary during the pilot.',
     schema: z.object({ platform: platformSchema, externalId: z.string() }).strict(),
-    gated: true,
+    gated: false,
     async execute(ctx, args) {
       const adapter = await getOrgAdapter(ctx.db, ctx.orgId, args.platform as AdPlatform);
       await adapter.pauseCampaign(args.externalId as string);

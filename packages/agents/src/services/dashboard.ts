@@ -173,9 +173,18 @@ export interface ActivityItem {
 }
 
 const GUARDIAN_TEXT: Record<string, string> = {
+  'guardian.signal.velocity': 'Budget Guardian detected projected spend above the monthly cap.',
+  'guardian.signal.zero_conversion': 'Budget Guardian detected spend with no conversions.',
   'guardian.auto_pause.velocity': 'Budget Guardian auto-paused campaigns — projected spend was heading over the monthly cap.',
   'guardian.auto_pause.zero_conversion': 'Budget Guardian auto-paused a campaign — spend with no conversions.',
 };
+
+function guardianText(row: { action: string | null; metadata: unknown }): string {
+  const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
+  return typeof metadata.message === 'string'
+    ? metadata.message
+    : (GUARDIAN_TEXT[row.action ?? ''] ?? `Budget Guardian: ${row.action}`);
+}
 
 export async function activityFeed(ctx: AgentContext, limit = 20): Promise<ActivityItem[]> {
   const runs = await ctx.db
@@ -217,7 +226,7 @@ export async function activityFeed(ctx: AgentContext, limit = 20): Promise<Activ
         at: g.createdAt,
         kind: 'guardian',
         actor: 'Budget Guardian',
-        text: GUARDIAN_TEXT[g.action ?? ''] ?? `Budget Guardian: ${g.action}`,
+        text: guardianText(g),
         status: null,
       }),
     ),
@@ -299,5 +308,5 @@ export async function simulateTick(ctx: AgentContext): Promise<{ polled: number;
     polled++;
   }
   const verdict = await guardianTick(ctx);
-  return { polled, guardian: verdict.autoPaused ?? [] };
+  return { polled, guardian: verdict.reason ? [verdict.reason] : [] };
 }

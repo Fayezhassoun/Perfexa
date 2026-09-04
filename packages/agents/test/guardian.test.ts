@@ -115,8 +115,11 @@ describe('tick observation-only mode', () => {
     expect(verdict.reason).toMatch(/attention required/i);
     const [mirror] = await db.select().from(campaignsMirror).where(eq(campaignsMirror.externalId, campaign.externalId));
     expect(mirror!.status).toBe('active');
+    await tick(org.ctx);
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
-    expect(audits.some((a) => a.action === 'guardian.signal.velocity')).toBe(true);
+    const signals = audits.filter((a) => a.action === 'guardian.signal.velocity');
+    expect(signals).toHaveLength(1);
+    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(/monthly cap/i);
     expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 
@@ -132,8 +135,11 @@ describe('tick observation-only mode', () => {
     expect(verdict.autoPaused).toEqual([]);
     const [mirror] = await db.select().from(campaignsMirror).where(eq(campaignsMirror.externalId, campaign.externalId));
     expect(mirror!.status).toBe('active');
+    await tick(org.ctx);
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
-    expect(audits.some((a) => a.action === 'guardian.signal.zero_conversion')).toBe(true);
+    const signals = audits.filter((a) => a.action === 'guardian.signal.zero_conversion');
+    expect(signals).toHaveLength(1);
+    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(/no conversions/i);
     expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 

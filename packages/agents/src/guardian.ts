@@ -2,8 +2,8 @@
 // Every enforcement action is audit-logged. checkSpend runs inside every gated
 // ads tool before the adapter write.
 
-import { and, eq } from 'drizzle-orm';
-import { budgets, campaignsMirror } from '@growthcrew/db';
+import { and, desc, eq } from 'drizzle-orm';
+import { auditLogs, budgets, campaignsMirror } from '@growthcrew/db';
 import type { AdPlatform } from '@growthcrew/integrations';
 import type { AgentContext } from './types.js';
 import type { MirrorMetrics } from './store.js';
@@ -84,6 +84,29 @@ function totalSpend(rows: CampaignRow[]): number {
   return rows.reduce((s, r) => s + metricsOf(r).spendCents, 0);
 }
 
+const SIGNAL_COOLDOWN_MS = 60 * 60 * 1000;
+
+async function shouldLogSignal(
+  ctx: AgentContext,
+  action: 'guardian.signal.velocity' | 'guardian.signal.zero_conversion',
+  entityId: string,
+  now: Date,
+): Promise<boolean> {
+  const [latest] = await ctx.db
+    .select({ createdAt: auditLogs.createdAt })
+    .from(auditLogs)
+    .where(
+      and(
+        eq(auditLogs.orgId, ctx.orgId),
+        eq(auditLogs.action, action),
+        eq(auditLogs.entityId, entityId),
+      ),
+    )
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(1);
+  return !latest || now.getTime() - latest.createdAt.getTime() >= SIGNAL_COOLDOWN_MS;
+}
+
 /**
  * Pre-flight check for a gated spend action. Returns {ok:false, ...} when the
  * action would breach any cap; the tool layer throws BudgetCapExceeded on it.
@@ -148,13 +171,22 @@ export async function tick(ctx: AgentContext): Promise<GuardianVerdict> {
   if (caps.globalMonthly != null) {
     const projected = projectMonthEnd(spentThisMonth, activeDailyTotal(allRows), now);
     if (wouldExceed(caps.globalMonthly, projected) && activeDailyTotal(allRows) > 0) {
-      reasons.push(`Attention required: projected spend $${(projected / 100).toFixed(0)} exceeds the monthly cap of $${(caps.globalMonthly / 100).toFixed(0)}.`);
-      await ctx.audit.log({
-        actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.velocity',
-        entityType: 'organization', entityId: ctx.orgId,
-        payload: { projectedCents: projected, capCents: caps.globalMonthly, platforms },
-        metadata: { mode: 'read_only' },
-      });
+      const message = `Attention required: projected spend ${(projected / 100).toFixed(0)} exceeds the monthly cap of ${(caps.globalMonthly / 100).toFixed(0)}.`;
+      reasons.push(message);
+      if (await shouldLogSignal(ctx, 'guardian.signal.velocity', ctx.orgId, now)) {
+        await ctx.audit.log({
+          actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.velocity',
+          entityType: 'organization', entityId: ctx.orgId,
+          payload: { projectedCents: projected, capCents: caps.globalMonthly, platforms },
+          metadata: {
+            mode: 'read_only',
+            message,
+            projectedCents: projected,
+            capCents: caps.globalMonthly,
+            platforms,
+          },
+        });
+      }
     }
   }
 
@@ -167,12 +199,16 @@ export async function tick(ctx: AgentContext): Promise<GuardianVerdict> {
     });
     for (const campaign of burners) {
       const spendCents = metricsOf(campaign).spendCents;
-      reasons.push(`Attention required: campaign ${campaign.id} has spent $${(spendCents / 100).toFixed(0)} with no conversions.`);
-      await ctx.audit.log({
-        actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.zero_conversion',
-        entityType: 'campaign', entityId: campaign.id,
-        payload: { platform, spendCents, targetCplCents }, metadata: { mode: 'read_only' },
-      });
+      const message = `Attention required: campaign ${campaign.id} has spent ${(spendCents / 100).toFixed(0)} with no conversions.`;
+      reasons.push(message);
+      if (await shouldLogSignal(ctx, 'guardian.signal.zero_conversion', campaign.id, now)) {
+        await ctx.audit.log({
+          actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.zero_conversion',
+          entityType: 'campaign', entityId: campaign.id,
+          payload: { platform, spendCents, targetCplCents },
+          metadata: { mode: 'read_only', message, platform, spendCents, targetCplCents },
+        });
+      }
     }
   }
 
