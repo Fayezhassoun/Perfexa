@@ -5,12 +5,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   AdapterError,
-  createGoogleAdsLiveAdapter,
-  createMetaLiveAdapter,
   type AdCampaign,
   type CampaignMetrics,
   type LiveAdapterDeps,
 } from '../src/index.js';
+import { createGoogleAdsLiveAdapter } from '../src/ads/live-google.js';
+import { createMetaLiveAdapter } from '../src/ads/live-meta.js';
 import { fakeFetch } from './oauth.test.js';
 
 function googleDeps(fetchImpl: LiveAdapterDeps['fetchImpl']): LiveAdapterDeps {

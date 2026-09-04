@@ -1,5 +1,4 @@
-// Budget Guardian (CONTRACTS §8): overspend block, velocity auto-pause,
-// zero-conversion burn auto-pause — all audit-logged.
+// Budget Guardian: pre-flight spend checks plus observation-only pilot signals.
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
@@ -100,58 +99,45 @@ describe('checkSpend', () => {
   });
 });
 
-describe('tick enforcement', () => {
-  beforeEach(async () => {
-    await truncateAll(db);
-  });
+describe('tick observation-only mode', () => {
+  beforeEach(async () => { await truncateAll(db); });
 
-  it('velocity anomaly: projected overspend auto-pauses campaigns + audit-logs', async () => {
+  it('records a velocity signal without pausing the campaign', async () => {
     const org = await freshOrg({ now: NOW });
-    const campaign = await launchCampaign(org, 1_000); // fits the cap at creation
-
-    // Simulate runaway spend recorded in the mirror.
-    await db
-      .update(campaignsMirror)
+    const campaign = await launchCampaign(org, 1_000);
+    await db.update(campaignsMirror)
       .set({ metrics: { impressions: 100_000, clicks: 5_000, spendCents: 49_000, conversions: 10, history: [] } })
       .where(eq(campaignsMirror.orgId, org.orgId));
 
     const verdict = await tick(org.ctx);
-    expect(verdict.autoPaused!.length).toBeGreaterThan(0);
-    expect(verdict.reason).toMatch(/auto-paused/i);
-
-    const [mirror] = await db
-      .select()
-      .from(campaignsMirror)
-      .where(eq(campaignsMirror.externalId, campaign.externalId));
-    expect(mirror!.status).toBe('paused');
-
+    expect(verdict.ok).toBe(false);
+    expect(verdict.autoPaused).toEqual([]);
+    expect(verdict.reason).toMatch(/attention required/i);
+    const [mirror] = await db.select().from(campaignsMirror).where(eq(campaignsMirror.externalId, campaign.externalId));
+    expect(mirror!.status).toBe('active');
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
-    expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(true);
+    expect(audits.some((a) => a.action === 'guardian.signal.velocity')).toBe(true);
+    expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 
-  it('zero-conversion burn: ≥3× target CPL with 0 conversions auto-pauses', async () => {
-    const org = await freshOrg({ now: NOW, monthlyBudgetCeilingCents: 10_000_000 }); // cap far away
+  it('records a zero-conversion signal without pausing the campaign', async () => {
+    const org = await freshOrg({ now: NOW, monthlyBudgetCeilingCents: 10_000_000 });
     const campaign = await launchCampaign(org, 1_000);
-
-    await db
-      .update(campaignsMirror)
+    await db.update(campaignsMirror)
       .set({ metrics: { impressions: 9_000, clicks: 400, spendCents: 20_000, conversions: 0, history: [] } })
       .where(eq(campaignsMirror.orgId, org.orgId));
 
     const verdict = await tick(org.ctx);
-    expect(verdict.autoPaused).toContainEqual(expect.any(String));
-
-    const [mirror] = await db
-      .select()
-      .from(campaignsMirror)
-      .where(eq(campaignsMirror.externalId, campaign.externalId));
-    expect(mirror!.status).toBe('paused');
-
+    expect(verdict.ok).toBe(false);
+    expect(verdict.autoPaused).toEqual([]);
+    const [mirror] = await db.select().from(campaignsMirror).where(eq(campaignsMirror.externalId, campaign.externalId));
+    expect(mirror!.status).toBe('active');
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
-    expect(audits.some((a) => a.action === 'guardian.auto_pause.zero_conversion')).toBe(true);
+    expect(audits.some((a) => a.action === 'guardian.signal.zero_conversion')).toBe(true);
+    expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 
-  it('healthy spend does not auto-pause', async () => {
+  it('returns a healthy verdict without signals', async () => {
     const org = await freshOrg({ now: NOW });
     await launchCampaign(org, 1_000);
     const verdict = await tick(org.ctx);

@@ -85,7 +85,7 @@ describe('buildAuthorizationUrl', () => {
     );
     expect(url.host).toBe('www.facebook.com');
     expect(url.pathname).toBe('/v20.0/dialog/oauth');
-    expect(url.searchParams.get('scope')).toContain('ads_management');
+    expect(url.searchParams.get('scope')).toBe('ads_read');
   });
 });
 

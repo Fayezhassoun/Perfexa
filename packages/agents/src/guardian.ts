@@ -6,7 +6,6 @@ import { and, eq } from 'drizzle-orm';
 import { budgets, campaignsMirror } from '@growthcrew/db';
 import type { AdPlatform } from '@growthcrew/integrations';
 import type { AgentContext } from './types.js';
-import { getOrgAdapter } from './store.js';
 import type { MirrorMetrics } from './store.js';
 
 export interface GuardianVerdict {
@@ -135,85 +134,47 @@ export async function checkSpend(
 }
 
 /**
- * Periodic enforcement (worker poll): velocity anomaly auto-pause +
- * zero-conversion burn auto-pause. All actions audit-logged.
+ * Periodic observation for the pilot. It records risks but never mutates an
+ * external ad account. Recommendations must be reviewed by a human separately.
  */
 export async function tick(ctx: AgentContext): Promise<GuardianVerdict> {
   const now = ctx.now ?? new Date();
-  const autoPaused: string[] = [];
   const reasons: string[] = [];
-
   const allRows = await loadCampaigns(ctx);
   const platforms = [...new Set(allRows.map((r) => r.platform).filter((p): p is AdPlatform => Boolean(p)))];
 
-  // 1. Velocity anomaly: projected month-end > monthly cap → pause the platform.
   const caps = await loadBudgetCaps(ctx);
   const spentThisMonth = totalSpend(allRows);
   if (caps.globalMonthly != null) {
     const projected = projectMonthEnd(spentThisMonth, activeDailyTotal(allRows), now);
     if (wouldExceed(caps.globalMonthly, projected) && activeDailyTotal(allRows) > 0) {
-      for (const platform of platforms) {
-        const paused = await pausePlatform(ctx, platform, 'spend-velocity anomaly: projected month-end spend exceeds the monthly cap');
-        autoPaused.push(...paused);
-      }
-      reasons.push(`Auto-paused ${platforms.join(', ')} — projected spend $${(projected / 100).toFixed(0)} > cap $${(caps.globalMonthly / 100).toFixed(0)}.`);
+      reasons.push(`Attention required: projected spend $${(projected / 100).toFixed(0)} exceeds the monthly cap of $${(caps.globalMonthly / 100).toFixed(0)}.`);
+      await ctx.audit.log({
+        actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.velocity',
+        entityType: 'organization', entityId: ctx.orgId,
+        payload: { projectedCents: projected, capCents: caps.globalMonthly, platforms },
+        metadata: { mode: 'read_only' },
+      });
     }
   }
 
-  // 2. Zero-conversion burn: spend ≥ 3× target CPL with 0 conversions → pause campaign.
-  const targetCplCents = 5000; // default; per-org override lands in settings
+  const targetCplCents = 5000;
   for (const platform of platforms) {
-    const rows = allRows.filter((r) => r.platform === platform && r.status === 'active');
-    const burners = rows.filter((r) => {
-      const m = metricsOf(r);
-      return m.spendCents >= 3 * targetCplCents && m.conversions === 0;
+    const burners = allRows.filter((row) => {
+      if (row.platform !== platform || row.status !== 'active') return false;
+      const metrics = metricsOf(row);
+      return metrics.spendCents >= 3 * targetCplCents && metrics.conversions === 0;
     });
-    if (burners.length > 0) {
-      const adapter = await getOrgAdapter(ctx.db, ctx.orgId, platform);
-      for (const b of burners) {
-        const [mirror] = await ctx.db
-          .select({ externalId: campaignsMirror.externalId, name: campaignsMirror.name })
-          .from(campaignsMirror)
-          .where(eq(campaignsMirror.id, b.id))
-          .limit(1);
-        if (!mirror?.externalId) continue;
-        await adapter.pauseCampaign(mirror.externalId);
-        autoPaused.push(b.id);
-        await ctx.audit.log({
-          actorType: 'agent',
-          actorId: 'budget_guardian',
-          action: 'guardian.auto_pause.zero_conversion',
-          entityType: 'campaign',
-          entityId: b.id,
-          payload: { platform, externalId: mirror.externalId, name: mirror.name, spendCents: metricsOf(b).spendCents },
-        });
-        reasons.push(`Auto-paused "${mirror.name}" — $${(metricsOf(b).spendCents / 100).toFixed(0)} spent with no conversions.`);
-      }
+    for (const campaign of burners) {
+      const spendCents = metricsOf(campaign).spendCents;
+      reasons.push(`Attention required: campaign ${campaign.id} has spent $${(spendCents / 100).toFixed(0)} with no conversions.`);
+      await ctx.audit.log({
+        actorType: 'agent', actorId: 'budget_guardian', action: 'guardian.signal.zero_conversion',
+        entityType: 'campaign', entityId: campaign.id,
+        payload: { platform, spendCents, targetCplCents }, metadata: { mode: 'read_only' },
+      });
     }
   }
 
-  return { ok: autoPaused.length === 0, autoPaused, reason: reasons.join(' ') || undefined };
-}
-
-async function pausePlatform(ctx: AgentContext, platform: AdPlatform, reason: string): Promise<string[]> {
-  const adapter = await getOrgAdapter(ctx.db, ctx.orgId, platform);
-  const active = await ctx.db
-    .select({ id: campaignsMirror.id, externalId: campaignsMirror.externalId, name: campaignsMirror.name })
-    .from(campaignsMirror)
-    .where(and(eq(campaignsMirror.orgId, ctx.orgId), eq(campaignsMirror.platform, platform), eq(campaignsMirror.status, 'active')));
-  const paused: string[] = [];
-  for (const row of active) {
-    if (!row.externalId) continue;
-    await adapter.pauseCampaign(row.externalId);
-    paused.push(row.id);
-    await ctx.audit.log({
-      actorType: 'agent',
-      actorId: 'budget_guardian',
-      action: 'guardian.auto_pause.velocity',
-      entityType: 'campaign',
-      entityId: row.id,
-      payload: { platform, externalId: row.externalId, name: row.name, reason },
-    });
-  }
-  return paused;
+  return { ok: reasons.length === 0, autoPaused: [], reason: reasons.join(' ') || undefined };
 }
