@@ -34,6 +34,7 @@ export function wouldExceed(capCents: number, projectedCents: number): boolean {
 
 interface CampaignRow {
   id: string;
+  name: string | null;
   platform: string | null;
   status: string | null;
   budgetDailyCents: number | null;
@@ -43,6 +44,12 @@ interface CampaignRow {
 function metricsOf(row: CampaignRow): { spendCents: number; conversions: number } {
   const m = row.metrics as Partial<MirrorMetrics> | null;
   return { spendCents: m?.spendCents ?? 0, conversions: m?.conversions ?? 0 };
+}
+
+function platformLabel(platform: AdPlatform): string {
+  if (platform === 'google_ads') return 'Google Ads';
+  if (platform === 'meta') return 'Meta';
+  return 'TikTok';
 }
 
 async function loadBudgetCaps(ctx: AgentContext, platform?: AdPlatform) {
@@ -65,6 +72,7 @@ async function loadCampaigns(ctx: AgentContext, platform?: AdPlatform): Promise<
   return ctx.db
     .select({
       id: campaignsMirror.id,
+      name: campaignsMirror.name,
       platform: campaignsMirror.platform,
       status: campaignsMirror.status,
       budgetDailyCents: campaignsMirror.budgetDailyCents,
@@ -171,7 +179,7 @@ export async function tick(ctx: AgentContext): Promise<GuardianVerdict> {
   if (caps.globalMonthly != null) {
     const projected = projectMonthEnd(spentThisMonth, activeDailyTotal(allRows), now);
     if (wouldExceed(caps.globalMonthly, projected) && activeDailyTotal(allRows) > 0) {
-      const message = `Attention required: projected spend ${(projected / 100).toFixed(0)} exceeds the monthly cap of ${(caps.globalMonthly / 100).toFixed(0)}.`;
+      const message = `Attention required: projected spend $${(projected / 100).toFixed(0)} exceeds the monthly cap of $${(caps.globalMonthly / 100).toFixed(0)}.`;
       reasons.push(message);
       if (await shouldLogSignal(ctx, 'guardian.signal.velocity', ctx.orgId, now)) {
         await ctx.audit.log({
@@ -199,7 +207,8 @@ export async function tick(ctx: AgentContext): Promise<GuardianVerdict> {
     });
     for (const campaign of burners) {
       const spendCents = metricsOf(campaign).spendCents;
-      const message = `Attention required: campaign ${campaign.id} has spent ${(spendCents / 100).toFixed(0)} with no conversions.`;
+      const campaignName = campaign.name?.trim() || `Campaign ${campaign.id}`;
+      const message = `Attention required: "${campaignName}" on ${platformLabel(platform)} has spent $${(spendCents / 100).toFixed(0)} with no conversions.`;
       reasons.push(message);
       if (await shouldLogSignal(ctx, 'guardian.signal.zero_conversion', campaign.id, now)) {
         await ctx.audit.log({

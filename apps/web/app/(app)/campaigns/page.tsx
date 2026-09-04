@@ -22,7 +22,9 @@ export default function CampaignsPage() {
   const [platform, setPlatform] = useState<string>('');
   const utils = trpc.useUtils();
   const campaigns = trpc.campaigns.list.useQuery(platform ? { platform: platform as never } : undefined);
-  const pause = trpc.campaigns.pause.useMutation({ onSuccess: () => utils.campaigns.invalidate() });
+  const pause = trpc.campaigns.pause.useMutation({
+    onSuccess: () => utils.campaigns.invalidate(),
+  });
   const resume = trpc.campaigns.resume.useMutation({
     onSuccess: () => {
       void utils.campaigns.invalidate();
@@ -42,7 +44,7 @@ export default function CampaignsPage() {
       <PageHeader
         eyebrow="Growth"
         title="Campaigns"
-        description="Monitor active campaigns across platforms. Actions operate safely within your budget limits."
+        description="Monitor campaigns across platforms. Connected live accounts remain read-only during the pilot."
         actions={
           <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">
             <option value="">All platforms</option>
@@ -52,6 +54,11 @@ export default function CampaignsPage() {
           </Select>
         }
       />
+      {pause.error && (
+        <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+          {pause.error.message}
+        </p>
+      )}
       {resume.data && (
         <p
           className={
@@ -76,6 +83,7 @@ export default function CampaignsPage() {
                 spendCents?: number;
                 conversions?: number;
               } | null;
+              const liveReadOnly = c.mode === 'live';
               return (
                 <div key={c.id} className="glass-tile flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
@@ -95,10 +103,11 @@ export default function CampaignsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={pause.isPending}
+                        disabled={pause.isPending || liveReadOnly}
+                        title={liveReadOnly ? 'Live campaign changes are disabled during the read-only pilot.' : undefined}
                         onClick={() => pause.mutate({ id: c.id })}
                       >
-                        Pause
+                        {liveReadOnly ? 'Read-only' : 'Pause'}
                       </Button>
                     ) : (
                       <Button

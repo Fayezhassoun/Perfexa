@@ -119,7 +119,9 @@ describe('tick observation-only mode', () => {
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
     const signals = audits.filter((a) => a.action === 'guardian.signal.velocity');
     expect(signals).toHaveLength(1);
-    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(/monthly cap/i);
+    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(
+      /projected spend \$640.*monthly cap of \$500/i,
+    );
     expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 
@@ -139,7 +141,9 @@ describe('tick observation-only mode', () => {
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, org.orgId));
     const signals = audits.filter((a) => a.action === 'guardian.signal.zero_conversion');
     expect(signals).toHaveLength(1);
-    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(/no conversions/i);
+    expect((signals[0]!.metadata as Record<string, unknown>).message).toMatch(
+      /Campaign 1000.*Google Ads.*\$200.*no conversions/i,
+    );
     expect(audits.some((a) => a.action.startsWith('guardian.auto_pause'))).toBe(false);
   });
 
