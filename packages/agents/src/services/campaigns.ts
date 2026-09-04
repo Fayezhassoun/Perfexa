@@ -49,7 +49,9 @@ export async function getCampaign(ctx: AgentContext, id: string): Promise<Campai
 export async function pauseCampaign(ctx: AgentContext, id: string): Promise<{ ok: true }> {
   const row = await getCampaign(ctx, id);
   if (!row.externalId) throw new Error('Campaign has no external id');
-  if (row.accountMode === 'live') throw new Error('Live campaign changes are disabled during the read-only pilot.');
+  if (row.accountMode !== 'sandbox' || row.mode !== 'sandbox') {
+    throw new Error('Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.');
+  }
   await executeTool(ctx, 'ads.pause_campaign', { platform: row.platform as AdPlatform, externalId: row.externalId });
   return { ok: true };
 }
@@ -63,7 +65,9 @@ export interface ResumeResult {
 export async function resumeCampaign(ctx: AgentContext, id: string, via: 'voice' | 'click'): Promise<ResumeResult> {
   const row = await getCampaign(ctx, id);
   if (!row.externalId) throw new Error('Campaign has no external id');
-  if (row.accountMode === 'live') throw new Error('Live campaign changes are disabled during the read-only pilot.');
+  if (row.accountMode !== 'sandbox' || row.mode !== 'sandbox') {
+    throw new Error('Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.');
+  }
   const args = { platform: row.platform as AdPlatform, externalId: row.externalId };
   const action = { type: 'tool', toolName: 'ads.resume_campaign', args, summary: `Resume "${row.name}"` };
 

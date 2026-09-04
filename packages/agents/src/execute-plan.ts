@@ -121,18 +121,6 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
 
   await assertNoLiveAdWrites(ctx, plan);
   const now = ctx.now ?? new Date();
-  await ctx.db
-    .update(proposals)
-    .set({ status: 'approved', decidedBy: ctx.userId ?? null, decidedVia: via, decidedAt: now })
-    .where(eq(proposals.id, proposal.id));
-  await ctx.audit.log({
-    actorType: 'user',
-    actorId: ctx.userId ?? 'unknown',
-    action: 'proposal.approved',
-    entityType: 'proposal',
-    entityId: proposal.id,
-    payload: { via, title: plan.title, monthlyBudgetCents: plan.monthlyBudgetCents },
-  });
 
   // 1. Create the specialist agents (idempotent by orgId+type).
   const createdAgents: Agent[] = [];
@@ -144,6 +132,13 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
   const runIds: string[] = [];
   const errors: string[] = [];
   for (const action of plan.actions) {
+    try {
+      await assertNoLiveAdWrites(ctx, { ...plan, actions: [action] });
+    } catch (err) {
+      errors.push(`${action.summary}: ${err instanceof Error ? err.message : String(err)}`);
+      break;
+    }
+
     const [approval] = await ctx.db
       .insert(approvals)
       .values(approvalsValues(ctx, proposal.id, action, via, now))
@@ -179,15 +174,47 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
         .update(agentRuns)
         .set({ status: 'failed', error: message, toolCalls: records, completedAt: ctx.now ?? new Date() })
         .where(eq(agentRuns.id, run!.id));
+      await ctx.db
+        .update(approvals)
+        .set({
+          status: 'rejected',
+          decidedBy: ctx.userId ?? null,
+          decidedVia: 'system',
+          decidedAt: ctx.now ?? new Date(),
+        })
+        .where(eq(approvals.id, approval!.id));
+      await ctx.audit.log({
+        actorType: 'system',
+        actorId: 'proposal-executor',
+        action: 'approval.rejected',
+        entityType: 'approval',
+        entityId: approval!.id,
+        payload: { proposalId: proposal.id, toolName: action.toolName },
+        metadata: { automated: true, reason: 'tool_execution_failed', error: message },
+      });
       runIds.push(run!.id);
       break; // stop on first failure — partial execution stays visible (CONTRACTS §8)
     }
     runIds.push(run!.id);
   }
 
-  // 3. Remember the decisions.
-  await remember(ctx, 'approvedMonthlyBudgetCents', plan.monthlyBudgetCents);
-  if (plan.geography) await remember(ctx, 'geography', plan.geography);
+  // 3. Commit approval state only after every action succeeds.
+  if (errors.length === 0) {
+    await ctx.db
+      .update(proposals)
+      .set({ status: 'approved', decidedBy: ctx.userId ?? null, decidedVia: via, decidedAt: now })
+      .where(eq(proposals.id, proposal.id));
+    await ctx.audit.log({
+      actorType: 'user',
+      actorId: ctx.userId ?? 'unknown',
+      action: 'proposal.approved',
+      entityType: 'proposal',
+      entityId: proposal.id,
+      payload: { via, title: plan.title, monthlyBudgetCents: plan.monthlyBudgetCents },
+    });
+    await remember(ctx, 'approvedMonthlyBudgetCents', plan.monthlyBudgetCents);
+    if (plan.geography) await remember(ctx, 'geography', plan.geography);
+  }
 
   const [updated] = await ctx.db.select().from(proposals).where(eq(proposals.id, proposalId)).limit(1);
   return { proposal: updated!, plan, agentRuns: runIds, createdAgents, errors };

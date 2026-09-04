@@ -127,6 +127,20 @@ export async function setIntegrationMode(
           decidedAt: ctx.now ?? new Date(),
         })
         .where(eq(approvals.id, approval.id));
+      await ctx.audit.log({
+        actorType: 'system',
+        actorId: 'integration-mode',
+        action: 'approval.rejected',
+        entityType: 'approval',
+        entityId: approval.id,
+        payload: { platform, toolName: action.toolName },
+        metadata: {
+          automated: true,
+          reason: 'retired_when_platform_entered_live_read_only_mode',
+          platform,
+          toolName: action.toolName,
+        },
+      });
       retiredApprovals += 1;
     }
   }

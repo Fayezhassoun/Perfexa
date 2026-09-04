@@ -87,6 +87,37 @@ describe('setIntegrationMode', () => {
     expect(pending).toHaveLength(0);
     const [retired] = await db.select().from(approvals).where(eq(approvals.id, staleApproval!.id));
     expect(retired!.status).toBe('rejected');
+    const auditRows = await db.select().from(auditLogs).where(eq(auditLogs.orgId, orgId));
+    expect(
+      auditRows.some(
+        (entry) => entry.action === 'approval.rejected' && entry.entityId === staleApproval!.id,
+      ),
+    ).toBe(true);
+  });
+
+  it('keeps live-provenance rows read-only after switching the account back to sandbox', async () => {
+    const { ctx, orgId } = await freshOrg();
+    await connectSandboxAccount(ctx, 'google_ads');
+    await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
+    const [mirror] = await db
+      .insert(campaignsMirror)
+      .values({
+        orgId,
+        platform: 'google_ads',
+        externalId: 'live-provider-row',
+        name: 'Live provider campaign',
+        status: 'paused',
+        mode: 'live',
+      })
+      .returning();
+    await setIntegrationMode(ctx, 'google_ads', 'sandbox');
+
+    const [campaign] = await listCampaigns(ctx);
+    expect(campaign!.mode).toBe('live');
+    expect(campaign!.accountMode).toBe('sandbox');
+    await expect(resumeCampaign(ctx, mirror!.id, 'click')).rejects.toThrow(/sandbox-provenance/i);
+    const approvalRows = await db.select().from(approvals).where(eq(approvals.orgId, orgId));
+    expect(approvalRows).toHaveLength(0);
   });
 
   it('switching back to sandbox needs no confirmation', async () => {

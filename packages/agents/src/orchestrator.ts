@@ -100,11 +100,11 @@ export async function handleUserMessage(
     if (APPROVE_RE.test(message)) {
       const { plan, agentRuns, errors } = await approveProposal(ctx, pending.id, modality === 'voice' ? 'voice' : 'click');
       const firstRunSummary = plan.actions.map((a) => a.summary).join(' ');
-      const assistantMessage =
-        errors.length > 0
-          ? `I approved the plan but hit a problem: ${errors[0]} Check the activity feed for details.`
-          : `Done! ${firstRunSummary} Your ${plan.agents.length} specialists are set up and everything is running in safe sandbox mode — no real money is being spent. Take a look at the dashboard to watch results come in.`;
-      return { assistantMessage, proposal: plan, proposalId: pending.id, proposalApproved: true, agentRuns, errors };
+      const proposalApproved = errors.length === 0;
+      const assistantMessage = proposalApproved
+        ? `Done! ${firstRunSummary} Your ${plan.agents.length} specialists are set up and everything is running in safe sandbox mode — no real money is being spent. Take a look at the dashboard to watch results come in.`
+        : `I could not approve the plan: ${errors[0]} No blocked action was treated as completed.`;
+      return { assistantMessage, proposal: plan, proposalId: pending.id, proposalApproved, agentRuns, errors };
     }
     if (REJECT_RE.test(message)) {
       await ctx.db

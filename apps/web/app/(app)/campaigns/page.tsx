@@ -84,7 +84,7 @@ export default function CampaignsPage() {
                 spendCents?: number;
                 conversions?: number;
               } | null;
-              const liveReadOnly = c.accountMode === 'live';
+              const readOnly = c.accountMode !== 'sandbox' || c.mode !== 'sandbox';
               return (
                 <div key={c.id} className="glass-tile flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
@@ -104,21 +104,21 @@ export default function CampaignsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={pause.isPending || liveReadOnly}
-                        title={liveReadOnly ? 'Live campaign changes are disabled during the read-only pilot.' : undefined}
+                        disabled={pause.isPending || readOnly}
+                        title={readOnly ? 'Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.' : undefined}
                         onClick={() => pause.mutate({ id: c.id })}
                       >
-                        {liveReadOnly ? 'Read-only' : 'Pause'}
+                        {readOnly ? 'Read-only' : 'Pause'}
                       </Button>
                     ) : (
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={resume.isPending || liveReadOnly}
-                        title={liveReadOnly ? 'Live campaign changes are disabled during the read-only pilot.' : undefined}
+                        disabled={resume.isPending || readOnly}
+                        title={readOnly ? 'Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.' : undefined}
                         onClick={() => resume.mutate({ id: c.id })}
                       >
-                        {liveReadOnly ? 'Read-only' : 'Resume'}
+                        {readOnly ? 'Read-only' : 'Resume'}
                       </Button>
                     )}
                   </div>
