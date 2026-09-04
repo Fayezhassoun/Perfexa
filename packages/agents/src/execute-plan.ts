@@ -7,6 +7,7 @@ import { agents, agentRuns, approvals, connectedAccounts, proposals, type Agent,
 import type { AgentContext, AgentType, Plan, ToolCallRecord } from './types.js';
 import { executeTool } from './tools.js';
 import { remember } from './memory.js';
+import { payloadHash } from './audit.js';
 
 const AGENT_DISPLAY: Record<AgentType, string> = {
   orchestrator: 'Orchestrator',
@@ -84,6 +85,10 @@ const PILOT_BLOCKED_AD_TOOLS = new Set([
   'campaigns.delete',
 ]);
 
+function proposalActionKey(toolName: string, args: Record<string, unknown>): string {
+  return `${toolName}:${payloadHash(args)}`;
+}
+
 async function assertNoLiveAdWrites(ctx: AgentContext, plan: Plan): Promise<void> {
   const candidateActions = plan.actions.filter(
     (action) => PILOT_BLOCKED_AD_TOOLS.has(action.toolName) && typeof action.args.platform === 'string',
@@ -129,9 +134,25 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
   }
 
   // 2. Execute each gated action behind its own recorded approval.
+  // Approved rows for this proposal represent actions that completed in a
+  // previous partial attempt; skip them so retry cannot duplicate side effects.
+  const priorApprovals = await ctx.db
+    .select()
+    .from(approvals)
+    .where(and(eq(approvals.proposalId, proposal.id), eq(approvals.status, 'approved')));
+  const completedActionKeys = new Set(
+    priorApprovals.map((approval) => {
+      const action = approval.action as { toolName?: string; args?: Record<string, unknown> };
+      return proposalActionKey(action.toolName ?? '', action.args ?? {});
+    }),
+  );
+
   const runIds: string[] = [];
   const errors: string[] = [];
   for (const action of plan.actions) {
+    const actionKey = proposalActionKey(action.toolName, action.args);
+    if (completedActionKeys.has(actionKey)) continue;
+
     try {
       await assertNoLiveAdWrites(ctx, { ...plan, actions: [action] });
     } catch (err) {
@@ -167,6 +188,7 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
         .update(agentRuns)
         .set({ status: 'completed', output, toolCalls: records, completedAt: ctx.now ?? new Date() })
         .where(eq(agentRuns.id, run!.id));
+      completedActionKeys.add(actionKey);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       errors.push(`${action.summary}: ${message}`);

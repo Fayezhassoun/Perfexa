@@ -90,6 +90,44 @@ describe('§12 reference dialog (mock orchestrator)', () => {
     );
   });
 
+  it('skips completed proposal actions on retry instead of duplicating campaigns', async () => {
+    const org = await freshOrg({ websiteUrl: 'https://example.com' });
+    const r1 = await say(org, BRIEF);
+    const r2 = await say(org, 'Chicago area, yes $500 is fine.', r1.conversationId);
+    const plan = r2.proposal as Plan;
+    const createAction = plan.actions.find((action) => action.toolName === 'ads.create_campaign')!;
+
+    await db.insert(campaignsMirror).values({
+      orgId: org.orgId,
+      platform: 'google_ads',
+      externalId: 'already-created',
+      name: 'Already created',
+      status: 'active',
+      budgetDailyCents: 1_000,
+      mode: 'sandbox',
+    });
+    await db.insert(approvals).values({
+      orgId: org.orgId,
+      proposalId: r2.proposalId!,
+      action: {
+        type: 'tool',
+        toolName: createAction.toolName,
+        args: createAction.args,
+        summary: createAction.summary,
+      },
+      status: 'approved',
+      decidedBy: org.userId,
+      decidedVia: 'click',
+      decidedAt: new Date(),
+    });
+
+    const result = await say(org, 'approve', r2.conversationId);
+    expect(result.proposalApproved).toBe(true);
+    const mirrors = await db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, org.orgId));
+    expect(mirrors).toHaveLength(1);
+    expect(mirrors[0]!.externalId).toBe('already-created');
+  });
+
   it('keeps a proposal pending when it contains a blocked live-account write', async () => {
     const org = await freshOrg({ websiteUrl: 'https://example.com' });
     const r1 = await say(org, BRIEF);
