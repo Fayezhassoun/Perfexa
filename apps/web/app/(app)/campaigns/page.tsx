@@ -84,7 +84,7 @@ export default function CampaignsPage() {
                 spendCents?: number;
                 conversions?: number;
               } | null;
-              const liveReadOnly = c.mode === 'live';
+              const liveReadOnly = c.accountMode === 'live';
               return (
                 <div key={c.id} className="glass-tile flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">

@@ -3,7 +3,7 @@
 // (CONTRACTS §5/§16, acceptance invariant 4).
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { approvals, auditLogs, campaignsMirror, connectedAccounts } from '@growthcrew/db';
 import { listCampaigns, resumeCampaign } from '../src/services/campaigns.js';
 import { connectSandboxAccount, listIntegrations, setIntegrationMode } from '../src/services/settings.js';
@@ -62,13 +62,31 @@ describe('setIntegrationMode', () => {
         mode: 'sandbox',
       })
       .returning();
+    const [staleApproval] = await db
+      .insert(approvals)
+      .values({
+        orgId,
+        action: {
+          type: 'tool',
+          toolName: 'ads.resume_campaign',
+          args: { platform: 'google_ads', externalId: 'stale-sandbox-row' },
+        },
+        status: 'pending',
+      })
+      .returning();
     await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
 
     const [campaign] = await listCampaigns(ctx);
-    expect(campaign!.mode).toBe('live');
+    expect(campaign!.mode).toBe('sandbox');
+    expect(campaign!.accountMode).toBe('live');
     await expect(resumeCampaign(ctx, mirror!.id, 'click')).rejects.toThrow(/read-only pilot/i);
-    const pending = await db.select().from(approvals).where(eq(approvals.orgId, orgId));
+    const pending = await db
+      .select()
+      .from(approvals)
+      .where(and(eq(approvals.orgId, orgId), eq(approvals.status, 'pending')));
     expect(pending).toHaveLength(0);
+    const [retired] = await db.select().from(approvals).where(eq(approvals.id, staleApproval!.id));
+    expect(retired!.status).toBe('rejected');
   });
 
   it('switching back to sandbox needs no confirmation', async () => {

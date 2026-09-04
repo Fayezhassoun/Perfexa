@@ -3,8 +3,9 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { agents, auditLogs, campaignsMirror, proposals } from '@growthcrew/db';
+import { agents, approvals, auditLogs, campaignsMirror, proposals } from '@growthcrew/db';
 import { sendChatMessage } from '../src/services/conversations.js';
+import { connectSandboxAccount, setIntegrationMode } from '../src/services/settings.js';
 import type { Plan } from '../src/types.js';
 import { db, freshOrg, truncateAll, type TestOrg } from './helpers.js';
 
@@ -87,6 +88,22 @@ describe('§12 reference dialog (mock orchestrator)', () => {
     expect(actions).toEqual(
       expect.arrayContaining(['proposal.approved', 'tool.ads.create_campaign', 'agent.created']),
     );
+  });
+
+  it('keeps a proposal pending when it contains a blocked live-account write', async () => {
+    const org = await freshOrg({ websiteUrl: 'https://example.com' });
+    const r1 = await say(org, BRIEF);
+    const r2 = await say(org, 'Chicago area, yes $500 is fine.', r1.conversationId);
+    await connectSandboxAccount(org.ctx, 'google_ads');
+    await setIntegrationMode(org.ctx, 'google_ads', 'live', 'LIVE');
+
+    await expect(say(org, 'approve', r2.conversationId)).rejects.toThrow(/read-only pilot/i);
+    const [proposal] = await db.select().from(proposals).where(eq(proposals.orgId, org.orgId));
+    expect(proposal!.status).toBe('pending');
+    const approvalRows = await db.select().from(approvals).where(eq(approvals.orgId, org.orgId));
+    expect(approvalRows).toHaveLength(0);
+    const mirror = await db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, org.orgId));
+    expect(mirror).toHaveLength(0);
   });
 
   it('"cancel" on a pending proposal rejects it and launches nothing', async () => {

@@ -3,7 +3,7 @@
 // executes without a recorded approval, and execution stops loudly on failure.
 
 import { and, eq } from 'drizzle-orm';
-import { agents, agentRuns, approvals, proposals, type Agent, type Proposal } from '@growthcrew/db';
+import { agents, agentRuns, approvals, connectedAccounts, proposals, type Agent, type Proposal } from '@growthcrew/db';
 import type { AgentContext, AgentType, Plan, ToolCallRecord } from './types.js';
 import { executeTool } from './tools.js';
 import { remember } from './memory.js';
@@ -76,6 +76,33 @@ export interface ApproveProposalResult {
   errors: string[];
 }
 
+const PILOT_BLOCKED_AD_TOOLS = new Set([
+  'ads.create_campaign',
+  'ads.pause_campaign',
+  'ads.resume_campaign',
+  'ads.update_budget',
+  'campaigns.delete',
+]);
+
+async function assertNoLiveAdWrites(ctx: AgentContext, plan: Plan): Promise<void> {
+  const candidateActions = plan.actions.filter(
+    (action) => PILOT_BLOCKED_AD_TOOLS.has(action.toolName) && typeof action.args.platform === 'string',
+  );
+  if (candidateActions.length === 0) return;
+
+  const accounts = await ctx.db
+    .select({ platform: connectedAccounts.platform })
+    .from(connectedAccounts)
+    .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.mode, 'live')));
+  const livePlatforms = new Set(accounts.map((account) => account.platform));
+  const blocked = candidateActions.find((action) => livePlatforms.has(action.args.platform as string));
+  if (blocked) {
+    throw new Error(
+      `This proposal includes ${blocked.toolName} for a live account. External ad changes are disabled during the read-only pilot.`,
+    );
+  }
+}
+
 export async function approveProposal(ctx: AgentContext, proposalId: string, via: 'voice' | 'click'): Promise<ApproveProposalResult> {
   const [proposal] = await ctx.db
     .select()
@@ -92,6 +119,7 @@ export async function approveProposal(ctx: AgentContext, proposalId: string, via
   }
   if (proposal.status !== 'pending') throw new Error(`Proposal is ${proposal.status}; only pending proposals can be approved`);
 
+  await assertNoLiveAdWrites(ctx, plan);
   const now = ctx.now ?? new Date();
   await ctx.db
     .update(proposals)
