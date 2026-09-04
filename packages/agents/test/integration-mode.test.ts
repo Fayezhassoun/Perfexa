@@ -4,7 +4,8 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { auditLogs, connectedAccounts } from '@growthcrew/db';
+import { approvals, auditLogs, campaignsMirror, connectedAccounts } from '@growthcrew/db';
+import { listCampaigns, resumeCampaign } from '../src/services/campaigns.js';
 import { connectSandboxAccount, listIntegrations, setIntegrationMode } from '../src/services/settings.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 
@@ -45,6 +46,29 @@ describe('setIntegrationMode', () => {
 
     const rows = await db.select().from(auditLogs).where(eq(auditLogs.orgId, orgId));
     expect(rows.some((r) => r.action === 'integration.mode_changed')).toBe(true);
+  });
+
+  it('uses connected-account mode for stale mirror rows and creates no impossible resume approval', async () => {
+    const { ctx, orgId } = await freshOrg();
+    await connectSandboxAccount(ctx, 'google_ads');
+    const [mirror] = await db
+      .insert(campaignsMirror)
+      .values({
+        orgId,
+        platform: 'google_ads',
+        externalId: 'stale-sandbox-row',
+        name: 'Paused live campaign',
+        status: 'paused',
+        mode: 'sandbox',
+      })
+      .returning();
+    await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
+
+    const [campaign] = await listCampaigns(ctx);
+    expect(campaign!.mode).toBe('live');
+    await expect(resumeCampaign(ctx, mirror!.id, 'click')).rejects.toThrow(/read-only pilot/i);
+    const pending = await db.select().from(approvals).where(eq(approvals.orgId, orgId));
+    expect(pending).toHaveLength(0);
   });
 
   it('switching back to sandbox needs no confirmation', async () => {

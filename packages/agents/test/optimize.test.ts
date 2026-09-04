@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { approvals, auditLogs, campaignsMirror, type CampaignMirror } from '@growthcrew/db';
 import { buildSuggestions, generateOptimizationApprovals } from '../src/services/optimize.js';
+import { connectSandboxAccount, setIntegrationMode } from '../src/services/settings.js';
 import { db, freshOrg, truncateAll } from './helpers.js';
 
 function row(partial: Partial<CampaignMirror>): CampaignMirror {
@@ -58,10 +59,11 @@ describe('buildSuggestions (pure rules)', () => {
     expect(shift[1]!.args).toEqual({ platform: 'meta', externalId: 'm', dailyBudgetCents: 1200 });
   });
 
-  it('ignores paused/removed campaigns and healthy active ones', () => {
+  it('ignores paused, healthy, and live read-only campaigns', () => {
     const suggestions = buildSuggestions([
       row({ externalId: 'p', status: 'paused', metrics: metrics(9999, 0) }),
       row({ externalId: 'h', budgetDailyCents: 1000, metrics: metrics(500, 0) }), // under 3× daily
+      row({ externalId: 'live', mode: 'live', metrics: metrics(9999, 0) }),
     ]);
     expect(suggestions).toHaveLength(0);
   });
@@ -115,6 +117,19 @@ describe('generateOptimizationApprovals (db)', () => {
 
     const audits = await db.select().from(auditLogs).where(eq(auditLogs.orgId, orgId));
     expect(audits.some((a) => a.action === 'optimize.suggestions')).toBe(true);
+  });
+
+  it('does not create approvals for a live-connected platform even when mirror mode is stale', async () => {
+    const { ctx, orgId } = await freshOrg();
+    await seedCampaign(orgId, { externalId: 'stale-sandbox-row', budgetDailyCents: 1000, spendCents: 3500, conversions: 0 });
+    await connectSandboxAccount(ctx, 'google_ads');
+    await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
+
+    const result = await generateOptimizationApprovals(ctx);
+    expect(result.created).toBe(0);
+    expect(result.suggestions).toEqual([]);
+    const rows = await db.select().from(approvals).where(eq(approvals.orgId, orgId));
+    expect(rows).toHaveLength(0);
   });
 
   it('is idempotent: a second run skips duplicates already pending', async () => {
