@@ -31,6 +31,7 @@ export default function CampaignsPage() {
       void utils.approvals.invalidate();
     },
   });
+  const controlError = pause.error ?? resume.error;
 
   const grouped = new Map<string, NonNullable<typeof campaigns.data>>();
   for (const c of campaigns.data ?? []) {
@@ -54,9 +55,9 @@ export default function CampaignsPage() {
           </Select>
         }
       />
-      {pause.error && (
+      {controlError && (
         <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-          {pause.error.message}
+          {controlError.message}
         </p>
       )}
       {resume.data && (
@@ -113,10 +114,11 @@ export default function CampaignsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={resume.isPending}
+                        disabled={resume.isPending || liveReadOnly}
+                        title={liveReadOnly ? 'Live campaign changes are disabled during the read-only pilot.' : undefined}
                         onClick={() => resume.mutate({ id: c.id })}
                       >
-                        Resume
+                        {liveReadOnly ? 'Read-only' : 'Resume'}
                       </Button>
                     )}
                   </div>

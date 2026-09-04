@@ -87,7 +87,9 @@ async function dispatch(ctx: AgentContext, agentType: AgentType, task: string): 
     }
     case 'budget_guardian': {
       const verdict = await tick(ctx);
-      return verdict.ok ? 'Budget Guardian: all within caps.' : `Budget Guardian acted: ${verdict.reason}`;
+      return verdict.ok
+        ? 'Budget Guardian: all within caps.'
+        : `Budget Guardian observed a risk: ${verdict.reason} Review it before making changes.`;
     }
     default:
       return `Task noted: ${task}`;
