@@ -21,13 +21,16 @@ export function oauthProviderFor(platform: ConnectablePlatform): OAuthProvider {
   return 'google';
 }
 
+// Google Ads exposes one API scope for reads and writes. Pilot safety therefore
+// also requires the connected Google identity to have a read-only Ads account role.
 const GOOGLE_SCOPES: Record<'google_ads' | 'ga4' | 'gsc', string> = {
   google_ads: 'https://www.googleapis.com/auth/adwords',
   ga4: 'https://www.googleapis.com/auth/analytics.readonly',
   gsc: 'https://www.googleapis.com/auth/webmasters.readonly',
 };
 
-export const META_SCOPES = ['ads_management', 'ads_read', 'business_management'];
+/** Minimum permission needed to read ad-account data during the pilot. */
+export const META_SCOPES = ['ads_read'];
 
 /** TikTok app permissions are configured on the app itself — no scope param. */
 export function scopesFor(platform: ConnectablePlatform): string[] {

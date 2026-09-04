@@ -22,13 +22,16 @@ export default function CampaignsPage() {
   const [platform, setPlatform] = useState<string>('');
   const utils = trpc.useUtils();
   const campaigns = trpc.campaigns.list.useQuery(platform ? { platform: platform as never } : undefined);
-  const pause = trpc.campaigns.pause.useMutation({ onSuccess: () => utils.campaigns.invalidate() });
+  const pause = trpc.campaigns.pause.useMutation({
+    onSuccess: () => utils.campaigns.invalidate(),
+  });
   const resume = trpc.campaigns.resume.useMutation({
     onSuccess: () => {
       void utils.campaigns.invalidate();
       void utils.approvals.invalidate();
     },
   });
+  const controlError = pause.error ?? resume.error;
 
   const grouped = new Map<string, NonNullable<typeof campaigns.data>>();
   for (const c of campaigns.data ?? []) {
@@ -42,7 +45,7 @@ export default function CampaignsPage() {
       <PageHeader
         eyebrow="Growth"
         title="Campaigns"
-        description="Monitor active campaigns across platforms. Actions operate safely within your budget limits."
+        description="Monitor campaigns across platforms. Connected live accounts remain read-only during the pilot."
         actions={
           <Select value={platform} onChange={(e) => setPlatform(e.target.value)} className="w-44">
             <option value="">All platforms</option>
@@ -52,6 +55,11 @@ export default function CampaignsPage() {
           </Select>
         }
       />
+      {controlError && (
+        <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+          {controlError.message}
+        </p>
+      )}
       {resume.data && (
         <p
           className={
@@ -76,6 +84,7 @@ export default function CampaignsPage() {
                 spendCents?: number;
                 conversions?: number;
               } | null;
+              const readOnly = c.accountMode !== 'sandbox' || c.mode !== 'sandbox';
               return (
                 <div key={c.id} className="glass-tile flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
@@ -95,19 +104,21 @@ export default function CampaignsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={pause.isPending}
+                        disabled={pause.isPending || readOnly}
+                        title={readOnly ? 'Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.' : undefined}
                         onClick={() => pause.mutate({ id: c.id })}
                       >
-                        Pause
+                        {readOnly ? 'Read-only' : 'Pause'}
                       </Button>
                     ) : (
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={resume.isPending}
+                        disabled={resume.isPending || readOnly}
+                        title={readOnly ? 'Campaign changes require sandbox account mode and sandbox-provenance data during the read-only pilot.' : undefined}
                         onClick={() => resume.mutate({ id: c.id })}
                       >
-                        Resume
+                        {readOnly ? 'Read-only' : 'Resume'}
                       </Button>
                     )}
                   </div>

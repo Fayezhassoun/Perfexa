@@ -6,11 +6,11 @@ import { describe, expect, it } from 'vitest';
 import {
   LiveAdapterNotConnected,
   createLiveAdapter,
-  createGoogleAdsLiveAdapter,
-  createMetaLiveAdapter,
-  createTikTokLiveAdapter,
   type LiveAdapterDeps,
 } from '../src/index.js';
+import { createGoogleAdsLiveAdapter } from '../src/ads/live-google.js';
+import { createMetaLiveAdapter } from '../src/ads/live-meta.js';
+import { createTikTokLiveAdapter } from '../src/ads/live-tiktok.js';
 import { fakeFetch, parsedBody } from './oauth.test.js';
 
 function googleDeps(fetchImpl: LiveAdapterDeps['fetchImpl']): LiveAdapterDeps {

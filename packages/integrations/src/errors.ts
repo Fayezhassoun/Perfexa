@@ -23,6 +23,20 @@ export class LiveAdapterNotConnected extends AdapterError {
   }
 }
 
+/** Thrown when any caller attempts to mutate an external ad account during the read-only pilot. */
+export class PilotReadOnlyViolation extends AdapterError {
+  constructor(
+    platform: string,
+    public readonly action: string,
+  ) {
+    super(
+      `${action} is disabled for ${platform} while Perfexa is operating in pilot read-only mode.`,
+      platform,
+    );
+    this.name = 'PilotReadOnlyViolation';
+  }
+}
+
 /** Thrown by the tool layer when a gated tool runs without an approved approval row. */
 export class ApprovalRequired extends Error {
   constructor(

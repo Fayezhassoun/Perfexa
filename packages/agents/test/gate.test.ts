@@ -96,7 +96,7 @@ describe('approval gate', () => {
     expect(audits.some((a) => a.action === 'tool.ads.create_campaign' && a.payloadHash)).toBe(true);
   });
 
-  it('non-gated tools run without approvals (pause is always safe)', async () => {
+  it('allows sandbox pause without approval while the live adapter boundary remains authoritative', async () => {
     const { ctx, orgId, userId } = await freshOrg();
     const approval = await approvedRowFor(orgId, userId, 'ads.create_campaign', CAMPAIGN_ARGS);
     const { result } = await executeTool(ctx, 'ads.create_campaign', {
@@ -108,5 +108,11 @@ describe('approval gate', () => {
     await expect(
       executeTool(ctx, 'ads.pause_campaign', { platform: 'google_ads', externalId }),
     ).resolves.toBeTruthy();
+
+    const [mirror] = await db
+      .select()
+      .from(campaignsMirror)
+      .where(eq(campaignsMirror.externalId, externalId));
+    expect(mirror!.status).toBe('paused');
   });
 });

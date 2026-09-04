@@ -6,7 +6,7 @@
 // check at execution time anyway.
 
 import { and, desc, eq } from 'drizzle-orm';
-import { approvals, campaignsMirror, type CampaignMirror } from '@growthcrew/db';
+import { approvals, campaignsMirror, connectedAccounts, type CampaignMirror } from '@growthcrew/db';
 import type { MirrorMetrics } from '../store.js';
 import { payloadHash } from '../audit.js';
 import type { AgentContext } from '../types.js';
@@ -46,7 +46,7 @@ function statsOf(row: CampaignMirror): CampaignStats {
  *    the worst campaign's daily budget to the best one.
  */
 export function buildSuggestions(campaigns: CampaignMirror[]): OptimizationSuggestion[] {
-  const active = campaigns.filter((c) => c.status === 'active' && c.externalId);
+  const active = campaigns.filter((c) => c.status === 'active' && c.externalId && c.mode !== 'live');
   const stats = active.map(statsOf);
   const suggestions: OptimizationSuggestion[] = [];
 
@@ -150,7 +150,14 @@ export async function generateOptimizationApprovals(ctx: AgentContext): Promise<
     .where(and(eq(campaignsMirror.orgId, ctx.orgId), eq(campaignsMirror.status, 'active')))
     .orderBy(desc(campaignsMirror.updatedAt));
 
-  const suggestions = buildSuggestions(campaigns);
+  const liveAccounts = await ctx.db
+    .select({ platform: connectedAccounts.platform })
+    .from(connectedAccounts)
+    .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.mode, 'live')));
+  const livePlatforms = new Set(liveAccounts.map((account) => account.platform));
+  const suggestions = buildSuggestions(
+    campaigns.filter((campaign) => !livePlatforms.has(campaign.platform ?? '')),
+  );
   const pending = await ctx.db
     .select()
     .from(approvals)

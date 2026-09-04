@@ -8,9 +8,6 @@ export { runPageSpeed } from './pagespeed.js';
 export { runSeoAudit } from './seo-audit.js';
 
 export { getAdAdapter, createMockAdapter, createLiveAdapter, type MockAdAdapter } from './ads/index.js';
-export { createGoogleAdsLiveAdapter } from './ads/live-google.js';
-export { createMetaLiveAdapter } from './ads/live-meta.js';
-export { createTikTokLiveAdapter } from './ads/live-tiktok.js';
 export { checkAdCopyPolicy } from './ads/policy.js';
 
 export {

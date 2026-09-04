@@ -8,6 +8,13 @@ import type { AgentContext } from '../types.js';
 import { isOAuthConfigured } from '../live.js';
 
 const PLATFORMS = ['google_ads', 'meta', 'tiktok', 'ga4', 'gsc'] as const;
+const PILOT_BLOCKED_AD_TOOLS = new Set([
+  'ads.create_campaign',
+  'ads.pause_campaign',
+  'ads.resume_campaign',
+  'ads.update_budget',
+  'campaigns.delete',
+]);
 export type IntegrationPlatform = (typeof PLATFORMS)[number];
 
 export interface IntegrationStatus {
@@ -91,13 +98,60 @@ export async function setIntegrationMode(
   } else {
     await ctx.db.insert(connectedAccounts).values({ orgId: ctx.orgId, platform, mode, status: 'connected' });
   }
+  let retiredApprovals = 0;
+  if (mode === 'live') {
+    const pending = await ctx.db
+      .select()
+      .from(approvals)
+      .where(and(eq(approvals.orgId, ctx.orgId), eq(approvals.status, 'pending')));
+    for (const approval of pending) {
+      const action = approval.action as {
+        type?: string;
+        toolName?: string;
+        args?: Record<string, unknown>;
+      };
+      if (
+        action.type !== 'tool' ||
+        !action.toolName ||
+        !PILOT_BLOCKED_AD_TOOLS.has(action.toolName) ||
+        action.args?.platform !== platform
+      ) {
+        continue;
+      }
+      await ctx.db
+        .update(approvals)
+        .set({
+          status: 'rejected',
+          decidedBy: ctx.userId ?? null,
+          decidedVia: 'system',
+          decidedAt: ctx.now ?? new Date(),
+        })
+        .where(eq(approvals.id, approval.id));
+      await ctx.audit.log({
+        actorType: 'system',
+        actorId: 'integration-mode',
+        action: 'approval.rejected',
+        entityType: 'approval',
+        entityId: approval.id,
+        payload: { platform, toolName: action.toolName },
+        metadata: {
+          automated: true,
+          reason: 'retired_when_platform_entered_live_read_only_mode',
+          platform,
+          toolName: action.toolName,
+        },
+      });
+      retiredApprovals += 1;
+    }
+  }
+
   await ctx.audit.log({
     actorType: 'user',
     actorId: ctx.userId ?? 'unknown',
     action: 'integration.mode_changed',
     entityType: 'connected_account',
     entityId: row?.id ?? platform,
-    payload: { platform, mode },
+    payload: { platform, mode, retiredApprovals },
   });
   const all = await listIntegrations(ctx);
   return all.find((i) => i.platform === platform)!;
