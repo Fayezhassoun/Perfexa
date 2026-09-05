@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageShell, PageHeader } from '@/components/page-shell';
 import { ModelSelectorCard } from '@/components/model-selector';
 import { cn } from '@/lib/utils';
+import { SyncResults } from '@/components/pilot-evidence';
 import {
   GoLiveDialog,
   IntegrationPlatformCard,
@@ -33,6 +34,12 @@ const PLATFORM_LABELS: Record<string, string> = {
 };
 
 export default function SettingsPage() {
+  return <Suspense fallback={null}><SettingsContent /></Suspense>;
+}
+
+function SettingsContent() {
+  const params = useSearchParams();
+  const initialTab = params.has('connected') || params.has('error') || params.get('tab') === 'integrations' ? 'integrations' : 'brand';
   return (
     <PageShell className="space-y-4">
       <PageHeader
@@ -40,7 +47,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage ad platform integrations, hard budget caps, team members, and notification preferences."
       />
-      <Tabs defaultValue="brand">
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="brand">Brand DNA</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
@@ -182,14 +189,14 @@ function OAuthNotice() {
   const error = params.get('error');
   if (connected) {
     return (
-      <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
-        {PLATFORM_LABELS[connected] ?? connected} connected — the card below shows the connected account, and it&apos;s
+      <p role="status" className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm">
+        {PLATFORM_LABELS[connected] ?? connected} connected. The card below shows the connected account, and it&apos;s
         in sandbox mode. Switch to live when you&apos;re ready (you&apos;ll type LIVE to confirm).
       </p>
     );
   }
   if (error) {
-    return <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">{error}</p>;
+    return <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">{error}</p>;
   }
   return null;
 }
@@ -209,19 +216,6 @@ function asDate(value: Date | string | null): Date | null {
   if (!value) return null;
   const date = value instanceof Date ? value : new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function formatSyncAge(value: Date | string | null): string {
-  const date = asDate(value);
-  if (!date) return 'not synced yet';
-
-  const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60_000));
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 }
 
 function IntegrationHealthRow({
@@ -250,10 +244,10 @@ function IntegrationHealthRow({
       ? 'Connection health unavailable'
       : health?.needsReconnect
         ? expiring
-          ? 'Token expiring — reconnect soon'
-          : 'Connection lost — reconnect'
+          ? 'Token expiring. Reconnect soon'
+          : 'Connection lost. Reconnect'
         : health
-          ? `Connected · synced ${formatSyncAge(health.lastSyncAt)}`
+          ? integration.oauthConnected ? `OAuth connected · token ${health.tokenHealthy ? 'healthy' : 'needs attention'}` : 'Simulated sandbox connection'
           : integration.connected
             ? 'Connected · sync status pending'
             : 'Not connected · connect to start syncing';
@@ -283,6 +277,7 @@ function IntegrationHealthRow({
         <span className="font-medium">{label}</span>
       </div>
 
+      {integration.connected && <span className="basis-full">Last successful sync: {health?.lastSyncAt ? asDate(health.lastSyncAt)?.toISOString() : 'not synced yet'}</span>}
       {health?.warning && health.needsReconnect && (
         <span className="basis-full leading-5 text-current/80">{health.warning}</span>
       )}
@@ -325,7 +320,7 @@ function IntegrationsTab() {
       void utils.settings.invalidate();
       void utils.dashboard.invalidate();
       void utils.reports.invalidate();
-      const failed = result.filter((row) => row.error);
+      const failed = result.filter((row) => row.error || row.skipped);
       const synced = result.reduce((total, row) => total + row.synced, 0);
       setSyncMessage(
         failed.length
@@ -342,7 +337,7 @@ function IntegrationsTab() {
   );
   const connectedCount = rows.filter((integration) => integration.connected).length;
   const liveConnected = rows.some(
-    (integration) => integration.connected && integration.status === 'connected' && integration.mode === 'live',
+    (integration) => ['google_ads', 'meta', 'tiktok'].includes(integration.platform) && integration.oauthConnected && integration.oauthConfigured && integration.status === 'connected' && integration.mode === 'live',
   );
 
   if (integrations.isLoading) {
@@ -395,8 +390,10 @@ function IntegrationsTab() {
         </div>
       </div>
 
+      {syncNow.data && <SyncResults results={syncNow.data} />}
       {syncMessage && <p className="text-sm text-muted-foreground" role="status">{syncMessage}</p>}
 
+      {setMode.error && !confirming && <p role="alert" className="text-sm text-destructive">{setMode.error.message}</p>}
       {connect.error && (
         <p className="rounded-xl border border-destructive/35 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
           {connect.error.message}

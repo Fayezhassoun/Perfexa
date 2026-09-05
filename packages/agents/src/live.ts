@@ -60,6 +60,14 @@ export function oauthClientConfigFor(
   return config;
 }
 
+/** Names only: never return credential values to clients. */
+export function missingOAuthConfiguration(platform: string, env: NodeJS.ProcessEnv = process.env): string[] {
+  const keys = platform === 'meta' ? ['META_APP_ID', 'META_APP_SECRET']
+    : platform === 'tiktok' ? ['TIKTOK_APP_ID', 'TIKTOK_APP_SECRET']
+    : ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', ...(platform === 'google_ads' ? ['GOOGLE_ADS_DEVELOPER_TOKEN'] : [])];
+  return keys.filter((key) => !env[key]);
+}
+
 export function isOAuthConfigured(platform: string, env: NodeJS.ProcessEnv = process.env): boolean {
   return oauthClientConfigFor(platform, env) !== null;
 }

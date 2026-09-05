@@ -1,13 +1,15 @@
 // The §12 reference dialog (CONTRACTS §9) — exact required mock behavior,
 // driven through the same sendChatMessage entry the web app uses.
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { agents, approvals, auditLogs, campaignsMirror, proposals } from '@growthcrew/db';
 import { sendChatMessage } from '../src/services/conversations.js';
-import { connectSandboxAccount, setIntegrationMode } from '../src/services/settings.js';
+import { setIntegrationMode } from '../src/services/settings.js';
 import type { Plan } from '../src/types.js';
-import { db, freshOrg, truncateAll, type TestOrg } from './helpers.js';
+import { connectOAuthTestAccount, db, freshOrg, truncateAll, type TestOrg } from './helpers.js';
+
+afterEach(() => vi.unstubAllEnvs());
 
 const BRIEF = 'I need an SEO specialist. I need my website to be top visible. I need to get leads.';
 
@@ -132,7 +134,7 @@ describe('§12 reference dialog (mock orchestrator)', () => {
     const org = await freshOrg({ websiteUrl: 'https://example.com' });
     const r1 = await say(org, BRIEF);
     const r2 = await say(org, 'Chicago area, yes $500 is fine.', r1.conversationId);
-    await connectSandboxAccount(org.ctx, 'google_ads');
+    await connectOAuthTestAccount(org.ctx, 'google_ads');
     await setIntegrationMode(org.ctx, 'google_ads', 'live', 'LIVE');
 
     await expect(say(org, 'approve', r2.conversationId)).rejects.toThrow(/read-only pilot/i);

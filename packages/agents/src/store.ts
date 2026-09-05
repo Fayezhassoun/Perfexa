@@ -33,6 +33,8 @@ export interface AdapterStateView {
 }
 
 export interface MirrorMetrics extends CampaignMetrics {
+  syncedAt?: string;
+  externalAccountId?: string;
   history: ({ date: string } & CampaignMetrics)[];
 }
 
@@ -46,7 +48,10 @@ export async function mirrorCampaigns(
   platform: AdPlatform,
   state: AdapterStateView,
   mode: 'sandbox' | 'live' = 'sandbox',
+  source?: { connectedAccountId: string; externalAccountId: string; syncedAt: string },
 ): Promise<void> {
+  const date = source?.syncedAt.slice(0, 10) ?? today();
+  const provenance = source ? { externalAccountId: source.externalAccountId, syncedAt: source.syncedAt } : {};
   for (const c of state.campaigns ?? []) {
     const [existing] = await db
       .select()
@@ -63,12 +68,14 @@ export async function mirrorCampaigns(
     if (!existing) {
       const metrics: MirrorMetrics = {
         ...c.metrics,
-        history: [{ date: today(), ...c.metrics }],
+        ...provenance,
+        history: [{ date, ...c.metrics }],
       };
       await db.insert(campaignsMirror).values({
         orgId,
         platform,
         externalId: c.externalId,
+        connectedAccountId: source?.connectedAccountId ?? null,
         name: c.name,
         status: c.status,
         budgetDailyCents: c.budgetDailyCents,
@@ -77,16 +84,17 @@ export async function mirrorCampaigns(
       });
     } else {
       const prev = (existing.metrics as MirrorMetrics | null) ?? { ...c.metrics, history: [] };
-      const history = [...(prev.history ?? [])];
-      if (history.length === 0 || history[history.length - 1]?.date !== today()) {
-        history.push({ date: today(), ...c.metrics });
+      const sameSource = existing.mode === mode && prev.externalAccountId === source?.externalAccountId;
+      const history = sameSource ? [...(prev.history ?? [])] : [];
+      if (history.length === 0 || history[history.length - 1]?.date !== date) {
+        history.push({ date, ...c.metrics });
       } else {
-        history[history.length - 1] = { date: today(), ...c.metrics };
+        history[history.length - 1] = { date, ...c.metrics };
       }
-      const metrics: MirrorMetrics = { ...c.metrics, history: history.slice(-90) };
+      const metrics: MirrorMetrics = { ...c.metrics, ...provenance, history: history.slice(-90) };
       await db
         .update(campaignsMirror)
-        .set({ name: c.name, status: c.status, budgetDailyCents: c.budgetDailyCents, metrics, mode })
+        .set({ name: c.name, status: c.status, budgetDailyCents: c.budgetDailyCents, metrics, mode, connectedAccountId: source?.connectedAccountId ?? null })
         .where(eq(campaignsMirror.id, existing.id));
     }
   }

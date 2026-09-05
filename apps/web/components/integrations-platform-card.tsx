@@ -32,6 +32,8 @@ export type IntegrationRecord = {
   externalAccountId: string | null;
   health: string;
   oauthConfigured: boolean;
+  missingConfiguration?: string[];
+  oauthConnected?: boolean;
   connectUrl: string | null;
 };
 
@@ -115,7 +117,7 @@ function PlatformIcon({ platform }: { platform: IntegrationPlatform }) {
 
 /**
  * The truthful state of one integration, derived only from the server-provided
- * record. Live connections are supported by the product — `setup_needed` means
+ * record. Live connections are supported by the product. `setup_needed` means
  * this deployment is missing the platform's OAuth app credentials, not that the
  * feature is "coming soon".
  */
@@ -141,17 +143,19 @@ export function integrationNextStep(integration: IntegrationRecord): string {
     case 'setup_needed':
       return `Sandbox mode works now. A live ${config.name} connection needs an operator to add the OAuth app credentials to this deployment first.`;
     case 'ready_to_connect':
-      return `Next step: connect your ${config.name} account with read-only OAuth — it starts in sandbox until you approve live mode.`;
+      return `Next step: connect your ${config.name} account with read-only OAuth. it starts in sandbox until you approve live mode.`;
     case 'connected_sandbox':
       return integration.oauthConfigured
-        ? 'Next step: review the sandbox data, then Go Live when you are ready — you will type LIVE to confirm.'
+        ? integration.oauthConnected
+          ? 'Next step: verify the account, then Go Live. You will type LIVE to confirm read-only access.'
+          : 'Go Live is blocked until you connect a real account through OAuth. The current connection is simulated.'
         : `Sandbox mode works now. Going live needs an operator to add the ${config.name} OAuth app credentials to this deployment first.`;
     case 'connected_live':
-      return 'Live mode is on — Perfexa reads real account data. Campaign changes still need your explicit approval.';
+      return 'Live mode is on. Sync now to read real account data. The pilot cannot change campaigns or spend.';
     case 'connection_error':
       return integration.connectUrl
-        ? 'This connection needs attention — reconnect to restore syncing.'
-        : `This connection needs attention — an operator must restore the ${config.name} OAuth app credentials before you can reconnect.`;
+        ? 'This connection needs attention. reconnect to restore syncing.'
+        : `This connection needs attention. an operator must restore the ${config.name} OAuth app credentials before you can reconnect.`;
   }
 }
 
@@ -180,7 +184,7 @@ function HealthIndicator({ integration }: { integration: IntegrationRecord }) {
       title={integration.health}
     >
       <span className={cn('h-2 w-2 rounded-full ring-4', live ? 'bg-emerald-500 ring-emerald-500/10' : 'bg-amber-500 ring-amber-500/10')} />
-      {live ? 'Healthy connection' : 'Sandbox ready'}
+      {live ? 'Live mode selected' : 'Sandbox mode selected'}
     </span>
   );
 }
@@ -241,8 +245,9 @@ export function IntegrationPlatformCard({
             <div className="flex items-start gap-2 rounded-xl border border-amber-500/25 bg-amber-500/8 px-3 py-2.5 text-xs leading-5 text-amber-700 dark:text-amber-300">
               <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span>
-                Live {config.name} connection is supported, but it is not configured on this deployment yet — an
-                operator needs to add the {config.name} OAuth app credentials. Sandbox mode is fully available now.
+                {config.name} is not configured on this deployment. Missing OAuth app credentials:
+                {' '}{integration.missingConfiguration?.join(' + ') || 'provider configuration'}.
+                Sandbox mode is fully available now.
               </span>
             </div>
           )}
@@ -260,7 +265,7 @@ export function IntegrationPlatformCard({
             </div>
 
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              {state === 'ready_to_connect' && integration.connectUrl && (
+              {(state === 'ready_to_connect' || (state === 'connected_sandbox' && !integration.oauthConnected)) && integration.connectUrl && (
                 <Button variant="default" size="sm" asChild className="w-full sm:w-auto">
                   <a href={integration.connectUrl}>
                     Connect account
@@ -277,7 +282,7 @@ export function IntegrationPlatformCard({
                   disabled={connectPending}
                   onClick={onConnect}
                 >
-                  {connectPending ? 'Connecting…' : 'Connect (Sandbox)'}
+                  {connectPending ? 'Connecting…' : 'Connect sandbox (simulated)'}
                 </Button>
               )}
 
@@ -290,7 +295,7 @@ export function IntegrationPlatformCard({
                 </Button>
               )}
 
-              {state === 'connected_sandbox' && integration.oauthConfigured && (
+              {state === 'connected_sandbox' && integration.oauthConfigured && integration.oauthConnected && (
                 <Button
                   variant="default"
                   size="sm"
@@ -367,7 +372,7 @@ export function GoLiveDialog({
         </div>
 
         <p id="go-live-description" className="mt-5 text-sm leading-6 text-muted-foreground">
-          Live mode enables real API calls for this account. Perfexa will still require approval for campaign changes and keep every action under your Budget Guardian caps.
+          Live mode allows Perfexa to read this account for reporting. This pilot cannot create, pause, resume, or change campaigns or spend.
         </p>
 
         <div className="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/8 p-4">
@@ -375,7 +380,7 @@ export function GoLiveDialog({
             <ShieldCheck className="h-4 w-4" aria-hidden="true" />
             This is a deliberate safety check
           </div>
-          <p className="mt-1.5 text-xs leading-5 text-amber-800/80 dark:text-amber-200/80">Type LIVE below to confirm you understand this account can make real changes.</p>
+          <p className="mt-1.5 text-xs leading-5 text-amber-800/80 dark:text-amber-200/80">Type LIVE below to confirm read-only access to real account data.</p>
         </div>
 
         <div className="mt-5 space-y-2">

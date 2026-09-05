@@ -85,7 +85,7 @@ describe('IntegrationPlatformCard — OAuth not configured for this deployment',
   });
 
   it('keeps the sandbox path as the working action and renders no dead connect link', () => {
-    expect(markup).toContain('Connect (Sandbox)');
+    expect(markup).toContain('Connect sandbox (simulated)');
     expect(markup).not.toContain('Connect account');
     expect(markup).not.toContain('<a href=');
   });
@@ -102,7 +102,7 @@ describe('IntegrationPlatformCard — ready to connect', () => {
   });
 
   it('keeps sandbox available and never says coming soon where a route exists', () => {
-    expect(markup).toContain('Connect (Sandbox)');
+    expect(markup).toContain('Connect sandbox (simulated)');
     expect(markup).not.toContain('coming soon');
     expect(markup).not.toContain('not configured on this deployment');
     expect(markup).toContain('read-only OAuth');
@@ -116,6 +116,7 @@ describe('IntegrationPlatformCard — connected, sandbox mode', () => {
         connected: true,
         status: 'connected',
         externalAccountId: 'act_4242',
+        oauthConnected: true,
         oauthConfigured: true,
         connectUrl: '/api/integrations/meta/connect',
       }),
@@ -144,6 +145,7 @@ describe('IntegrationPlatformCard — connected, live mode', () => {
         status: 'connected',
         mode: 'live',
         externalAccountId: 'act_4242',
+        oauthConnected: true,
         oauthConfigured: true,
         connectUrl: '/api/integrations/meta/connect',
         health: 'live — real API calls',
@@ -165,6 +167,7 @@ describe('IntegrationPlatformCard — connection error', () => {
         connected: true,
         status: 'error',
         externalAccountId: 'act_4242',
+        oauthConnected: true,
         oauthConfigured: true,
         connectUrl: '/api/integrations/meta/connect',
         health: 'live — connection problem',
@@ -183,6 +186,7 @@ describe('IntegrationPlatformCard — connection error', () => {
         status: 'error',
         mode: 'live',
         externalAccountId: 'act_4242',
+        oauthConnected: true,
         oauthConfigured: true,
         connectUrl: '/api/integrations/meta/connect',
       }),
@@ -212,8 +216,20 @@ describe('IntegrationPlatformCard — safety rails', () => {
       expect(markup).not.toContain('accesstoken');
       expect(markup).not.toContain('refreshtoken');
       expect(markup).not.toContain('clientsecret');
-      expect(markup).not.toContain('client_secret');
-      expect(markup).not.toContain('app_secret');
+      expect(markup).not.toContain('test-secret-value');
     }
   });
+});
+
+it('lists missing configuration names without a dead OAuth link', () => {
+  const markup = renderCard(record({ platform: 'google_ads', missingConfiguration: ['GOOGLE_CLIENT_SECRET', 'GOOGLE_ADS_DEVELOPER_TOKEN'] }));
+  expect(markup).toContain('GOOGLE_CLIENT_SECRET + GOOGLE_ADS_DEVELOPER_TOKEN');
+  expect(markup).not.toContain('<a href=');
+});
+it('requires real OAuth after a simulated sandbox connection', () => {
+  const markup = renderCard(record({ connected: true, status: 'connected', externalAccountId: 'sandbox-meta-acct', oauthConfigured: true, oauthConnected: false, connectUrl: '/api/integrations/meta/connect' }));
+  expect(markup).toContain('Go Live is blocked');
+  expect(markup).toContain('href="/api/integrations/meta/connect"');
+  expect(markup).toContain('Connect account');
+  expect(markup).not.toContain('>Go Live</');
 });

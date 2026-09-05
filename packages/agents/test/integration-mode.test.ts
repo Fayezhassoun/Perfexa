@@ -2,12 +2,14 @@
 // literal confirm text "LIVE" — and both outcomes are audit-logged
 // (CONTRACTS §5/§16, acceptance invariant 4).
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { and, eq } from 'drizzle-orm';
 import { approvals, auditLogs, campaignsMirror, connectedAccounts } from '@growthcrew/db';
 import { listCampaigns, resumeCampaign } from '../src/services/campaigns.js';
-import { connectSandboxAccount, listIntegrations, setIntegrationMode } from '../src/services/settings.js';
-import { db, freshOrg, truncateAll } from './helpers.js';
+import { listIntegrations, setIntegrationMode } from '../src/services/settings.js';
+import { connectOAuthTestAccount, db, freshOrg, truncateAll } from './helpers.js';
+
+afterEach(() => vi.unstubAllEnvs());
 
 describe('setIntegrationMode', () => {
   beforeEach(async () => {
@@ -27,14 +29,14 @@ describe('setIntegrationMode', () => {
 
   it('refuses live without the exact LIVE confirm text even when connected', async () => {
     const { ctx } = await freshOrg();
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     await expect(setIntegrationMode(ctx, 'google_ads', 'live', 'yes really')).rejects.toThrow(/LIVE/);
     await expect(setIntegrationMode(ctx, 'google_ads', 'live')).rejects.toThrow(/LIVE/);
   });
 
   it('goes live with a connected account + LIVE confirm, and audit-logs it', async () => {
     const { ctx, orgId } = await freshOrg();
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     const result = await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
     expect(result.mode).toBe('live');
 
@@ -50,7 +52,7 @@ describe('setIntegrationMode', () => {
 
   it('uses connected-account mode for stale mirror rows and creates no impossible resume approval', async () => {
     const { ctx, orgId } = await freshOrg();
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     const [mirror] = await db
       .insert(campaignsMirror)
       .values({
@@ -97,7 +99,7 @@ describe('setIntegrationMode', () => {
 
   it('keeps live-provenance rows read-only after switching the account back to sandbox', async () => {
     const { ctx, orgId } = await freshOrg();
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
     const [mirror] = await db
       .insert(campaignsMirror)
@@ -122,7 +124,7 @@ describe('setIntegrationMode', () => {
 
   it('switching back to sandbox needs no confirmation', async () => {
     const { ctx } = await freshOrg();
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
     const back = await setIntegrationMode(ctx, 'google_ads', 'sandbox');
     expect(back.mode).toBe('sandbox');

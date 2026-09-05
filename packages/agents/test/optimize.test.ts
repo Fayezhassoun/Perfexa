@@ -2,12 +2,14 @@
 // deterministic rules, idempotency, and — critically — that nothing ever
 // executes: campaign state is untouched until a human approves.
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { approvals, auditLogs, campaignsMirror, type CampaignMirror } from '@growthcrew/db';
 import { buildSuggestions, generateOptimizationApprovals } from '../src/services/optimize.js';
-import { connectSandboxAccount, setIntegrationMode } from '../src/services/settings.js';
-import { db, freshOrg, truncateAll } from './helpers.js';
+import { setIntegrationMode } from '../src/services/settings.js';
+import { connectOAuthTestAccount, db, freshOrg, truncateAll } from './helpers.js';
+
+afterEach(() => vi.unstubAllEnvs());
 
 function row(partial: Partial<CampaignMirror>): CampaignMirror {
   return {
@@ -122,7 +124,7 @@ describe('generateOptimizationApprovals (db)', () => {
   it('does not create approvals for a live-connected platform even when mirror mode is stale', async () => {
     const { ctx, orgId } = await freshOrg();
     await seedCampaign(orgId, { externalId: 'stale-sandbox-row', budgetDailyCents: 1000, spendCents: 3500, conversions: 0 });
-    await connectSandboxAccount(ctx, 'google_ads');
+    await connectOAuthTestAccount(ctx, 'google_ads');
     await setIntegrationMode(ctx, 'google_ads', 'live', 'LIVE');
 
     const result = await generateOptimizationApprovals(ctx);

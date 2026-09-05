@@ -1,3 +1,4 @@
+import { getCampaignSnapshot } from './sync-evidence.js';
 // Weekly reports (Phase 3, CONTRACTS §4/§11): aggregates the last 7 days of
 // campaigns_mirror metric history into a stored `reports` row, and — when
 // RESEND_API_KEY is configured — emails it to org owners via the Resend
@@ -67,6 +68,11 @@ function isoDay(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+function snapshotTotals(value: unknown): WeeklyTotals {
+  const m = value as Partial<WeeklyTotals> | null;
+  return { spendCents: m?.spendCents ?? 0, impressions: m?.impressions ?? 0, clicks: m?.clicks ?? 0, conversions: m?.conversions ?? 0 };
+}
+
 function sumWindow(history: HistoryPoint[], from: string, to: string): WeeklyTotals {
   const totals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   for (const h of history) {
@@ -97,7 +103,7 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
   // content.demoData and is rendered by the email template.
   const campaigns = demo
     ? demoCampaignRows(now)
-    : await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
+    : await getCampaignSnapshot(ctx);
   const totals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   const prevTotals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   const byPlatform: Record<string, WeeklyTotals> = {};
@@ -105,8 +111,8 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
   for (const c of campaigns) {
     const metrics = c.metrics as { history?: HistoryPoint[] } | null;
     const history = metrics?.history ?? [];
-    const week = sumWindow(history, periodStart, periodEnd);
-    const prev = sumWindow(history, prevStart, periodStart);
+    const week = c.mode === 'live' ? snapshotTotals(c.metrics) : sumWindow(history, periodStart, periodEnd);
+    const prev = c.mode === 'live' ? { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 } : sumWindow(history, prevStart, isoDay(new Date(new Date(periodStart).getTime() - dayMs(1))));
     for (const k of Object.keys(totals) as (keyof WeeklyTotals)[]) {
       totals[k] += week[k];
       prevTotals[k] += prev[k];
@@ -157,6 +163,8 @@ export async function buildWeeklyReport(ctx: AgentContext, now: Date = ctx.now ?
     // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
     demoData: demo ? true : undefined,
     dataSource: demo ? 'demo' : dataSourceForCampaigns(campaigns),
+    sourceSyncs: demo ? [] : sourceSyncsFor(campaigns),
+    metricBasis: campaigns.some((c) => c.mode === 'live') ? LIVE_METRIC_BASIS : 'Daily sandbox history for the report period.',
   };
 
   // LLM narrative (publication-grade): live providers rewrite the summary in
@@ -300,7 +308,22 @@ function pctDelta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / previous) * 100);
 }
 
+type SourceSync = { platform: string; externalAccountId: string; syncedAt: string };
+const LIVE_METRIC_BASIS = 'Latest provider snapshots, not summed daily totals. Google Ads: LAST_30_DAYS (excludes sync day); Meta: last_30d; TikTok: sync day minus 30 days through sync day. Sandbox rows, if present, use the report period.';
+function sourceSyncsFor(campaigns: Array<{ platform: string | null; mode: string | null; metrics: unknown }>): SourceSync[] {
+  const entries = new Map<string, SourceSync>();
+  for (const c of campaigns) {
+    const m = c.metrics as { externalAccountId?: string; syncedAt?: string } | null;
+    if (c.mode !== 'live' || !m?.externalAccountId || !m.syncedAt) continue;
+    const entry = { platform: c.platform ?? 'unknown', externalAccountId: m.externalAccountId, syncedAt: m.syncedAt };
+    entries.set(JSON.stringify(entry), entry);
+  }
+  return [...entries.values()];
+}
+
 export interface WeekAggregation {
+  sourceSyncs?: SourceSync[];
+  metricBasis?: string;
   periodLabel: string;
   totals: WeeklyTotals;
   prevTotals: WeeklyTotals;
@@ -363,7 +386,7 @@ async function aggregateWeek(ctx: AgentContext, weekStart: Date, now: Date): Pro
   const periodEnd = isoDay(now);
   const prevStart = isoDay(new Date(weekStart.getTime() - dayMs(7)));
 
-  const campaigns = await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
+  const campaigns = await getCampaignSnapshot(ctx);
 
   const totals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
   const prevTotals: WeeklyTotals = { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 };
@@ -374,8 +397,8 @@ async function aggregateWeek(ctx: AgentContext, weekStart: Date, now: Date): Pro
   for (const c of campaigns) {
     const metrics = c.metrics as { history?: HistoryPoint[]; spendCents?: number; conversions?: number } | null;
     const history = metrics?.history ?? [];
-    const week = sumWindow(history, periodStart, periodEnd);
-    const prev = sumWindow(history, prevStart, periodStart);
+    const week = c.mode === 'live' ? snapshotTotals(c.metrics) : sumWindow(history, periodStart, periodEnd);
+    const prev = c.mode === 'live' ? { spendCents: 0, impressions: 0, clicks: 0, conversions: 0 } : sumWindow(history, prevStart, isoDay(new Date(new Date(periodStart).getTime() - dayMs(1))));
     for (const k of Object.keys(totals) as (keyof WeeklyTotals)[]) {
       totals[k] += week[k];
       prevTotals[k] += prev[k];
@@ -452,6 +475,8 @@ async function aggregateWeek(ctx: AgentContext, weekStart: Date, now: Date): Pro
     fatiguedCreatives,
     fatigueExamples,
     dataSource: dataSourceForCampaigns(campaigns),
+    sourceSyncs: sourceSyncsFor(campaigns),
+    metricBasis: campaigns.some((c) => c.mode === 'live') ? LIVE_METRIC_BASIS : 'Daily sandbox history for the report period.',
   };
 }
 
@@ -476,6 +501,15 @@ interface DeterministicBrief {
 
 /** Build a substantive markdown brief purely from the aggregated numbers. */
 function buildDeterministicBrief(agg: WeekAggregation): DeterministicBrief {
+  if (agg.dataSource === 'live' || agg.dataSource === 'mixed') {
+    return {
+      wins: [], losses: [], recommendations: ['Verify the snapshot totals against the provider account.'], priorities: ['Run a fresh sync before the next review.'],
+      markdown: `## Account snapshot review\n\n${agg.metricBasis}\n\n` +
+        `Stored spend: ${(agg.totals.spendCents / 100).toFixed(2)} in provider account currency (${agg.totals.spendCents} spendCents). ` +
+        `${agg.totals.impressions} impressions, ${agg.totals.clicks} clicks, ${agg.totals.conversions} conversions.\n\n` +
+        'Daily live breakdowns and comparable prior-period totals are unavailable. No week-over-week change is inferred.',
+    };
+  }
   const { totals, prevTotals } = agg;
   const ctrPct = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
   const prevCtrPct = prevTotals.impressions > 0 ? (prevTotals.clicks / prevTotals.impressions) * 100 : 0;
@@ -721,7 +755,7 @@ export async function generateWeeklyReport(
   // LLM narrative — only when a real provider is configured AND the org is
   // within budget. Any failure keeps the deterministic brief (CONTRACTS §3).
   // Demo mode stays fully deterministic so the label and numbers never drift.
-  if (!demo && ctx.llm.name !== 'mock' && (await isWithinBudget(ctx))) {
+  if (!demo && agg.dataSource !== 'live' && agg.dataSource !== 'mixed' && ctx.llm.name !== 'mock' && (await isWithinBudget(ctx))) {
     try {
       const res = await ctx.llm.chat(
         [
@@ -761,6 +795,8 @@ export async function generateWeeklyReport(
     }
   }
 
+  const syncLabel = (agg.sourceSyncs ?? []).map((s) => `${platformLabel(s.platform)} account ${s.externalAccountId}: ${s.syncedAt}`).join('; ') || 'Live sync timestamp unavailable';
+  if (!demo) markdown = `**Data source: ${agg.dataSource}**\n\nSource sync: ${syncLabel}\n\n${markdown}`;
   const content: WeeklyReportPayload = {
     markdown,
     periodLabel: agg.periodLabel,
@@ -777,6 +813,8 @@ export async function generateWeeklyReport(
     // Surfaces rendering this report MUST show DEMO_DATA_LABEL when set.
     demoData: demo ? true : undefined,
     dataSource: agg.dataSource,
+    sourceSyncs: agg.sourceSyncs ?? [],
+    metricBasis: agg.metricBasis,
   };
 
   // Upsert keyed to (org, weekStart) so regenerating refreshes rather than

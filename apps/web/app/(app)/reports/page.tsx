@@ -19,8 +19,7 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageShell, PageHeader } from '@/components/page-shell';
-import { DemoDataBanner } from '@/components/demo-data-banner';
-import { DataSourceNotice } from '@/components/data-source-notice';
+import { ReportSourceEvidence } from '@/components/pilot-evidence';
 import { ShareReportButton } from '@/components/share-report-button';
 import { cn } from '@/lib/utils';
 import { Markdown } from './markdown';
@@ -39,6 +38,8 @@ interface ReportContent {
   source: 'llm' | 'deterministic';
   generatedAt: string;
   demoData?: boolean;
+  sourceSyncs?: { platform: string; externalAccountId: string; syncedAt: string }[];
+  metricBasis?: string;
   dataSource?: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
 }
 
@@ -103,7 +104,7 @@ export default function ReportsPage() {
 
   const stats = content
     ? [
-        { label: 'Spend', value: usd(content.totals.spendCents), icon: DollarSign },
+        { label: 'Spend', value: content.dataSource === 'live' || content.dataSource === 'mixed' ? (content.totals.spendCents / 100).toFixed(2) : usd(content.totals.spendCents), icon: DollarSign },
         { label: 'Impressions', value: content.totals.impressions.toLocaleString(), icon: Eye },
         { label: 'Clicks', value: content.totals.clicks.toLocaleString(), icon: MousePointerClick },
         { label: 'Conversions', value: String(content.totals.conversions), icon: Target },
@@ -115,7 +116,7 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Insights"
         title="Weekly Reports"
-        description="Your week in review — wins, losses, and what to do next. Generated from your live campaign, alert, and creative-health data, then narrated by AI."
+        description="Review stored campaign performance and its source evidence. Live reports use provider snapshots; sandbox and demo reports remain labeled."
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button variant="outline" onClick={() => window.print()} disabled={!selected} data-testid="print-report">
@@ -211,15 +212,7 @@ export default function ReportsPage() {
           {/* Detail */}
           {selected && content && (
             <div className="space-y-4">
-              {/* Demo-data mode: simulated numbers must always carry the label */}
-              {content.demoData && <DemoDataBanner />}
-              {!content.demoData && content.dataSource && (
-                <DataSourceNotice
-                  source={content.dataSource === 'demo' ? 'none' : content.dataSource}
-                  actionHref={content.dataSource === 'none' ? '/settings' : undefined}
-                  actionLabel={content.dataSource === 'none' ? 'Connect an account' : undefined}
-                />
-              )}
+              <ReportSourceEvidence content={content} />
               <div className="glass-panel space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">

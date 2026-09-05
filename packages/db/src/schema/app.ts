@@ -319,6 +319,8 @@ export interface WeeklyReportPayload {
   demoData?: boolean;
   /** Provenance of the campaign rows used for this report. Older rows may omit it. */
   dataSource?: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
+  sourceSyncs?: { platform: string; externalAccountId: string; syncedAt: string }[];
+  metricBasis?: string;
 }
 
 // In-app weekly performance report (the #1 retention surface). Distinct from

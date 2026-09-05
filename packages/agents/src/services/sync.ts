@@ -9,6 +9,7 @@ import { connectedAccounts, type Db } from '@growthcrew/db';
 import { createLiveAdapter, type AdPlatform, type FetchLike } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
 import { createAgentContext } from '../context.js';
+import { createAuditLogger } from '../audit.js';
 import { loadLiveDeps } from '../live.js';
 import { mirrorCampaigns } from '../store.js';
 import { track } from './analytics.js';
@@ -29,6 +30,8 @@ export interface SyncResult {
   platform: AdPlatform;
   /** Number of campaigns upserted into campaigns_mirror. */
   synced: number;
+  externalAccountId?: string;
+  syncedAt?: string;
   /** Set when the platform was not synced (e.g. not connected / no live deps). */
   skipped?: string;
   /** Set when the platform's API call failed (per-platform isolation). */
@@ -55,27 +58,44 @@ export async function syncOrgPlatform(
   platform: AdPlatform,
   opts?: SyncOptions,
 ): Promise<SyncResult> {
+  const [account] = await ctx.db.select().from(connectedAccounts)
+    .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.platform, platform))).limit(1);
+  if (!account?.externalAccountId) return { platform, synced: 0, skipped: 'not-connected' };
+  if (account.mode !== 'live') return { platform, synced: 0, skipped: 'sandbox-mode: confirm LIVE before syncing' };
+  if (account.status !== 'connected') return { platform, synced: 0, skipped: 'connection needs reconnect' };
   const live = await loadLiveDeps(ctx.db, ctx.orgId, platform, { fetchImpl: opts?.fetchImpl });
-  if (!live) return { platform, synced: 0, skipped: 'not-connected' };
+  if (!live) return { platform, synced: 0, skipped: 'OAuth credentials or account tokens are missing; reconnect in Settings' };
 
-  const campaigns = await createLiveAdapter(platform, live).listCampaigns();
-  await mirrorCampaigns(ctx.db, ctx.orgId, platform, { campaigns }, 'live');
-  await ctx.db
-    .update(connectedAccounts)
-    .set({ status: 'connected', updatedAt: ctx.now ?? new Date() })
-    .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.platform, platform)));
+  const adapter = createLiveAdapter(platform, live);
+  const campaigns = await adapter.listCampaigns();
+  // Meta/TikTok listings contain placeholder zeros, so read actual metrics.
+  if (platform !== 'google_ads') {
+    for (const campaign of campaigns) campaign.metrics = await adapter.getMetrics(campaign.externalId);
+  }
+  const syncedAt = (ctx.now ?? new Date()).toISOString();
+  await ctx.db.transaction(async (tx) => {
+    const [current] = await tx.select().from(connectedAccounts).where(eq(connectedAccounts.id, account.id)).for('update');
+    if (current?.mode !== 'live' || current.status !== 'connected' || current.externalAccountId !== live.externalAccountId) {
+      throw new Error('The connection changed during sync. Verify the account and confirm LIVE before retrying.');
+    }
+    await mirrorCampaigns(tx, ctx.orgId, platform, { campaigns }, 'live', { connectedAccountId: account.id, externalAccountId: live.externalAccountId, syncedAt });
+    await tx
+      .update(connectedAccounts)
+      .set({ status: 'connected', updatedAt: ctx.now ?? new Date() })
+      .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.platform, platform)));
 
-  await ctx.audit.log({
-    actorType: ctx.userId ? 'user' : 'system',
-    actorId: ctx.userId ?? 'sync',
-    action: 'sync.platform',
-    entityType: 'connected_account',
-    entityId: platform,
-    metadata: { platform, synced: campaigns.length },
+    await createAuditLogger(tx, ctx.orgId).log({
+      actorType: ctx.userId ? 'user' : 'system',
+      actorId: ctx.userId ?? 'sync',
+      action: 'sync.platform',
+      entityType: 'connected_account',
+      entityId: account.id,
+      metadata: { platform, externalAccountId: live.externalAccountId, syncedAt, synced: campaigns.length },
+    });
   });
   await track(ctx, 'sync_run', { platform, synced: campaigns.length });
 
-  return { platform, synced: campaigns.length };
+  return { platform, synced: campaigns.length, externalAccountId: live.externalAccountId, syncedAt };
 }
 
 /**

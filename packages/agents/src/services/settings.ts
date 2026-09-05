@@ -5,7 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { approvals, budgets, connectedAccounts, orgInvites, orgMembers, organizations, users, type Budget, type ConnectedAccount } from '@growthcrew/db';
 import { sendEmail, type FetchLike } from '@growthcrew/integrations';
 import type { AgentContext } from '../types.js';
-import { isOAuthConfigured } from '../live.js';
+import { isOAuthConfigured, missingOAuthConfiguration } from '../live.js';
 
 const PLATFORMS = ['google_ads', 'meta', 'tiktok', 'ga4', 'gsc'] as const;
 const PILOT_BLOCKED_AD_TOOLS = new Set([
@@ -26,6 +26,8 @@ export interface IntegrationStatus {
   health: string;
   /** True when the platform's OAuth app credentials exist in env (Phase 2). */
   oauthConfigured: boolean;
+  missingConfiguration: string[];
+  oauthConnected: boolean;
   /** Relative URL that starts the real OAuth flow (null when not configured). */
   connectUrl: string | null;
 }
@@ -45,10 +47,12 @@ export async function listIntegrations(ctx: AgentContext): Promise<IntegrationSt
       health:
         mode === 'live'
           ? row?.status === 'connected'
-            ? 'live — real API calls'
-            : 'live — connection problem'
-          : 'sandbox — simulated responses, no real spend',
+            ? 'live: read-only API calls'
+            : 'live: connection problem'
+          : 'sandbox: simulated responses, no real spend',
       oauthConfigured,
+      missingConfiguration: missingOAuthConfiguration(platform),
+      oauthConnected: Boolean(row?.externalAccountId && row.accessTokenEnc && !row.externalAccountId.startsWith('sandbox-')),
       connectUrl: oauthConfigured ? `/api/integrations/${platform}/connect` : null,
     };
   });
@@ -72,10 +76,14 @@ export async function setIntegrationMode(
     .limit(1);
 
   if (mode === 'live') {
-    const reason = !row?.externalAccountId
+    const reason = !row?.externalAccountId || !row.accessTokenEnc || row.externalAccountId.startsWith('sandbox-')
       ? `Connect your ${platform} account first (OAuth) before going live.`
-      : confirmText !== 'LIVE'
-        ? 'Type LIVE to confirm switching to real spend.'
+      : row.status !== 'connected'
+        ? 'Reconnect this account through OAuth before going live.'
+        : !isOAuthConfigured(platform)
+          ? `Restore the missing provider configuration: ${missingOAuthConfiguration(platform).join(', ')}.`
+          : confirmText !== 'LIVE'
+        ? 'Type LIVE to confirm read-only live data access.'
         : null;
     if (reason) {
       await ctx.audit.log({
@@ -164,6 +172,7 @@ export async function connectSandboxAccount(ctx: AgentContext, platform: Integra
     .from(connectedAccounts)
     .where(and(eq(connectedAccounts.orgId, ctx.orgId), eq(connectedAccounts.platform, platform)))
     .limit(1);
+  if (existing?.accessTokenEnc) return existing;
   if (existing) {
     const [updated] = await ctx.db
       .update(connectedAccounts)

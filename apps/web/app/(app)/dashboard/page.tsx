@@ -39,6 +39,7 @@ import { PageShell, PageHeader } from '@/components/page-shell';
 import { ProofFlow, type ProofFlowHandle } from '@/components/proof-flow';
 import { ActivationCard } from '@/components/activation-card';
 import { DemoDataBanner } from '@/components/demo-data-banner';
+import { SyncResults } from '@/components/pilot-evidence';
 import { DataSourceNotice, type DataSource } from '@/components/data-source-notice';
 import { CustomerReadinessChecklist } from '@/components/customer-readiness-checklist';
 import { cn } from '@/lib/utils';
@@ -533,6 +534,7 @@ export default function DashboardPage() {
         loading={overview.isLoading}
       />
 
+      {overview.data?.syncs && <SyncResults results={overview.data.syncs} />}
       {overview.data?.demoData && <DemoDataBanner />}
       {overview.data && !overview.data.demoData && (
         <DataSourceNotice

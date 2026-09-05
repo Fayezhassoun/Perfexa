@@ -8,6 +8,7 @@ import type { AgentContext } from '../types.js';
 import type { MirrorMetrics } from '../store.js';
 import { tick as guardianTick } from '../guardian.js';
 import { getOrgAdapter } from '../store.js';
+import { getCampaignSnapshot, getSyncEvidence, type SyncEvidence } from './sync-evidence.js';
 import { DEMO_CAMPAIGNS, demoHistory, isDemoDataEnabled } from './demo-data.js';
 
 interface Totals {
@@ -49,6 +50,7 @@ export interface OverviewResult {
   byPlatform: Record<string, OverviewTotals>;
   series: { date: string; spendCents: number; clicks: number; conversions: number }[];
   campaigns: number;
+  syncs: SyncEvidence[];
   /** True when the numbers are simulated (demo-data mode) and must be labeled as such. */
   demoData: boolean;
   /** Provenance of rows in campaigns_mirror; never infer live data from non-empty numbers alone. */
@@ -93,6 +95,7 @@ function demoOverview(now: Date, range: { from?: string; to?: string } | undefin
     campaigns: DEMO_CAMPAIGNS.length,
     demoData: true,
     dataSource: 'demo',
+    syncs: [],
   };
 }
 
@@ -110,7 +113,7 @@ export async function overview(ctx: AgentContext, range?: { from?: string; to?: 
     return demoOverview(ctx.now ?? new Date(), range, avgValue);
   }
 
-  const rows = await ctx.db.select().from(campaignsMirror).where(eq(campaignsMirror.orgId, ctx.orgId));
+  const rows = await getCampaignSnapshot(ctx);
 
   const byPlatform: Record<string, Totals> = {};
   const seriesByDate = new Map<string, Totals>();
@@ -160,6 +163,7 @@ export async function overview(ctx: AgentContext, range?: { from?: string; to?: 
     campaigns: rows.length,
     demoData: false,
     dataSource: dataSourceForRows(rows),
+    syncs: await getSyncEvidence(ctx),
   };
 }
 

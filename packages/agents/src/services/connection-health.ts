@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { connectedAccounts } from '@growthcrew/db';
 import type { AgentContext } from '../types.js';
 import type { IntegrationPlatform } from './settings.js';
+import { getSyncEvidence } from './sync-evidence.js';
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
@@ -49,22 +50,23 @@ function warningFor(
 /**
  * Read-only connection health for the active organization.
  *
- * `connected_accounts.updatedAt` is the existing connection activity marker;
- * there is no separate sync timestamp in the current schema, so it is exposed
- * as the best available last-sync value without introducing a migration.
+ * Sync times come from successful provider-read audit events for this account.
+ * OAuth callbacks, mode changes and token refreshes never count as syncs.
  */
 export async function getConnectionHealth(ctx: AgentContext): Promise<ConnectionHealth[]> {
   const now = ctx.now ?? new Date();
+  const syncs = await getSyncEvidence(ctx);
   const rows = await ctx.db.select().from(connectedAccounts).where(eq(connectedAccounts.orgId, ctx.orgId));
 
   return rows.flatMap((row) => {
     if (!row.externalAccountId || !row.platform || !PLATFORMS.has(row.platform as IntegrationPlatform)) return [];
 
     const platform = row.platform as IntegrationPlatform;
+    const syncedAt = syncs.find((s) => s.platform === platform)?.syncedAt;
     const mode = row.mode === 'live' ? 'live' : 'sandbox';
     const status = row.status ?? 'unknown';
     const tokenExpiresAt = row.expiresAt ?? null;
-    const tokenHealthy = Boolean(tokenExpiresAt && tokenExpiresAt.getTime() > now.getTime() + ONE_HOUR_MS);
+    const tokenHealthy = Boolean(row.accessTokenEnc && (!tokenExpiresAt || tokenExpiresAt.getTime() > now.getTime() + ONE_HOUR_MS));
     const needsReconnect = status !== 'connected' || (mode === 'live' && !tokenHealthy);
     const warning = warningFor(platform, mode, status, tokenExpiresAt, tokenHealthy, now);
 
@@ -75,7 +77,7 @@ export async function getConnectionHealth(ctx: AgentContext): Promise<Connection
         status,
         tokenExpiresAt,
         tokenHealthy,
-        lastSyncAt: row.updatedAt ?? null,
+        lastSyncAt: syncedAt ? new Date(syncedAt) : null,
         needsReconnect,
         ...(warning ? { warning } : {}),
       },

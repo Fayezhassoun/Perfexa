@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: { platform: st
   if (!userId) return back('/login');
   if (!orgId) return back('/onboarding');
   if (!isConnectablePlatform(params.platform)) {
-    return back(`/settings?error=${encodeURIComponent('Unknown integration.')}`);
+    return back(`/settings?tab=integrations&error=${encodeURIComponent('Unknown integration.')}`);
   }
 
   const agentCtx = createAgentContext({ db, orgId, userId });
@@ -23,6 +23,6 @@ export async function GET(req: NextRequest, { params }: { params: { platform: st
     return NextResponse.redirect(url);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'OAuth is not configured yet';
-    return back(`/settings?error=${encodeURIComponent(message)}`);
+    return back(`/settings?tab=integrations&error=${encodeURIComponent(message)}`);
   }
 }
