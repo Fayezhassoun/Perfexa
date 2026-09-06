@@ -8,10 +8,12 @@ import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { env } from '@/lib/env';
 import { Button } from '@/components/ui/button';
-import { AppNav, ThemeToggle } from '@/components/app-nav';
+import { AppNav } from '@/components/app-nav';
+import { WorkspaceAccount } from '@/components/workspace-account';
+import Link from 'next/link';
 import { MobileNav } from '@/components/mobile-nav';
 import { OrgSwitcher } from '@/components/org-switcher';
-import { BrandMark } from '@/components/brand-mark';
+import './workspace.css';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -28,51 +30,30 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (org && org.onboardingStep !== 'done') redirect('/onboarding');
 
   return (
-    <div className="liquid-shell flex min-h-screen">
-      <aside className="liquid-sidebar fixed inset-y-0 left-0 z-40 hidden w-60 flex-col rounded-none border-y-0 border-l-0 md:flex">
-        <div className="glass-divider-b flex h-16 items-center px-5">
-          <BrandMark href="/console" size="md" descriptor="Operator system" showDescriptor />
-        </div>
+    <div className="brief-workspace flex min-h-screen">
+      <a href="#workspace-main" className="workspace-skip">Skip to content</a>
+      <aside className="workspace-sidebar">
+        <Link href="/dashboard" className="workspace-wordmark" aria-label="Perfexa home">Perfexa</Link>
         <AppNav geoEnabled={env.GEO_ENABLED} />
-        <div className="glass-divider-t p-4">
-          <div className="glass-tile mb-3 space-y-2 rounded-xl px-3 py-2.5">
-            <OrgSwitcher
-              orgs={orgRows.map((o) => ({ id: o.id, name: o.name }))}
-              activeOrgId={orgId}
-            />
-            <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <form
-              className="flex-1"
-              action={async () => {
-                'use server';
-                await signOut({ redirectTo: '/login' });
-              }}
-            >
-              <Button variant="outline" size="sm" className="w-full" type="submit">
-                Sign out
-              </Button>
-            </form>
-            <ThemeToggle />
-          </div>
-        </div>
       </aside>
-
-      {/* Content column with blur top bar */}
-      <div className="flex min-w-0 flex-1 flex-col md:pl-60">
-        <header className="liquid-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-6">
-          <div className="md:hidden">
-            <BrandMark href="/console" size="sm" />
-          </div>
-          <span className="hidden truncate text-sm text-muted-foreground md:block">
-            {org?.name}
-          </span>
-          <span className="md:hidden">
-            <ThemeToggle />
-          </span>
+      <div className="workspace-column">
+        <header className="workspace-topbar">
+          <Link href="/dashboard" className="workspace-mobile-brand" aria-label="Perfexa home">Perfexa</Link>
+          <OrgSwitcher
+            orgs={orgRows.map((o) => ({ id: o.id, name: o.name }))}
+            activeOrgId={orgId}
+            placement="below"
+          />
+          <time className="workspace-today" dateTime={new Date().toISOString().slice(0, 10)}>
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </time>
+          <WorkspaceAccount name={session.user.name || 'Your account'} email={session.user.email || ''}>
+            <form action={async () => { 'use server'; await signOut({ redirectTo: '/login' }); }}>
+              <Button variant="ghost" size="sm" type="submit">Sign out</Button>
+            </form>
+          </WorkspaceAccount>
         </header>
-        <main className="min-w-0 flex-1 pb-20 md:pb-0">{children}</main>
+        <main id="workspace-main" tabIndex={-1} className="min-w-0 flex-1 pb-20 md:pb-0">{children}</main>
       </div>
       <MobileNav geoEnabled={env.GEO_ENABLED} />
     </div>

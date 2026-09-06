@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -29,6 +30,11 @@ import {
   Globe,
   FileText,
   Radar,
+  ChevronDown,
+  Crosshair,
+  Activity,
+  PanelsTopLeft,
+  ChartNoAxesCombined,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -65,35 +71,35 @@ export const NAV_GROUPS = [
   {
     title: 'Command',
     href: '/dashboard',
-    icon: LayoutDashboard,
+    icon: Crosshair,
     description: 'Current truth and next action',
     items: ['/dashboard', '/console', '/growth-plan'],
   },
   {
     title: 'Signals',
     href: '/alerts',
-    icon: Bell,
+    icon: Activity,
     description: 'Risks, opportunities, and market reads',
     items: ['/alerts', '/creatives', '/campaigns', '/competitors', '/visibility', '/reviews'],
   },
   {
     title: 'Studio',
     href: '/content',
-    icon: PenLine,
+    icon: PanelsTopLeft,
     description: 'Creative and publishing workbench',
     items: ['/content', '/social', '/video', '/inspiration', '/proposals'],
   },
   {
     title: 'Evidence',
     href: '/reports',
-    icon: FileText,
+    icon: ChartNoAxesCombined,
     description: 'Reports, portal, and audit trail',
     items: ['/reports', '/portal', '/audit'],
   },
   {
     title: 'Context',
     href: '/business-brain',
-    icon: Sparkles,
+    icon: BookOpen,
     description: 'Brand and business memory',
     items: ['/business-brain', '/knowledge', '/memory', '/leads'],
   },
@@ -112,60 +118,32 @@ function isActive(pathname: string, href: string): boolean {
 
 export function AppNav({ geoEnabled = true }: { geoEnabled?: boolean } = {}) {
   const pathname = usePathname();
-  const items = NAV.filter((item) => !item.geo || geoEnabled);
-  const byHref = new Map(items.map((item) => [item.href, item]));
-  const groups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((href) => byHref.has(href)),
-  })).filter((group) => group.items.length > 0);
-
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const byHref = new Map(NAV.filter((item) => !item.geo || geoEnabled).map((item) => [item.href, item]));
   return (
-    <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-4" aria-label="Workspace navigation" data-testid="app-nav">
-      {groups.map((group, i) => {
-        const groupActive = group.items.some((href) => isActive(pathname, href));
-        const GroupIcon = group.icon;
+    <nav className="workspace-nav" aria-label="Workspace navigation" data-testid="app-nav">
+      {NAV_GROUPS.map((group) => {
+        const active = group.items.some((href) => isActive(pathname, href));
+        const open = expanded === group.title;
+        const items = group.items.filter((href) => byHref.has(href));
+        const Icon = group.icon;
         return (
-          <section key={group.title} className="animate-nav-in" style={{ animationDelay: `${i * 45}ms` }}>
-            <Link
-              href={group.href}
-              aria-current={isActive(pathname, group.href) ? 'page' : undefined}
-              className={cn(
-                'group relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-[0.84rem]',
-                groupActive
-                  ? 'border-primary/25 bg-primary/10 font-semibold text-foreground shadow-sm'
-                  : 'border-transparent text-muted-foreground hover:border-[color:var(--glass-border)] hover:bg-[color:var(--glass-bg-subtle)] hover:text-foreground',
-              )}
-            >
-              <GroupIcon className={cn('h-4 w-4', groupActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
-              <span className="min-w-0">
-                <span className="block leading-tight">{group.title}</span>
-                <span className="block truncate text-[0.64rem] font-normal text-muted-foreground">{group.description}</span>
-              </span>
-            </Link>
-            <div className="mt-1.5 space-y-0.5 pl-8">
-              {group.items
-                .filter((href) => href !== group.href)
-                .map((href) => {
-                  const item = byHref.get(href);
-                  if (!item) return null;
-                  const active = isActive(pathname, href);
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      aria-current={active ? 'page' : undefined}
-                      className={cn(
-                        'relative flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-[0.76rem]',
-                        active
-                          ? 'bg-primary/8 font-medium text-foreground'
-                          : 'text-muted-foreground hover:bg-[color:var(--glass-bg-subtle)] hover:text-foreground',
-                      )}
-                    >
-                      <item.icon className={cn('h-3.5 w-3.5', active ? 'text-primary' : 'text-muted-foreground')} />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
+          <section key={group.title} className={cn('workspace-nav-group', active && 'is-active')}>
+            <div className="workspace-nav-row">
+              <Link href={group.href} aria-current={isActive(pathname, group.href) ? 'page' : undefined}>
+                <Icon size={23} strokeWidth={1.6} /><span>{group.title}</span>
+              </Link>
+              <button type="button" aria-label={`${open ? 'Collapse' : 'Expand'} ${group.title} sections`}
+                aria-expanded={open} aria-controls={`nav-${group.title.toLowerCase()}`}
+                onClick={() => setExpanded(open ? null : group.title)}>
+                <ChevronDown size={14} className={cn(open && 'rotate-180')} />
+              </button>
+            </div>
+            <div id={`nav-${group.title.toLowerCase()}`} hidden={!open} className="workspace-subnav">
+              {items.map((href) => {
+                const item = byHref.get(href)!;
+                return <Link key={href} href={href} aria-current={isActive(pathname, href) ? 'page' : undefined}>{item.label}</Link>;
+              })}
             </div>
           </section>
         );
