@@ -19,7 +19,8 @@ import { trpc } from '@/lib/trpc';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PageShell, PageHeader } from '@/components/page-shell';
-import { ReportSourceEvidence } from '@/components/pilot-evidence';
+import { DemoDataBanner } from '@/components/demo-data-banner';
+import { DataSourceNotice } from '@/components/data-source-notice';
 import { ShareReportButton } from '@/components/share-report-button';
 import { cn } from '@/lib/utils';
 import { Markdown } from './markdown';
@@ -38,8 +39,6 @@ interface ReportContent {
   source: 'llm' | 'deterministic';
   generatedAt: string;
   demoData?: boolean;
-  sourceSyncs?: { platform: string; externalAccountId: string; syncedAt: string }[];
-  metricBasis?: string;
   dataSource?: 'none' | 'live' | 'sandbox' | 'mixed' | 'demo';
 }
 
@@ -87,7 +86,8 @@ export default function ReportsPage() {
 
   // Default to the newest report once the list lands.
   useEffect(() => {
-    const first = rows[0];
+    const requestedId = new URLSearchParams(window.location.search).get('report');
+    const first = rows.find((row) => row.id === requestedId) ?? rows[0];
     if (!selectedId && first) setSelectedId(first.id);
   }, [rows, selectedId]);
 
@@ -104,7 +104,7 @@ export default function ReportsPage() {
 
   const stats = content
     ? [
-        { label: 'Spend', value: content.dataSource === 'live' || content.dataSource === 'mixed' ? (content.totals.spendCents / 100).toFixed(2) : usd(content.totals.spendCents), icon: DollarSign },
+        { label: 'Spend', value: usd(content.totals.spendCents), icon: DollarSign },
         { label: 'Impressions', value: content.totals.impressions.toLocaleString(), icon: Eye },
         { label: 'Clicks', value: content.totals.clicks.toLocaleString(), icon: MousePointerClick },
         { label: 'Conversions', value: String(content.totals.conversions), icon: Target },
@@ -116,7 +116,7 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Insights"
         title="Weekly Reports"
-        description="Review stored campaign performance and its source evidence. Live reports use provider snapshots; sandbox and demo reports remain labeled."
+        description="Review wins, risks, and next steps from your account data. Source labels stay with every report."
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button variant="outline" onClick={() => window.print()} disabled={!selected} data-testid="print-report">
@@ -195,7 +195,7 @@ export default function ReportsPage() {
                             r.content.source === 'llm' ? 'bg-primary' : 'bg-muted-foreground/50',
                           )}
                         />
-                        {r.content.source === 'llm' ? 'AI narrated' : 'Deterministic'}
+                        {r.content.source === 'llm' ? 'AI narrated' : 'Standard summary'}
                       </span>
                       <span>·</span>
                       <span>{timeAgo(r.createdAt)}</span>
@@ -212,7 +212,15 @@ export default function ReportsPage() {
           {/* Detail */}
           {selected && content && (
             <div className="space-y-4">
-              <ReportSourceEvidence content={content} />
+              {/* Demo-data mode: simulated numbers must always carry the label */}
+              {content.demoData && <DemoDataBanner />}
+              {!content.demoData && content.dataSource && (
+                <DataSourceNotice
+                  source={content.dataSource === 'demo' ? 'none' : content.dataSource}
+                  actionHref={content.dataSource === 'none' ? '/settings' : undefined}
+                  actionLabel={content.dataSource === 'none' ? 'Connect an account' : undefined}
+                />
+              )}
               <div className="glass-panel space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -222,7 +230,7 @@ export default function ReportsPage() {
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <Badge variant={content.source === 'llm' ? 'default' : 'secondary'}>
                       <Sparkles className="mr-1 h-3 w-3" />
-                      {content.source === 'llm' ? 'AI narrated' : 'Deterministic'}
+                      {content.source === 'llm' ? 'AI narrated' : 'Standard summary'}
                     </Badge>
                     <Badge variant="outline">{content.periodLabel}</Badge>
                     <span className="text-xs text-muted-foreground">generated {timeAgo(content.generatedAt)}</span>
