@@ -86,7 +86,8 @@ export default function ReportsPage() {
 
   // Default to the newest report once the list lands.
   useEffect(() => {
-    const first = rows[0];
+    const requestedId = new URLSearchParams(window.location.search).get('report');
+    const first = rows.find((row) => row.id === requestedId) ?? rows[0];
     if (!selectedId && first) setSelectedId(first.id);
   }, [rows, selectedId]);
 
@@ -115,7 +116,7 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Insights"
         title="Weekly Reports"
-        description="Your week in review — wins, losses, and what to do next. Generated from your live campaign, alert, and creative-health data, then narrated by AI."
+        description="Review wins, risks, and next steps from your account data. Source labels stay with every report."
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button variant="outline" onClick={() => window.print()} disabled={!selected} data-testid="print-report">
@@ -194,7 +195,7 @@ export default function ReportsPage() {
                             r.content.source === 'llm' ? 'bg-primary' : 'bg-muted-foreground/50',
                           )}
                         />
-                        {r.content.source === 'llm' ? 'AI narrated' : 'Deterministic'}
+                        {r.content.source === 'llm' ? 'AI narrated' : 'Standard summary'}
                       </span>
                       <span>·</span>
                       <span>{timeAgo(r.createdAt)}</span>
@@ -229,7 +230,7 @@ export default function ReportsPage() {
                   <div className="flex flex-wrap items-center justify-end gap-2">
                     <Badge variant={content.source === 'llm' ? 'default' : 'secondary'}>
                       <Sparkles className="mr-1 h-3 w-3" />
-                      {content.source === 'llm' ? 'AI narrated' : 'Deterministic'}
+                      {content.source === 'llm' ? 'AI narrated' : 'Standard summary'}
                     </Badge>
                     <Badge variant="outline">{content.periodLabel}</Badge>
                     <span className="text-xs text-muted-foreground">generated {timeAgo(content.generatedAt)}</span>
