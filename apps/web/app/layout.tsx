@@ -6,7 +6,7 @@ import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Perfexa',
-  description: 'Connect read-only ad accounts and get an approval-ready performance report every week.',
+  description: 'Bring ad-account performance, priority signals, and reports into one workspace. Review the evidence and decide with confidence.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,3 +18,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

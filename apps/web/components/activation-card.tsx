@@ -17,7 +17,7 @@ export function ActivationCard({ onShowDemo }: { onShowDemo: () => void }) {
   const anyConnected = (integrations.data ?? []).some((i) => i.connected);
   const hasAlerts = (alerts.data ?? []).length > 0;
 
-  if (integrations.isLoading || alerts.isLoading) return null;
+  if (integrations.isLoading || alerts.isLoading || integrations.isError || alerts.isError) return null;
   if (anyConnected || hasAlerts) return null;
 
   return (
@@ -30,8 +30,8 @@ export function ActivationCard({ onShowDemo }: { onShowDemo: () => void }) {
           <div>
             <p className="font-medium">Connect your first ad account to see live insights</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Link Google Ads, Meta, or TikTok and Perfexa starts monitoring spend, CTR, and
-              conversions immediately — in a safe sandbox.
+              Connect Google Ads, Meta, or TikTok, enable read-only live mode, then sync
+              your account. The demo uses clearly labeled sample data.
             </p>
           </div>
         </div>
@@ -49,3 +49,4 @@ export function ActivationCard({ onShowDemo }: { onShowDemo: () => void }) {
     </Card>
   );
 }
+

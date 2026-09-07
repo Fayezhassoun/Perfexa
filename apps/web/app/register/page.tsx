@@ -26,35 +26,47 @@ export default function RegisterPage() {
   const register = trpc.auth.register.useMutation({
     onError: (err) => setError(err.message),
     onSuccess: async () => {
-      const res = await signIn('credentials', { email, password, redirect: false });
-      if (res?.error) {
+      try {
+        const res = await signIn('credentials', { email: email.trim(), password, redirect: false });
+        if (!res || res.error || !res.ok) {
+          router.push('/login');
+          return;
+        }
+        router.push('/onboarding');
+        router.refresh();
+      } catch {
+        // Registration already succeeded. Recover through sign-in, never
+        // invite a second registration attempt for the same account.
         router.push('/login');
-        return;
       }
-      router.push('/onboarding');
-      router.refresh();
     },
   });
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    register.mutate({ name, email, password, plan });
+    register.mutate({ name: name.trim(), email: email.trim(), password, plan });
   }
 
   return (
     <div className="public-shell flex min-h-screen items-center justify-center p-4">
       <div className="public-card animate-fade-up w-full max-w-sm rounded-[var(--public-radius-lg)] p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <BrandMark layout="mark" size="lg" ariaLabel="Perfexa logo" />
+          <BrandMark href="/" layout="mark" size="lg" ariaLabel="Perfexa home" />
           <h1 className="mt-5 font-display text-xl font-semibold tracking-normal">Create your account</h1>
-          <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Start the pilot with a guarded marketing workspace</p>
+          <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Bring your accounts, decisions, and reports together.</p>
         </div>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <div className="mb-6 rounded-lg border border-[hsl(var(--ink)/0.12)] bg-[hsl(var(--cream))] p-3 text-sm">
+          <p className="font-semibold capitalize">{plan} plan <span className="font-normal normal-case">· Free during beta</span></p>
+          <p className="mt-1 text-xs text-[hsl(var(--ink-soft))]">No card required. Live ad accounts stay read-only.</p>
+          <Link href="/pricing" className="mt-2 inline-block text-xs underline underline-offset-4">Compare plans</Link>
+        </div>
+        <form onSubmit={onSubmit} className="space-y-4" aria-busy={register.isPending}>
           <div className="space-y-2">
             <Label htmlFor="name">Your name</Label>
             <Input
               id="name"
+              autoComplete="name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -86,7 +98,7 @@ export default function RegisterPage() {
               className="public-input h-11"
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="btn-pill btn-pill-ink h-11 w-full" disabled={register.isPending}>
             {register.isPending ? 'Creating…' : 'Create account'}
           </Button>

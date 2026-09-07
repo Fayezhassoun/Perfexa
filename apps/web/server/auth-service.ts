@@ -21,24 +21,28 @@ export async function registerUser(input: RegisterInput): Promise<{ id: string; 
     throw new TRPCError({ code: 'CONFLICT', message: 'An account with this email already exists' });
   }
 
-  const passwordHash = bcrypt.hashSync(input.password, 10);
-  const [user] = await db
-    .insert(users)
-    .values({ name: input.name, email, passwordHash })
-    .returning({ id: users.id, email: users.email, name: users.name });
+  const passwordHash = await bcrypt.hash(input.password, 10);
+  // An account must never exist without its workspace and owner membership.
+  return db.transaction(async (tx) => {
+    const [user] = await tx
+      .insert(users)
+      .values({ name: input.name, email, passwordHash })
+      .returning({ id: users.id, email: users.email, name: users.name });
 
-  const [org] = await db
-    .insert(organizations)
-    .values({
-      name: `${input.name}'s business`,
-      onboardingStep: 'welcome',
-      monthlyBudgetCeilingCents: 50000,
-      settings: { plan: input.plan ?? 'starter' },
-    })
-    .returning({ id: organizations.id });
+    const [org] = await tx
+      .insert(organizations)
+      .values({
+        name: `${input.name}'s business`,
+        onboardingStep: 'welcome',
+        monthlyBudgetCeilingCents: 50000,
+        settings: { plan: input.plan ?? 'starter' },
+      })
+      .returning({ id: organizations.id });
 
-  await db.insert(orgMembers).values({ orgId: org!.id, userId: user!.id, role: 'owner' });
+    await tx.insert(orgMembers).values({ orgId: org!.id, userId: user!.id, role: 'owner' });
 
-  // Never return the password hash.
-  return user!;
+    // Never return the password hash.
+    return user!;
+  });
 }
+

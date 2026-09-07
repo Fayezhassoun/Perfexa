@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, CalendarDays, ChevronDown, Circle, FileText, LockKeyhole, RefreshCw, Target } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { trpc } from '@/lib/trpc';
+import { CustomerReadinessChecklist } from '@/components/customer-readiness-checklist';
 import { Button } from '@/components/ui/button';
 import { SOURCE_LABELS, PLATFORM_NAMES, money, planText, shortDate, snapshotTakeaway, weekToDate, type BriefSource } from '@/lib/weekly-brief';
 
@@ -61,6 +62,7 @@ export default function DashboardPage() {
         <Circle size={11} strokeWidth={2.5} aria-hidden="true" />
         <span>{overview.isLoading ? 'Checking account sources…' : overview.isError ? 'Account source unavailable · refresh required' : SOURCE_LABELS[source]}</span>
       </div>
+      <CustomerReadinessChecklist />
       <div className="brief-columns">
         <div className="brief-main">
           <header className="brief-hero">
@@ -150,3 +152,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

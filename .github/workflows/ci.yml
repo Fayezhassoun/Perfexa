@@ -33,3 +33,11 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm --filter @growthcrew/integrations test
       - run: pnpm --filter @growthcrew/agents test
+      - run: pnpm --filter @growthcrew/llm test
+      - run: pnpm --filter @growthcrew/web test
+      - run: pnpm --filter @growthcrew/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          AUTH_SECRET: ci-build-only-secret-not-for-production
+          DATABASE_URL: postgres://postgres:postgres@localhost:5433/perfexa_ci
+
