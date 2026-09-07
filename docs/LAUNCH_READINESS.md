@@ -18,7 +18,9 @@ Status: launch-readiness improvements prepared for review. This is not productio
 - Web regression suite: passed, 33 tests in 6 files.
 - Integration suite: previously passed in this task, 138 tests.
 - Model suite: previously passed in this task, 32 tests.
+- CI evidence: the first run was green despite the database suite failing to initialize (missing libicuuc.so.60). This is not a passing database result. CI now uses a dedicated PostgreSQL service and rejects missing, empty, or incomplete test reports.
 - Database suite: could not run locally because embedded PostgreSQL rejects root and this environment cannot switch user. GitHub CI must validate the database suite, including the new transaction rollback test. A zero process exit from the local harness did not mean those tests ran.
+- Browser checks: homepage navigation, pricing FAQ, and Agency plan handoff to signup verified against the self-contained production build. Full authenticated and mobile visual checks remain outstanding.
 - Real provider OAuth, customer account reconciliation, scheduled email delivery, and full authenticated browser journey remain unverified.
 
 ## Required before accepting launch customers

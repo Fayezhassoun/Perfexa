@@ -23,3 +23,7 @@ coverage/
 playwright-report/
 test-results/
 scripts/dist/
+
+
+# Machine-readable CI test evidence
+agent-test-results.json

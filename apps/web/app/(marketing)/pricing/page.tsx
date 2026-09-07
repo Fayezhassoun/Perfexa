@@ -18,7 +18,7 @@ const FAQS = [
   {
     question: 'What is the catch with the design-partner pricing?',
     answer:
-      'The listed rates are planned monthly tiers. early-access pilot access is free during beta for operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
+      'The listed rates are planned monthly tiers. Early-access pilot access is free during beta for operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
   },
   {
     question: 'Can I cancel anytime?',
@@ -68,7 +68,7 @@ export default function PricingPage() {
         </h1>
         <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
           Start small, connect read-only ad accounts, and get an approval-ready weekly readout under your brand.
-          the beta access is free while the first report workflow is being shaped.
+          Beta access is free while the first report workflow is being shaped.
         </p>
         <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
           Start with your first report: connect an ad account, then decide whether the weekly readout is useful.
@@ -77,7 +77,7 @@ export default function PricingPage() {
         <div className="mx-auto mt-12 max-w-5xl text-left">
           <PricingTiers />
           <p className="mt-5 text-center text-xs text-[hsl(var(--ink-soft))]">
-            Planned monthly rates are shown for transparency. early-access pilot access is free during beta, with no card
+            Planned monthly rates are shown for transparency. Early-access pilot access is free during beta, with no card
             required.
           </p>
         </div>
