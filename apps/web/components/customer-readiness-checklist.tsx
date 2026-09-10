@@ -1,104 +1,41 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Check, ListChecks } from 'lucide-react';
+import { ArrowRight, Check, RefreshCw } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-
-type ChecklistStep = {
-  label: string;
-  detail: string;
-  href: string;
-  action: string;
-  complete: boolean;
-};
+import { setupProgress } from '@/lib/setup-progress';
+import type { BriefSource } from '@/lib/weekly-brief';
 
 export function CustomerReadinessChecklist() {
   const integrations = trpc.settings.integrations.useQuery();
   const overview = trpc.dashboard.overview.useQuery();
   const reports = trpc.reports.weekly.list.useQuery();
+  const loading = integrations.isLoading || overview.isLoading || reports.isLoading;
+  const error = integrations.isError || overview.isError || reports.isError;
+  if (loading) return <p className="brief-muted py-4" role="status">Checking your setup…</p>;
+  if (error) return <div className="brief-error my-4" role="alert"><span>Your setup progress couldn’t be loaded.</span><button type="button" onClick={() => { void integrations.refetch(); void overview.refetch(); void reports.refetch(); }}><RefreshCw size={14} /> Try again</button></div>;
 
-  const rows = integrations.data ?? [];
-  const connected = rows.some((row) => row.connected);
-  const liveConnected = rows.some(
-    (row) => row.connected && row.status === 'connected' && row.mode === 'live',
-  );
-  const liveData = overview.data?.dataSource === 'live';
-  const liveReport = (reports.data ?? []).some(
-    (report) => (report.content as { dataSource?: string } | null)?.dataSource === 'live',
-  );
-
-  const steps: ChecklistStep[] = [
-    {
-      label: 'Business context',
-      detail: 'Your onboarding details are saved.',
-      href: '/business-brain',
-      action: 'Review context',
-      complete: true,
-    },
-    {
-      label: 'Read-only account',
-      detail: connected ? 'An account is connected.' : 'Connect an account to start the supported workflow.',
-      href: '/settings',
-      action: connected ? 'Review connection' : 'Connect account',
-      complete: connected,
-    },
-    {
-      label: 'Live data sync',
-      detail: liveData
-        ? 'Live campaign data is in the dashboard.'
-        : liveConnected
-          ? 'Switch to Settings and sync the live account.'
-          : 'Switch a connected account to live, then sync it.',
-      href: '/settings',
-      action: liveData ? 'Review sync' : 'Open connections',
-      complete: liveData,
-    },
-    {
-      label: 'Weekly report',
-      detail: liveReport ? 'A report is ready to review or share.' : 'Generate a report after live data arrives.',
-      href: '/reports',
-      action: liveReport ? 'Open report' : 'Open reports',
-      complete: liveReport,
-    },
-  ];
-
+  const latest = reports.data?.[0]?.content;
+  const steps = setupProgress({
+    connections: integrations.data ?? [],
+    source: overview.data?.demoData ? 'demo' : overview.data?.dataSource ?? 'none',
+    reportSource: latest?.dataSource as BriefSource | undefined,
+    reportDemo: latest?.demoData,
+  });
+  const completed = steps.filter(step => step.complete).length;
+  // Completed workspaces keep their main briefing uncluttered.
+  if (completed === steps.length) return null;
+  const next = steps.find(step => !step.complete)!;
   return (
-    <Card data-testid="customer-readiness-checklist">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ListChecks className="h-4 w-4 text-primary" aria-hidden="true" />
-          First-customer checklist
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Complete this path before sharing performance with a design partner. Sandbox output is for testing only.
-        </p>
-      </CardHeader>
-      <CardContent className="grid gap-2 sm:grid-cols-2">
-        {steps.map((step, index) => (
-          <div key={step.label} className="glass-tile flex items-start gap-3 p-3">
-            <span
-              className={cn(
-                'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
-                step.complete
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
-                  : 'border-[color:var(--glass-border)] text-muted-foreground',
-              )}
-            >
-              {step.complete ? <Check className="h-3.5 w-3.5" /> : index + 1}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{step.label}</p>
-              <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{step.detail}</p>
-              <Link href={step.href} className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                {step.action}
-                <ArrowRight className="h-3 w-3" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+    <section className="setup-guide" aria-labelledby="setup-guide-heading" data-testid="customer-readiness-checklist">
+      <div className="setup-guide-heading"><div><p className="brief-eyebrow">Your first performance report</p><h2 id="setup-guide-heading">A clear path from account to insight.</h2></div><span>{completed} of {steps.length} steps complete</span></div>
+      <ol className="setup-guide-steps">
+        {steps.map((step, index) => <li key={step.label} aria-current={step === next ? 'step' : undefined}>
+          <span className={step.complete ? 'setup-step-number is-complete' : 'setup-step-number'}>{step.complete ? <Check size={15} aria-label="Complete" /> : index + 1}</span>
+          <div><strong>{step.label}</strong><p>{step.detail}</p></div>
+        </li>)}
+      </ol>
+      <Link className="setup-guide-action" href={next.href}>{next.action}<ArrowRight size={16} /></Link>
+    </section>
   );
 }

@@ -17,7 +17,7 @@ const TIERS: PricingTier[] = [
     name: 'Starter',
     price: '$19 planned',
     description: 'A low-friction way to put a weekly performance readout on your operating rhythm.',
-    features: ['Weekly report generation', 'Alerts', '1 brand', 'Free during Gate-1 beta'],
+    features: ['Weekly report generation', 'Alerts', '1 brand', 'Free during the beta'],
     cta: 'Start pilot',
     href: '/register?plan=starter',
   },
@@ -29,7 +29,7 @@ const TIERS: PricingTier[] = [
       'Everything in Starter',
       'Live Google Ads, Meta, and TikTok connections',
       'White-label client report portal',
-      'Free during Gate-1 beta',
+      'Free during the beta',
     ],
     cta: 'Start pilot',
     href: '/register?plan=growth',
@@ -39,7 +39,7 @@ const TIERS: PricingTier[] = [
     name: 'Agency',
     price: '$99 planned',
     description: 'For small teams managing several brands and wanting room to grow.',
-    features: ['Everything in Growth', 'Team seats', 'Multi-brand workspace', 'Priority support', 'Free during Gate-1 beta'],
+    features: ['Everything in Growth', 'Team seats', 'Multi-brand workspace', 'Priority support', 'Free during the beta'],
     cta: 'Start pilot',
     href: '/register?plan=agency',
   },
@@ -103,3 +103,4 @@ export function PricingTiers() {
     </div>
   );
 }
+

@@ -20,25 +20,30 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const res = await signIn('credentials', { email, password, redirect: false });
-    setBusy(false);
-    if (res?.error) {
-      setError('That email and password combination did not work.');
-      return;
+    try {
+      const res = await signIn('credentials', { email: email.trim(), password, redirect: false });
+      if (!res || res.error || !res.ok) {
+        setError('That email and password combination did not work. Please try again.');
+        return;
+      }
+      router.push('/dashboard');
+      router.refresh();
+    } catch {
+      setError('We couldn’t sign you in. Check your connection and try again.');
+    } finally {
+      setBusy(false);
     }
-    router.push('/console');
-    router.refresh();
   }
 
   return (
     <div className="public-shell flex min-h-screen items-center justify-center p-4">
       <div className="public-card animate-fade-up w-full max-w-sm rounded-[var(--public-radius-lg)] p-8">
         <div className="mb-6 flex flex-col items-center text-center">
-          <BrandMark layout="mark" size="lg" ariaLabel="Perfexa logo" />
+          <BrandMark href="/" layout="mark" size="lg" ariaLabel="Perfexa home" />
           <h1 className="mt-5 font-display text-xl font-semibold tracking-normal">Welcome back</h1>
           <p className="mt-1.5 text-sm text-[hsl(var(--ink-soft))]">Sign in to your performance marketing workspace</p>
         </div>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4" aria-busy={busy}>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -63,7 +68,7 @@ export default function LoginPage() {
               className="public-input h-11"
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="btn-pill btn-pill-ink h-11 w-full" disabled={busy}>
             {busy ? 'Signing in…' : 'Sign in'}
           </Button>

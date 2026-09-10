@@ -4,6 +4,7 @@ import { BrandMark } from '@/components/brand-mark';
 import { PricingTiers } from '@/components/pricing-tiers';
 
 const FAQS = [
+  { question: 'What period does a report cover?', answer: 'Live reports currently review provider account snapshots, typically about 30 days. Each report shows its source window. They do not calculate seven-day changes or compare equivalent prior periods yet. Verify account currency and totals before sharing.' },
   {
     question: 'What can I connect?',
     answer:
@@ -12,16 +13,16 @@ const FAQS = [
   {
     question: 'Is my data safe?',
     answer:
-      'Connections use read-only OAuth permissions where supported, and tokens are encrypted. Perfexa watches and explains what is happening; it does not change live ads or spend money without your approval.',
+      'Connections use read-only OAuth permissions where supported, and tokens are encrypted. Perfexa watches and explains what is happening; it cannot change live ad accounts, even after approval. Approved recommendations remain decisions for your team to implement in the ad platform.',
   },
   {
     question: 'What is the catch with the design-partner pricing?',
     answer:
-      'The listed rates are planned monthly tiers. Gate-1 pilot access is free during beta for operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
+      'The listed rates are planned monthly tiers. Early-access pilot access is free during beta for operators who are willing to share useful feedback as the product gets sharper. You get direct access to the founder, and we ask for a little time and candor in return.',
   },
   {
     question: 'Can I cancel anytime?',
-    answer: 'Yes. The Gate-1 pilot is free during beta, with no card and no long-term contract. If you stop, access ends when you choose.',
+    answer: 'Yes. The early-access pilot is free during beta, with no card and no long-term contract. If you stop, access ends when you choose.',
   },
   {
     question: 'What happens after I sign up?',
@@ -50,7 +51,7 @@ export default function PricingPage() {
               Sign in
             </Link>
             <Link href="/register?plan=growth" className="btn-pill btn-pill-ink h-10 px-5 text-sm">
-              Start the pilot
+              Start free beta
             </Link>
           </nav>
         </div>
@@ -59,7 +60,7 @@ export default function PricingPage() {
       <section className="mx-auto max-w-6xl px-5 pb-20 pt-16 text-center sm:px-8 lg:pb-24 lg:pt-24">
         <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[hsl(var(--ink)/0.1)] bg-white px-3.5 py-2 text-xs font-medium text-[hsl(var(--ink-soft))]">
           <span className="public-dot bg-[hsl(var(--coral))]" />
-          Design partner pricing · Gate-1 pilot
+          Design partner pricing · early-access pilot
         </div>
         <h1 className="animate-fade-up animation-delay-100 mx-auto mt-8 max-w-3xl text-balance font-display text-[clamp(2.75rem,5.5vw,4.25rem)] font-semibold leading-[1.06] tracking-normal">
           Weekly performance reports,
@@ -67,16 +68,16 @@ export default function PricingPage() {
         </h1>
         <p className="animate-fade-up animation-delay-200 mx-auto mt-7 max-w-2xl text-balance text-lg leading-relaxed text-[hsl(var(--ink-soft))]">
           Start small, connect read-only ad accounts, and get an approval-ready weekly readout under your brand.
-          Gate-1 beta access is free while the first report workflow is being shaped.
+          Beta access is free while the first report workflow is being shaped.
         </p>
         <p className="animate-fade-up animation-delay-300 mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[hsl(var(--ink-soft))]">
-          Gate 1 is about the first report: connect an ad account, then decide whether the weekly readout is useful.
+          Start with your first report: connect an ad account, then decide whether the weekly readout is useful.
         </p>
 
         <div className="mx-auto mt-12 max-w-5xl text-left">
           <PricingTiers />
           <p className="mt-5 text-center text-xs text-[hsl(var(--ink-soft))]">
-            Planned monthly rates are shown for transparency. Gate-1 pilot access is free during beta, with no card
+            Planned monthly rates are shown for transparency. Early-access pilot access is free during beta, with no card
             required.
           </p>
         </div>
@@ -99,10 +100,10 @@ export default function PricingPage() {
           </div>
           <div className="relative mt-7 shrink-0 lg:mt-0">
             <Link href="/register?plan=growth" className="btn-pill btn-pill-ink h-12 px-7 text-base">
-              Start the pilot <ArrowRight className="h-4 w-4" />
+              Start free beta <ArrowRight className="h-4 w-4" />
             </Link>
             <p className="mt-3 text-center text-xs text-[hsl(var(--ink-soft))] lg:text-right">
-              Pilot signup starts with a fit check.
+              Create your workspace, then complete a short setup.
             </p>
           </div>
         </div>
@@ -121,7 +122,7 @@ export default function PricingPage() {
             <div className="mt-8 space-y-3">
               <div className="public-tile flex items-start gap-3 p-4">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--mint))]" strokeWidth={2.5} />
-                <p className="text-sm leading-relaxed">Read-only connections and approval before action.</p>
+                <p className="text-sm leading-relaxed">Live ad-account changes stay blocked, even after approval.</p>
               </div>
               <div className="public-tile flex items-start gap-3 p-4">
                 <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--ink))]" strokeWidth={2.5} />
@@ -172,7 +173,7 @@ export default function PricingPage() {
           Choose a plan, connect what you need, and let the first weekly report show you where Perfexa is useful.
         </p>
         <Link href="/register?plan=growth" className="btn-pill btn-pill-ink mx-auto mt-8 h-12 px-7 text-base">
-          Start the pilot <ArrowRight className="h-4 w-4" />
+          Start free beta <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
 
@@ -185,3 +186,4 @@ export default function PricingPage() {
     </main>
   );
 }
+

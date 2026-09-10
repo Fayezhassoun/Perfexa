@@ -8,6 +8,7 @@ import { auth, signOut } from '@/auth';
 import { resolveActiveOrg } from '@/server/org-resolution';
 import { env } from '@/lib/env';
 import { Button } from '@/components/ui/button';
+import { WorkspaceSearch } from '@/components/workspace-search';
 import { AppNav } from '@/components/app-nav';
 import { WorkspaceAccount } from '@/components/workspace-account';
 import Link from 'next/link';
@@ -44,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             activeOrgId={orgId}
             placement="below"
           />
+          <WorkspaceSearch geoEnabled={env.GEO_ENABLED} />
           <time className="workspace-today" dateTime={new Date().toISOString().slice(0, 10)}>
             {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </time>
@@ -59,3 +61,4 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

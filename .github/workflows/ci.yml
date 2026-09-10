@@ -16,6 +16,20 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: perfexa_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d perfexa_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -32,4 +46,15 @@ jobs:
       - run: pnpm rebuild esbuild embedded-postgres @embedded-postgres/linux-x64
       - run: pnpm typecheck
       - run: pnpm --filter @growthcrew/integrations test
-      - run: pnpm --filter @growthcrew/agents test
+      - run: pnpm --filter @growthcrew/agents test --reporter=default --reporter=json --outputFile=../../agent-test-results.json
+        env:
+          PERFEXA_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/perfexa_test
+      - run: node scripts/check-test-results.mjs agent-test-results.json
+      - run: pnpm --filter @growthcrew/llm test
+      - run: pnpm --filter @growthcrew/web test
+      - run: pnpm --filter @growthcrew/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          AUTH_SECRET: ci-build-only-secret-not-for-production
+          DATABASE_URL: postgres://postgres:postgres@localhost:5433/perfexa_ci
+
